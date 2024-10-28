@@ -62,6 +62,36 @@ $primayColor :#0116a3;
 $primayColorHover :#011dd6;
 
 
+.ngx-pagination .current {
+  padding: .1875rem .625rem;
+  background: #0116a3 !important;
+  color: #fefefe;
+  cursor: default;
+}
+
+.btn-outline-primary {
+  color: #0116a3;
+  background-color: transparent;
+  background-image: none;
+  border-color: #152ab3;
+}
+
+
+.btn-outline-primary:hover {
+  color: #fff;
+  background-color: #0116a3 !important;
+  border-color: #0116a3 !important;
+}
+
+
+.btn-outline-primary:active {
+  color: #fff;
+  background-color: #0116a3 !important;
+  border-color: #0116a3 !important;
+}
+
+
+
 .btn-primary {
   color: #fff;
   background-color: #0116a3 !important;
@@ -74,7 +104,7 @@ $exemplify-colors: (
   one: #6610f2,
   two: #00a985,
   three: #17a2b8,
-  four: #0092e1,
+  four: #0116a3,
   five: #e83e8c,
 ) !default;
 
