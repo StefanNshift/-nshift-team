@@ -2,7 +2,7 @@
   <div *ngIf="isLoading" class="skeleton-loader skeleton-loader-table"></div>
 
   <!-- PROB Issues Section -->
-  <h4 *ngIf="!isLoading" style="margin-top: 2%" class="h2">Unassigned Prob Tickets</h4>
+  <h6 *ngIf="!isLoading" style="margin-top: 2%" class="h2">Unassigned Prob Tickets</h6>
 
   <p *ngIf="!isLoading && probIssues.length > 0">Total PROB Issues: {{ probIssueCount }}</p>
   <table class="table mb-0" *ngIf="probIssues.length > 0 && !isLoading">
@@ -33,7 +33,7 @@
 
 
 
-  <h4 *ngIf="!isLoading" style="margin-top: 2%" class="h2">Unassigned Zendesk Tickets</h4>
+  <h6 *ngIf="!isLoading" style="margin-top: 2%" class="h2">Unassigned Zendesk Tickets</h6>
 
 
   <!-- Unassigned tickets by tier breakdown -->
