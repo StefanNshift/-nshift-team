@@ -23,7 +23,7 @@ import { WizardTutorialComponent } from './wizard-tutorial.component';
 export class CustomTranslations implements WizardTranslations {
   constructor() {}
   // you need to provide translations$ observable with key value pairs for the keys you use in the wizard
-  translations$: Observable<WizardTexts> = of({ wiz_header_title: 'Carrier-Team' });
+  translations$: Observable<WizardTexts> = of({ wiz_header_title: 'Carrier Management' });
 }
 
 const TRANSLATIONS_PROVIDER: ClassProvider = {
