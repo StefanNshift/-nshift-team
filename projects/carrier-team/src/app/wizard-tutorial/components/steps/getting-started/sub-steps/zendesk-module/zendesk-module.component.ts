@@ -231,7 +231,7 @@ fetchPROBIssues() {
     }
   
     // If not in localStorage or expired, call the API
-    this.http.get('https://backendchatgpt-050f.onrender.com//GetAllTickets', { headers })
+    this.http.get('https://backendchatgpt-050f.onrender.com/GetAllTickets', { headers })
       .subscribe((response: any) => {
         console.log('Fetched new ticket data from API');
         localStorage.setItem('zendeskTickets', JSON.stringify(response)); // Save data to localStorage
