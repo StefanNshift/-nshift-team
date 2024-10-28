@@ -27,7 +27,7 @@
   </table>
   <p *ngIf="!isLoading && probIssues.length === 0">No PROB issues to display.</p>
 
-  <button *ngIf="!isLoading && probIssues.length > 0" class="btn btn-primary mt-3">Assign T1/T2 Tickets</button>
+  <button *ngIf="!isLoading && probIssues.length > 0" class="btn btn-primary mt-3">Assig  n T1/T2 Tickets</button>
 
 
 
@@ -36,14 +36,7 @@
   <h6 *ngIf="!isLoading" style="margin-top: 2%" class="h2">Unassigned Zendesk Tickets</h6>
 
 
-  <!-- Unassigned tickets by tier breakdown -->
-  <div  style="font-weight: 600;" *ngIf="!isLoading && unassignedTickets.length > 0">
-    <li >Total Unassigned Tickets: {{ totalUnassignedCount }}</li>
-    <li>T1: {{ unassignedTier1Count }}</li>
-    <li>T2: {{ unassignedTier2Count }}</li>
-    <li>T3: {{ unassignedTier3Count }}</li>
-  </div>
-
+ 
 
   <div *ngIf="isLoading" class="skeleton-loader skeleton-loader-table"></div>
 
@@ -86,6 +79,15 @@
       
     </tbody>
   </table>
+
+   <!-- Unassigned tickets by tier breakdown -->
+   <div  style="font-weight: 600;" *ngIf="!isLoading && unassignedTickets.length > 0">
+    <li >Total Unassigned Tickets: {{ totalUnassignedCount }}</li>
+    <li>T1: {{ unassignedTier1Count }}</li>
+    <li>T2: {{ unassignedTier2Count }}</li>
+    <li>T3: {{ unassignedTier3Count }}</li>
+  </div>
+
 
   <button class="btn btn-primary mt-3" (click)="syncTier1AndTier2Unassigned()">Sync T1/T2 for Unassigned</button>
 
