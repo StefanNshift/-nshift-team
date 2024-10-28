@@ -61,7 +61,15 @@ $exemplify-copy-notice-transition-time: 600ms !default; // copy notice transitio
 $primayColor :#0116a3;
 $primayColorHover :#011dd6;
 
-// default colors for code snippet tags
+
+.btn-primary {
+  color: #fff;
+  background-color: #0116a3 !important;
+  border-color: #152ab3 !important;
+  box-shadow: 0 0;
+}
+
+ // default colors for code snippet tags
 $exemplify-colors: (
   one: #6610f2,
   two: #00a985,
