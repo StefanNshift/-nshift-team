@@ -117,7 +117,7 @@ retrieveMembers() {
 fetchPROBIssues() {
   const headers = { 'x-api-key': 'zoYrWOhSUQ58KZkc2hpZnQuY29tOkFUQVRUM3hGZ' };
 
-  this.http.get('http://localhost:3000/GetPROBIssues', { headers })
+  this.http.get('https://backendchatgpt-050f.onrender.com/GetPROBIssues', { headers })
     .subscribe((response: any) => {
       this.probIssues = response.issues.map((issue) => {
         const tier = this.getCarrierTier(issue.carrierID);
@@ -231,7 +231,7 @@ fetchPROBIssues() {
     }
   
     // If not in localStorage or expired, call the API
-    this.http.get('http://localhost:3000/GetAllTickets', { headers })
+    this.http.get('https://backendchatgpt-050f.onrender.com//GetAllTickets', { headers })
       .subscribe((response: any) => {
         console.log('Fetched new ticket data from API');
         localStorage.setItem('zendeskTickets', JSON.stringify(response)); // Save data to localStorage
@@ -332,7 +332,7 @@ formatDate(dateString: string): string {
   fetchFilteredUnassignedTickets() {
     const headers = { 'x-api-key': 'zoYrWOhSUQ58KZkc2hpZnQuY29tOkFUQVRUM3hGZ' };
 
-    this.http.get('http://localhost:3000/GetFilteredUnassignedTickets', { headers })
+    this.http.get('https://backendchatgpt-050f.onrender.com/GetFilteredUnassignedTickets', { headers })
       .subscribe((response: any) => {
         console.log('Filtered Tickets Response:', response);  // Log response from API
         this.tickets = response.filteredTickets.map((ticket) => {
