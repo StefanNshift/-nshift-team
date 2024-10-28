@@ -1,0 +1,133 @@
+  <div *ngIf="isLoading">Loading data...</div>
+  <div *ngIf="isLoading" class="skeleton-loader skeleton-loader-table"></div>
+
+  <!-- PROB Issues Section -->
+  <h4 *ngIf="!isLoading" style="margin-top: 2%" class="h2">Unassigned Prob Tickets</h4>
+
+  <p *ngIf="!isLoading && probIssues.length > 0">Total PROB Issues: {{ probIssueCount }}</p>
+  <table class="table mb-0" *ngIf="probIssues.length > 0 && !isLoading">
+    <thead>
+      <tr>
+        <th>Issue Key</th>
+        <th>Title</th>
+        <th>Carrier ID</th>
+        <th>Carrier CIS</th> <!-- New column for Carrier CIS -->
+        <th>Tier</th> <!-- New column for Tier -->
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let issue of probIssues">
+        <td>{{ issue.key }}</td>
+        <td>{{ issue.title }}</td>
+        <td>{{ issue.carrierID }}</td>
+        <td>{{ issue.carrierCIS }}</td> <!-- Display Carrier CIS -->
+        <td>{{ issue.tier  }}</td> <!-- Display Tier -->
+      </tr>
+    </tbody>
+  </table>
+  <p *ngIf="!isLoading && probIssues.length === 0">No PROB issues to display.</p>
+
+  <button *ngIf="!isLoading && probIssues.length > 0" class="btn btn-primary mt-3">Assign T1/T2 Tickets</button>
+
+
+
+
+
+  <h4 *ngIf="!isLoading" style="margin-top: 2%" class="h2">Unassigned Zendesk Tickets</h4>
+
+
+  <!-- Unassigned tickets by tier breakdown -->
+  <div  style="font-weight: 600;" *ngIf="!isLoading && unassignedTickets.length > 0">
+    <li >Total Unassigned Tickets: {{ totalUnassignedCount }}</li>
+    <li>T1: {{ unassignedTier1Count }}</li>
+    <li>T2: {{ unassignedTier2Count }}</li>
+    <li>T3: {{ unassignedTier3Count }}</li>
+  </div>
+
+
+  <div *ngIf="isLoading" class="skeleton-loader skeleton-loader-table"></div>
+
+  <table class="table mb-0" *ngIf="unassignedTickets.length > 0 && !isLoading">
+    <thead>
+      <tr>
+        <th>Ticket ID</th>
+        <th>Subject</th>
+        <th>Created At</th>
+        <th>Updated At</th>
+        <th>Tier</th>
+        <th>Carrier ID</th>
+        <th>Priority</th> <!-- New column for Priority -->
+        <th>Carrier CIS</th> <!-- New column for assigned member -->
+        <th>Asignee Ticket</th> <!-- New column for assigned member -->
+
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let ticket of unassignedTickets">
+        <td>{{ ticket.ticket_id }}</td>
+        <td>{{ ticket.subject }}</td>
+        <td>{{ ticket.created_at }}</td>
+        <td>{{ ticket.updated_at }}</td>
+        <td>{{ ticket.tier | titlecase }}</td>
+        <td>{{ ticket.carrier_id }}</td>
+        <td>{{ ticket.priority | titlecase }}</td> <!-- Display Priority -->
+        <td>{{ ticket.assigned_to }}</td> <!-- Display assigned member -->
+        <td>
+          <select 
+          class="form-control"
+          (change)="updateTicketAssignee(ticket.ticket_id, getSelectValue($event))"
+          [value]="ticket.assigned_to || ''">
+          <option *ngFor="let member of members" [value]="member.zendeskID">
+            {{ member.name }}
+          </option>
+        </select>
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+
+  <button class="btn btn-primary mt-3" (click)="syncTier1AndTier2Unassigned()">Sync T1/T2 for Unassigned</button>
+
+
+  <!-- Carrier Management Team Section -->
+  <h4 style="margin-top: 2%" >Carrier Management Zendesk Team</h4>
+  <p *ngIf="!isLoading && members.length === 0">No team members available.</p>
+  <table class="table mb-0" *ngIf="members.length > 0 && !isLoading">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Ticket Count</th> <!-- Column for total ticket count -->
+        <th>T1 Tickets</th> <!-- Column for Tier 1 ticket count -->
+        <th>T2 Tickets</th> <!-- Column for Tier 2 ticket count -->
+        <th>T3 Tickets</th> <!-- Column for Tier 3 ticket count -->
+        <th>Low Priority</th> <!-- Column for Low priority ticket count -->
+        <th>Medium Priority</th> <!-- Column for Medium priority ticket count -->
+        <th>High Priority</th> <!-- Column for High priority ticket count -->
+        <th>Urgent Priority</th> <!-- Column for Urgent priority ticket count -->
+        <th>Vacation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let member of displayMembers; let i = index">
+        <td>{{ member.name }}</td>
+        <td>{{ member.ticket_count }}</td> <!-- Display total ticket count -->
+        <td>{{ member.tier1Tickets }}</td> <!-- Display Tier 1 ticket count -->
+        <td>{{ member.tier2Tickets }}</td> <!-- Display Tier 2 ticket count -->
+        <td>{{ member.tier3Tickets }}</td> <!-- Display Tier 3 ticket count -->
+        <td>{{ member.priorityLowTickets }}</td> <!-- Display Low priority count -->
+        <td>{{ member.priorityMediumTickets }}</td> <!-- Display Medium priority count -->
+        <td>{{ member.priorityHighTickets }}</td> <!-- Display High priority count -->
+        <td>{{ member.priorityUrgentTickets }}</td> <!-- Display Urgent priority count -->
+        <td>
+          <button 
+            (click)="toggleVacationStatus(i)" 
+            [ngClass]="member.vacation ? 'btn-danger' : 'btn-success'"
+            class="btn">
+            {{ member.vacation ? 'On Vacation' : 'Not on Vacation' }}
+          </button>
+        </td>
+      </tr>
+    </tbody>
+    
+  </table>

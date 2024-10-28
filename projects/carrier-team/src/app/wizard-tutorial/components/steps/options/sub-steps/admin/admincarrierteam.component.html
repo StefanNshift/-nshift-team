@@ -1,0 +1,119 @@
+
+
+
+<div *ngIf="user && isAdmin">
+  <input *ngIf="!isLoading"
+    type="text"
+    class="form-control mb-3"
+    placeholder="Search..."
+    [(ngModel)]="searchTerm"
+  />
+  <button  *ngIf="!isLoading" class="btn btn-primary mt-3" (click)="addNewRow()">Add Carrier</button>
+  <div *ngIf="isLoading" class="skeleton-loader skeleton-loader-table"></div>
+
+  <table *ngIf="!isLoading" class="table mb-0">
+    <thead>
+      <tr>
+        <th>Carrier</th>
+        <th>Carrier Concept ID</th>
+        <th>CIS</th>
+        <th>Tier</th>
+        <th>CIS Apport</th>
+        <th>CIS Online</th>
+        <th>CIS Transmart</th>
+        <th>CPM</th>
+        <th>TAL</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let carrierData of filteredData() | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage }; let i = index">
+        <!-- Hidden input to store the unique Firebase key -->
+        <input type="hidden" [value]="carrierData.key" />
+
+        <td>
+          <input
+            type="text"
+            [(ngModel)]="carrierData.carrier"
+            (ngModelChange)="updateFirebase({ carrierData, field: 'carrier', value: $event })"
+            class="form-control"
+          />
+        </td>
+        <td>
+          <input
+            type="number"
+            [(ngModel)]="carrierData.carrierConceptID"
+            (ngModelChange)="updateFirebase({ carrierData, field: 'carrierConceptID', value: $event })"
+            class="form-control"
+          />
+        </td>
+
+        <!-- Dropdown for selecting CIS member -->
+        <td>
+          <select
+            [(ngModel)]="carrierData.cis"
+            (ngModelChange)="updateFirebase({ carrierData, field: 'cis', value: $event })"
+            class="form-control"
+          >
+            <option *ngFor="let member of members" [value]="member.name">{{ member.name }}</option>
+          </select>
+        </td>
+        <td>
+          <input
+            type="number"
+            [(ngModel)]="carrierData.tier"
+            (ngModelChange)="updateFirebase({ carrierData, field: 'tier', value: $event })"
+            class="form-control"
+          />
+        </td>
+
+        <td>
+          <input
+            type="text"
+            [(ngModel)]="carrierData.cisapport"
+            (ngModelChange)="updateFirebase({ carrierData, field: 'cisapport', value: $event })"
+            class="form-control"
+          />
+        </td>
+        <td>
+          <input
+            type="text"
+            [(ngModel)]="carrierData.cisonline"
+            (ngModelChange)="updateFirebase({ carrierData, field: 'cisonline', value: $event })"
+            class="form-control"
+          />
+        </td>
+        <td>
+          <input
+            type="text"
+            [(ngModel)]="carrierData.cistransmart"
+            (ngModelChange)="updateFirebase({ carrierData, field: 'cistransmart', value: $event })"
+            class="form-control"
+          />
+        </td>
+        <td>
+          <input
+            type="text"
+            [(ngModel)]="carrierData.cpm"
+            (ngModelChange)="updateFirebase({ carrierData, field: 'cpm', value: $event })"
+            class="form-control"
+          />
+        </td>
+        <td>
+          <input
+            type="text"
+            [(ngModel)]="carrierData.tal"
+            (ngModelChange)="updateFirebase({ carrierData, field: 'tal', value: $event })"
+            class="form-control"
+          />
+        </td>
+        <td><button class="btn btn-danger" (click)="removeRow(carrierData.key)">Remove</button></td>
+
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!isLoading" style="margin-top: 2%;">
+    <pagination-controls (pageChange)="currentPage = $event"></pagination-controls>
+  </div>
+</div>
