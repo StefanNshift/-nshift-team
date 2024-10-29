@@ -1,5 +1,11 @@
 
 
+<div class="toast" *ngIf="toastVisible" [ngClass]="{'visible': toastVisible, 'toast-success': toastType === 'success', 'toast-error': toastType === 'error', 'toast-warning': toastType === 'warning'}">
+  <div class="toast-content">
+      <span class="toast-message">{{ toastMessage }}</span>
+      <button class="close-toast" (click)="hideToast()">×</button>
+  </div>
+</div>
 
 <div *ngIf="user && isAdmin">
   <input *ngIf="!isLoading"

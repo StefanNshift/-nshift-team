@@ -27,6 +27,10 @@ export class AdminModuleComponent implements OnInit {
   members: any[] = []; // To store the retrieved members data
   isLoading: boolean = true;
   showTable: boolean = false
+  toastVisible = false; // Control visibility of the toast
+  toastMessage = ''; // Message to display in the toast
+  toastType = ''; // To control the type of toast
+
   constructor(private db: Database, private auth: Auth) { } // Inject Database and Auth
 
   ngOnInit() {
@@ -46,7 +50,16 @@ export class AdminModuleComponent implements OnInit {
     }
   }
 
+  showToast(message: string, type: string) {
+    this.toastMessage = message;
+    this.toastType = type; // Set the toast type
+    this.toastVisible = true;
+    setTimeout(() => this.hideToast(), 3000);
+  }
 
+  hideToast() {
+    this.toastVisible = false;
+  }
 
   retrieveMembers() {
     const membersRef = ref(this.db, 'members');
@@ -135,15 +148,8 @@ export class AdminModuleComponent implements OnInit {
         console.error('Error retrieving data from Firebase Realtime Database:', error);
       });
 
-
   }
 
-
-
-
-
-  // Method to update Firebase Realtime Database in real-time
-  // Update Firebase using the key from carrierData directly
   // Update Firebase using the key from carrierData directly
   updateFirebase({ carrierData, field, value }: { carrierData: CollectedDataItem, field: string, value: any }) {
     if (!carrierData.key) {
@@ -163,14 +169,15 @@ export class AdminModuleComponent implements OnInit {
     update(dataRef, { [field]: validatedValue })
       .then(() => {
         console.log(`Updated field '${field}' with value '${validatedValue}' for key '${carrierData.key}'`);
+        this.showToast(`Updated field '${field}' with value '${validatedValue}' for key '${carrierData.key}'`, 'success');
+
       })
       .catch((error) => {
         console.error('Error updating Firebase:', error);
+        this.showToast('Error Updating!', 'error'); // Show error toast
+
       });
   }
-
-
-
 
   validateNumber(value: any): number {
     const num = Number(value);
@@ -201,10 +208,13 @@ export class AdminModuleComponent implements OnInit {
             tier: 0
           };
 
+
           const newEntryRef = ref(this.db, `Collected Data/${newKey}`);
           update(newEntryRef, newEntry)
             .then(() => {
               this.retrieveCollectedData(this.user!); // Reload data after adding the new row
+              this.showToast(`Added Row  '${newKey}'`, 'success');
+
             })
             .catch((error) => {
               console.error('Error adding new row:', error);
@@ -224,9 +234,12 @@ export class AdminModuleComponent implements OnInit {
     remove(dataRef)
       .then(() => {
         this.retrieveCollectedData(this.user!); // Reload the data after removing
+        this.showToast(`Removed Carrier '${key}'`, 'success');
+
       })
       .catch((error) => {
         console.error('Error removing row:', error);
+        this.showToast(`Error removing '${key}'`, 'warning');
       });
   }
 

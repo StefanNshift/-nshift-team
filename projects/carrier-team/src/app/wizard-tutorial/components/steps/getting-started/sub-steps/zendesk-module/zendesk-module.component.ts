@@ -19,7 +19,7 @@ export class ZendeskModuleComponent implements OnInit {
   toastType = ''; // To control the type of toast
 
   // To store the retrieved members data
-  constructor(private router: Router, private http: HttpClient, private db: Database, private auth: Auth) {}
+  constructor(private router: Router, private http: HttpClient, private db: Database, private auth: Auth) { }
   probIssues: any[] = []; // Array to hold PROB issues data
   probIssueCount: number = 0; // Count of PROB issues
   zendeskTicketCount: number = 0; // Count of Zendesk tickets
@@ -50,23 +50,20 @@ export class ZendeskModuleComponent implements OnInit {
 
   ngOnInit() {
     const storedAdmin = localStorage.getItem('isAdmin');
-
     if (storedAdmin) {
-      this.retrieveMembers();
-      this.fetchPROBIssues();
-      this.fetchAllTickets();
-    } else {
-      this.router.navigate(['/  ']);
-    }
-
-    // Sign in and fetch Firebase data, then fetch PROB issues and tickets
-    this.signInWithEmailAndPassword('stefan@admin.com', 'hemligt123').then(() => {
       this.retrieveCollectedData().then(() => {
         // Now call the methods that depend on collectedData being loaded
         this.retrieveMembers();
         this.fetchPROBIssues();
         this.fetchAllTickets();
       });
+    } else {
+      this.router.navigate(['/  ']);
+    }
+
+    // Sign in and fetch Firebase data, then fetch PROB issues and tickets
+    this.signInWithEmailAndPassword('stefan@admin.com', 'hemligt123').then(() => {
+
     });
   }
 
@@ -342,9 +339,23 @@ export class ZendeskModuleComponent implements OnInit {
       ticket.created_at = this.formatDate(ticket.created_at);
       ticket.updated_at = this.formatDate(ticket.updated_at);
 
-      // Assign responsibility
+      // Assign responsibility based on carrierCIS
       const carrierCIS = this.getCarrierCIS(ticket.carrier_id);
       ticket.assigned_to = carrierCIS !== 'Not Found' ? carrierCIS : 'All';
+
+      // Now check if tier is missing, and retrieve it from collectedData if necessary
+      let tier = ticket.tier || 'Not found';
+      if (tier === 'N/A') {
+        const carrierEntry = this.collectedData.find(data =>
+          data.carrierConceptID != null && ticket.carrier_id != null && data.carrierConceptID.toString() === ticket.carrier_id.toString()
+        );
+
+        // If found, format the tier correctly
+        if (carrierEntry) {
+          tier = typeof carrierEntry.tier === 'number' ? `tier ${carrierEntry.tier}` : carrierEntry.tier;
+        }
+      }
+      ticket.tier = tier;
     });
 
     // Sort unassigned tickets by priority in order: urgent > high > medium > low
