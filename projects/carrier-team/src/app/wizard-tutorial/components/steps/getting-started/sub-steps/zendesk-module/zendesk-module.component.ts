@@ -326,7 +326,10 @@ export class ZendeskModuleComponent implements OnInit {
         return ticket;
       });
 
-    console.log('Filtered Unassigned Tickets with Zendesk IDs:', this.filteredUnassignedTickets);
+    if(this.filteredUnassignedTickets.length == 0){
+      this.showToast(`No tickets to sync`, 'warning'); // Show warning toast
+    }
+    this.isLoading = false;
   }
 
   // Separate method to process the ticket response data
