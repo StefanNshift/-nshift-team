@@ -93,8 +93,6 @@ export class ZendeskModuleComponent implements OnInit {
     });
 
     if (!vacation) {
-      this.showToast(`Updating ticket: ${ticketId} to assignee: ${assigneeId}`, 'info'); // Show info toast
-
       const headers = { 'x-api-key': 'zoYrWOhSUQ58KZkc2hpZnQuY29tOkFUQVRUM3hGZ' }; // Replace with your actual API key
 
       this.http
