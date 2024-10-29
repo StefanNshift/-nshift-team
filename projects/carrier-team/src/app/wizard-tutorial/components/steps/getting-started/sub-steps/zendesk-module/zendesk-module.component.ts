@@ -75,6 +75,7 @@ export class ZendeskModuleComponent implements OnInit {
   }
 
   updateTicketAssignee(ticketId: number, assigneeId: string) {
+    this.isLoading = true;
     this.retrieveMembers();
     let vacation = false;
     if (assigneeId === '1') {
@@ -87,6 +88,7 @@ export class ZendeskModuleComponent implements OnInit {
       if (user.zendeskID == assigneeId && user.vacation == true) {
         this.showToast(`${user.name} is on vacation`, 'warning'); // Show warning toast
         vacation = true;
+        this.isLoading = false;
       }
     });
 
@@ -97,7 +99,7 @@ export class ZendeskModuleComponent implements OnInit {
 
       this.http
         .post(
-          'http://backendchatgpt-050f.onrender.com/assignTicket',
+          'https://backendchatgpt-050f.onrender.com/assignTicket',
           {
             ticketId: ticketId,
             userId: assigneeId,
@@ -273,6 +275,7 @@ export class ZendeskModuleComponent implements OnInit {
   }
 
   syncTier1AndTier2Unassigned() {
+    this.isLoading = true;
     this.filteredUnassignedTickets = this.unassignedTickets
       .filter(ticket => ticket.tier === 'tier 1' || ticket.tier === 'tier 2')
       .map(ticket => {
@@ -300,7 +303,7 @@ export class ZendeskModuleComponent implements OnInit {
             const headers = { 'x-api-key': 'zoYrWOhSUQ58KZkc2hpZnQuY29tOkFUQVRUM3hGZ' }; // Ersätt med din API-nyckel
             this.http
               .post(
-                'http://localhost:3000/assignTicket',
+                'https://backendchatgpt-050f.onrender.com/assignTicket',
                 {
                   ticketId: ticket.ticket_id,
                   userId: assignedMember.zendeskID,
@@ -312,7 +315,6 @@ export class ZendeskModuleComponent implements OnInit {
                   this.showToast('Tickets assigned successfully!', 'success'); // Show success toast
                   localStorage.removeItem('zendeskTickets');
                   localStorage.removeItem('zendeskTicketsTimestamp');
-                  this.isLoading = true;
                   this.fetchAllTickets();
                 },
                 error: error => {
