@@ -25,6 +25,60 @@
 .form-control input{
  width:66px;
 }
+
+.skeleton-loader {
+  z-index: 1000 !important; // Ensure the loader is below the toast but above other content
+}
+
+// Base Toast Styles
+.toast {
+  position: fixed;
+  top: 60px; // Adjust as needed
+  right: 20px; // Positioning from the right
+  color: #fff; // Text color
+  z-index: 1050; // Ensure the toast is above other elements
+  border-radius: 5px; // Rounded corners
+  padding: 15px; // Padding inside the toast
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); // Shadow effect
+  transition: opacity 0.5s ease, transform 0.5s ease; // Smooth transitions
+  transform: translateY(-100%); // Start off-screen
+  opacity: 0; // Start hidden
+
+  &.visible {
+      transform: translateY(0); // Move to visible position
+      opacity: 1; // Fully visible
+  }
+}
+
+// Toast Color Variants
+.toast-success {
+  background-color: #4caf50; // Green for success
+}
+
+.toast-error {
+  background-color: #f44336; // Red for error
+}
+
+.toast-warning {
+  background-color: #ff9800; // Yellow for warning
+}
+
+// Toast Content Styles
+.toast-content {
+  display: flex; // Flex layout for content alignment
+  align-items: center; // Center items vertically
+  justify-content: space-between; // Space between message and close button
+}
+
+// Close Button Styles
+.close-toast {
+  background: none; // No background for the button
+  border: none; // No border
+  color: #fff; // Close button text color
+  font-size: 18px; // Font size for close button
+  cursor: pointer; // Show pointer cursor on hover
+}
+
 // fix for compilation error with angular 12 (unaltered code)
 .list-group-bullet {
   margin-bottom: $list-group-margin-bottom;
