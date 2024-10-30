@@ -349,16 +349,14 @@ export class ZendeskModuleComponent implements OnInit {
 
       // Now check if tier is missing, and retrieve it from collectedData if necessary
       let tier = ticket.tier || 'Not found';
-      if (tier === 'N/A') {
         const carrierEntry = this.collectedData.find(data =>
           data.carrierConceptID != null && ticket.carrier_id != null && data.carrierConceptID.toString() === ticket.carrier_id.toString()
         );
 
-        // If found, format the tier correctly
         if (carrierEntry) {
           tier = typeof carrierEntry.tier === 'number' ? `tier ${carrierEntry.tier}` : carrierEntry.tier;
         }
-      }
+      
       ticket.tier = tier;
     });
 
