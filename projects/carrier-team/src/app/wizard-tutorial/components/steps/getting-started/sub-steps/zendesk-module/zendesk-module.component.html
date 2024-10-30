@@ -52,9 +52,10 @@
       <tr>
         <th>Ticket ID</th>
         <th>Subject</th>
-        <th>Created At</th>
-        <th>Updated At</th>
+        <th>Created</th>
+        <th>Updated</th>
         <th>Tier</th>
+        <th>Carrier</th> <!-- New column for assigned member -->
         <th>Carrier ID</th>
         <th>Priority</th> <!-- New column for Priority -->
         <th>Carrier CIS</th> <!-- New column for assigned member -->
@@ -69,6 +70,7 @@
         <td>{{ ticket.created_at }}</td>
         <td>{{ ticket.updated_at }}</td>
         <td>{{ ticket.tier | titlecase }}</td>
+        <td>{{ ticket.carrierName }}</td> <!-- Display Carrier Name -->
         <td>{{ ticket.carrier_id }}</td>
         <td>{{ ticket.priority | titlecase }}</td> <!-- Display Priority -->
         <td>{{ ticket.assigned_to }}</td> <!-- Display assigned member -->

@@ -341,6 +341,7 @@ export class ZendeskModuleComponent implements OnInit {
     this.unassignedTickets.forEach(ticket => {
       ticket.created_at = this.formatDate(ticket.created_at);
       ticket.updated_at = this.formatDate(ticket.updated_at);
+      ticket.carrierName = this.getCarrierName(ticket.carrier_id);
 
       // Assign responsibility based on carrierCIS
       const carrierCIS = this.getCarrierCIS(ticket.carrier_id);
@@ -424,6 +425,7 @@ export class ZendeskModuleComponent implements OnInit {
         console.log('Filtered Tickets Response:', response); // Log response from API
         this.tickets = response.filteredTickets.map(ticket => {
           const carrierCIS = this.getCarrierCIS(ticket.carrier_number);
+          
           console.log('Mapped Ticket:', { ...ticket, carrierCIS }); // Log mapped tickets
           return { ...ticket, carrierCIS };
         });
@@ -437,6 +439,19 @@ export class ZendeskModuleComponent implements OnInit {
     );
   }
 
+  getCarrierName(carrierID: number): string {
+    if (!carrierID) {
+      return 'Not Found'; // Return 'Not Found' if carrierID is invalid
+    }
+  
+    // Find the carrier entry with a matching carrier ID
+    const carrierEntry = this.collectedData.find(
+      data => data.carrierConceptID && data.carrierConceptID.toString() === carrierID.toString()
+    );
+  
+    return carrierEntry ? carrierEntry.carrier : 'Not Found'; // Return carrier name or 'Not Found'
+  }
+  
   // Method to get CIS responsible for a carrier from Firebase data
   getCarrierCIS(carrierNumber: number) {
     if (!carrierNumber) {
