@@ -61,10 +61,7 @@ export class ZendeskModuleComponent implements OnInit {
       this.router.navigate(['/  ']);
     }
 
-    // Sign in and fetch Firebase data, then fetch PROB issues and tickets
-    this.signInWithEmailAndPassword('stefan@admin.com', 'hemligt123').then(() => {
-
-    });
+   
   }
 
   getSelectValue(event: Event): string {
@@ -201,15 +198,6 @@ export class ZendeskModuleComponent implements OnInit {
       });
   }
 
-  signInWithEmailAndPassword(email: string, password: string): Promise<void> {
-    return signInWithEmailAndPassword(this.auth, email, password)
-      .then(userCredential => {
-        console.log('Signed in successfully:', userCredential.user);
-      })
-      .catch(error => {
-        console.error('Error signing in:', error);
-      });
-  }
 
   retrieveCollectedData(): Promise<void> {
     const dataRef = ref(this.db, 'Collected Data');

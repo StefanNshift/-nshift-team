@@ -17,7 +17,7 @@ itemsPerPage: number = 10; // Controls how many items per page
 
   ngOnInit() {
     // Sign in programmatically with Firebase Authentication (email/password)
-    this.signInWithEmailAndPassword('stefan@admin.com', 'hemligt123');
+    this.signInWithEmailAndPassword('stefan.liden@nshift.com', 'default');
   }
 
   signInWithEmailAndPassword(email: string, password: string) {

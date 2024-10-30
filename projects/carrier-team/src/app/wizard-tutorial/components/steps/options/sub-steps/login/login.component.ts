@@ -1,84 +1,72 @@
 import { Component, OnInit } from '@angular/core';
-import { Database, ref, get, update, push, remove } from '@angular/fire/database'; // Firebase Database modules
-import { Auth, signInWithEmailAndPassword, User } from '@angular/fire/auth'; // Firebase Auth modules
+import { Database, ref, get } from '@angular/fire/database';
+import { Auth, signInWithEmailAndPassword, User } from '@angular/fire/auth';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styles: [],
 })
-export class LoginComponent
+export class LoginComponent implements OnInit {
+  constructor(private db: Database, private auth: Auth) {}
 
- implements OnInit {
-  constructor(private db: Database, private auth: Auth) {} // Inject Database and Auth
-
-  email: string = '';  // For the login form
-  password: string = ''; // For the login form
-  user: User | null = null; // Hold the logged-in user
-  isAdmin: boolean = false; // Check if the user is admin
-  wrongpassword: boolean;
-
-
+  email: string = '';
+  password: string = '';
+  user: User | null = null;
+  isAdmin: boolean = false;
+  wrongpassword: boolean = false;
+  noAdminAccess: boolean = false; // New flag for non-admin access
 
   ngOnInit() {
-
-    // Check if the user and admin status are stored in localStorage
     const storedUser = localStorage.getItem('user');
     const storedAdmin = localStorage.getItem('isAdmin');
 
     if (storedUser && storedAdmin) {
       this.user = JSON.parse(storedUser);
       this.isAdmin = JSON.parse(storedAdmin) === true;
-
-      if (this.isAdmin) {
-      }
     }
   }
 
+  onLogin() {
+    this.wrongpassword = false;
+    this.noAdminAccess = false; // Reset flag for each login attempt
 
-onLogin() {
-  this.wrongpassword = false;
-  signInWithEmailAndPassword(this.auth, this.email, this.password)
-    .then((userCredential) => {
-      this.user = userCredential.user;
-      this.checkAdminStatus(this.user);
-    })
-    .catch((error) => {
-      console.error('Error signing in:', error);
-      this.wrongpassword = true;
-    });
-}
+    signInWithEmailAndPassword(this.auth, this.email, this.password)
+      .then((userCredential) => {
+        this.checkAdminStatus(userCredential.user);
+      })
+      .catch((error) => {
+        console.error('Error signing in:', error);
+        this.wrongpassword = true;
+      });
+  }
 
-logout() {
-  localStorage.removeItem('user');
-  localStorage.removeItem('isAdmin');
-  this.user = null;
-  this.isAdmin = false;
-  location.reload();
-}
+  logout() {
+    localStorage.removeItem('user');
+    localStorage.removeItem('isAdmin');
+    this.user = null;
+    this.isAdmin = false;
+    location.reload();
+  }
 
-checkAdminStatus(user: User) {
-  const adminRef = ref(this.db, `admins/${user.uid}`);
+  checkAdminStatus(user: User) {
+    const adminRef = ref(this.db, `admins/${user.uid}`);
 
-  get(adminRef)
-    .then((snapshot) => {
-      if (snapshot.exists()) {
-        this.isAdmin = snapshot.val();
-        localStorage.setItem('user', JSON.stringify(this.user));
-        localStorage.setItem('isAdmin', JSON.stringify(this.isAdmin));
-
-        if (this.isAdmin) {
+    get(adminRef)
+      .then((snapshot) => {
+        if (snapshot.exists() && snapshot.val() === true) {
+          this.user = user;
+          this.isAdmin = true;
+          localStorage.setItem('user', JSON.stringify(this.user));
+          localStorage.setItem('isAdmin', JSON.stringify(this.isAdmin));
           location.reload();
-          
+        } else {
+          this.noAdminAccess = true; // Set flag for non-admin access
+        
         }
-      } else {
-        console.log('User is not an admin.');
-      }
-    })
-    .catch((error) => {
-      console.error('Error checking admin status:', error);
-    });
+      })
+      .catch((error) => {
+        console.error('Error checking admin status:', error);
+      });
+  }
 }
-
-
- }
