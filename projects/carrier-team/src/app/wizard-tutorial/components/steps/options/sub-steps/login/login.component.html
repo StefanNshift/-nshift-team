@@ -25,8 +25,8 @@
         required
       />
     </div>
-    <p style="color:red" *ngIf="wrongpassword">Wrong Password</p>
-    <p style="color:red" *ngIf="noAdminAccess">Admin access required.</p>
+    <p class="alert-danger" *ngIf="wrongpassword">Wrong Password</p>
+    <p class="alert-warning" *ngIf="noAdminAccess">Admin access required.</p>
 
     <button type="submit" class="btn btn-primary">Login</button>
   </form>
