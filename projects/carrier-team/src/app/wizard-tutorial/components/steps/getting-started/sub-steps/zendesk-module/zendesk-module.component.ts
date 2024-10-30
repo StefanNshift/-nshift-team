@@ -342,7 +342,11 @@ export class ZendeskModuleComponent implements OnInit {
       ticket.created_at = this.formatDate(ticket.created_at);
       ticket.updated_at = this.formatDate(ticket.updated_at);
       ticket.carrierName = this.getCarrierName(ticket.carrier_id);
+      if(ticket.carrier_id == null){
+        ticket.carrier_id = 'N/a'
+      }
 
+      
       // Assign responsibility based on carrierCIS
       const carrierCIS = this.getCarrierCIS(ticket.carrier_id);
       ticket.assigned_to = carrierCIS !== 'Not Found' ? carrierCIS : 'All';
@@ -439,7 +443,7 @@ export class ZendeskModuleComponent implements OnInit {
 
   getCarrierName(carrierID: number): string {
     if (!carrierID) {
-      return 'Not Found'; // Return 'Not Found' if carrierID is invalid
+      return 'N/a'; // Return 'Not Found' if carrierID is invalid
     }
   
     // Find the carrier entry with a matching carrier ID
