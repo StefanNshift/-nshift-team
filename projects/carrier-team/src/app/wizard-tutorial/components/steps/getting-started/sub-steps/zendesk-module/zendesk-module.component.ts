@@ -315,7 +315,7 @@ export class ZendeskModuleComponent implements OnInit {
       });
 
     if(this.filteredUnassignedTickets.length == 0){
-      this.showToast(`No tickets to sync`, 'warning'); // Show warning toast
+      this.showToast(`No T1/T2 tickets to asignee`, 'warning'); // Show warning toast
     }
     this.isLoading = false;
   }

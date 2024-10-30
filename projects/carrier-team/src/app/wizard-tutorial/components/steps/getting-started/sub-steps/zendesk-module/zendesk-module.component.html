@@ -7,10 +7,8 @@
 
 <div *ngIf="isLoading">Loading data...</div>
   <div *ngIf="isLoading" class="skeleton-loader skeleton-loader-table"></div>
-
   <!-- PROB Issues Section -->
   <h6 *ngIf="!isLoading" style="margin-top: 2%" class="h3">Unassigned Prob Tickets</h6>
-
   <p *ngIf="!isLoading && probIssues.length > 0">Total PROB Issues: {{ probIssueCount }}</p>
   <table class="table table-responsive" *ngIf="probIssues.length > 0 && !isLoading">
     <thead>
@@ -35,15 +33,17 @@
   <p *ngIf="!isLoading && probIssues.length === 0">No PROB issues to display.</p>
 
   <button *ngIf="!isLoading && probIssues.length > 0" class="btn btn-primary mt-3">Assig  n T1/T2 Tickets</button>
-
-
-
-
-
+  <hr>  
   <h6 *ngIf="!isLoading" style="margin-top: 2%" class="h3">Unassigned Zendesk Tickets</h6>
+ <!-- Unassigned tickets by tier breakdown -->
+ <div class="list-group-bullet li"  style="font-weight: 600;color:black" *ngIf="!isLoading && unassignedTickets.length > 0">
+  <li>T1: {{ unassignedTier1Count }}</li>
+  <li>T2: {{ unassignedTier2Count }}</li>
+  <li>T3: {{ unassignedTier3Count }}</li>
+  <li >Total Unassigned Tickets: {{ totalUnassignedCount }}</li>
+  <button class="btn btn-primary" (click)="syncTier1AndTier2Unassigned()">Auto-assign T1/T2 tickets</button>
 
-
- 
+</div>
 
   <div *ngIf="isLoading" class="skeleton-loader skeleton-loader-table"></div>
 
@@ -89,17 +89,6 @@
     </tbody>
   </table>
 
-  
-
-  <button class="btn btn-primary mt-3" (click)="syncTier1AndTier2Unassigned()">Auto-assign T1/T2 tickets</button>
- <!-- Unassigned tickets by tier breakdown -->
-   <div class="list-group-bullet li"  style="font-weight: 600;" *ngIf="!isLoading && unassignedTickets.length > 0">
-    <li >Total Unassigned Tickets: {{ totalUnassignedCount }}</li>
-    <li>T1: {{ unassignedTier1Count }}</li>
-    <li>T2: {{ unassignedTier2Count }}</li>
-    <li>T3: {{ unassignedTier3Count }}</li>
-  </div>
-
 
   <!-- Carrier Management Team Section -->
   <h4 style="margin-top: 2%" >Carrier Management Zendesk Team</h4>
@@ -135,10 +124,9 @@
             (click)="toggleVacationStatus(i)" 
             [ngClass]="member.vacation ? 'btn-danger' : 'btn-success'"
             class="btn">
-            {{ member.vacation ? 'On Vacation' : 'Not on Vacation' }}
+            {{ member.vacation ? 'Vacation' : 'Working' }}
           </button>
         </td>
       </tr>
     </tbody>
-    
   </table>

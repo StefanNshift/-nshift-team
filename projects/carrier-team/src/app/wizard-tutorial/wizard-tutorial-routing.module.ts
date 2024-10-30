@@ -53,7 +53,7 @@ const routes: WizardStep[] = [
             path: 'tickets',
             component: ZendeskModuleComponent,
             data: {
-              heading: 'Carrier Ticket',
+              heading: 'Carrier Tickets',
               pageHeading: '',
             }
           
