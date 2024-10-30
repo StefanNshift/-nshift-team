@@ -188,6 +188,15 @@ export class AdminModuleComponent implements OnInit {
     return String(value).trim(); // Konvertera till sträng och trimma eventuella mellanslag
   }
 
+  validateTierNumber(value: any): number {
+    const num = Number(value);
+    if (isNaN(num)) return 1; // Default to 1 if the value is not a number
+    // Ensure the value is between 1 and 3
+    if (num < 1) return 1;
+    if (num > 3) return 3;
+    return num;
+  }
+
   addNewRow() {
     const dataRef = ref(this.db, 'Collected Data');
 
@@ -207,7 +216,6 @@ export class AdminModuleComponent implements OnInit {
             team: '',
             tier: 0
           };
-
 
           const newEntryRef = ref(this.db, `Collected Data/${newKey}`);
           update(newEntryRef, newEntry)

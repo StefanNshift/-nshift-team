@@ -65,14 +65,15 @@
           </select>
         </td>
         <td>
-          <input
-            type="number"
-            [(ngModel)]="carrierData.tier"
-            (ngModelChange)="updateFirebase({ carrierData, field: 'tier', value: $event })"
-            class="form-control"
-          />
+            <input
+              type="number"
+              [(ngModel)]="carrierData.tier"
+              (ngModelChange)="updateFirebase({ carrierData, field: 'tier', value: validateTierNumber($event) })"
+              class="form-control"
+              min="1"
+              max="3"
+            />
         </td>
-
         <td>
           <input
             type="text"
