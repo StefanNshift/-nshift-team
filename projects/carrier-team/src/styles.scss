@@ -63,6 +63,13 @@
   background-color: #ff9800; // Yellow for warning
 }
 
+.table thead tr th {
+    font-weight: 500;
+    border-bottom-width: 1px;
+    color: #ffffff;
+    background: #333333;
+}
+
 // Toast Content Styles
 .toast-content {
   display: flex; // Flex layout for content alignment
@@ -166,7 +173,7 @@ $primayColorHover :#011dd6;
 
 .btn-success:active {
   color: #fff;
-  background-color: #19eb85 !important;
+  background-color: #18aa63  !important;
   border-color: #01a355 !important;
   box-shadow: 0 0;
 }

@@ -14,7 +14,7 @@
     placeholder="Search..."
     [(ngModel)]="searchTerm"
   />
-  <button  *ngIf="!isLoading" class="btn btn-primary mt-3" (click)="addNewRow()">Add Carrier</button>
+  <button style="margin-bottom: 1%;" *ngIf="!isLoading" class="btn btn-primary mt-3" (click)="addNewRow()">Add Carrier</button>
   <div *ngIf="isLoading" class="skeleton-loader skeleton-loader-table"></div>
 
   <table *ngIf="!isLoading" class="table mb-0">

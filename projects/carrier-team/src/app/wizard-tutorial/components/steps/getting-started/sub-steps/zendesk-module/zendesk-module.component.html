@@ -9,10 +9,10 @@
   <div *ngIf="isLoading" class="skeleton-loader skeleton-loader-table"></div>
 
   <!-- PROB Issues Section -->
-  <h6 *ngIf="!isLoading" style="margin-top: 2%" class="h2">Unassigned Prob Tickets</h6>
+  <h6 *ngIf="!isLoading" style="margin-top: 2%" class="h3">Unassigned Prob Tickets</h6>
 
   <p *ngIf="!isLoading && probIssues.length > 0">Total PROB Issues: {{ probIssueCount }}</p>
-  <table class="table mb-0" *ngIf="probIssues.length > 0 && !isLoading">
+  <table class="table table-responsive" *ngIf="probIssues.length > 0 && !isLoading">
     <thead>
       <tr>
         <th>Issue Key</th>
@@ -40,7 +40,7 @@
 
 
 
-  <h6 *ngIf="!isLoading" style="margin-top: 2%" class="h2">Unassigned Zendesk Tickets</h6>
+  <h6 *ngIf="!isLoading" style="margin-top: 2%" class="h3">Unassigned Zendesk Tickets</h6>
 
 
  
@@ -89,8 +89,11 @@
     </tbody>
   </table>
 
-   <!-- Unassigned tickets by tier breakdown -->
-   <div  style="font-weight: 600;" *ngIf="!isLoading && unassignedTickets.length > 0">
+  
+
+  <button class="btn btn-primary mt-3" (click)="syncTier1AndTier2Unassigned()">Sync T1/T2 for Unassigned</button>
+ <!-- Unassigned tickets by tier breakdown -->
+   <div class="list-group-bullet li"  style="font-weight: 600;" *ngIf="!isLoading && unassignedTickets.length > 0">
     <li >Total Unassigned Tickets: {{ totalUnassignedCount }}</li>
     <li>T1: {{ unassignedTier1Count }}</li>
     <li>T2: {{ unassignedTier2Count }}</li>
@@ -98,13 +101,10 @@
   </div>
 
 
-  <button class="btn btn-primary mt-3" (click)="syncTier1AndTier2Unassigned()">Sync T1/T2 for Unassigned</button>
-
-
   <!-- Carrier Management Team Section -->
   <h4 style="margin-top: 2%" >Carrier Management Zendesk Team</h4>
   <p *ngIf="!isLoading && members.length === 0">No team members available.</p>
-  <table class="table mb-0" *ngIf="members.length > 0 && !isLoading">
+  <table class="table table-responsive" *ngIf="members.length > 0 && !isLoading">
     <thead>
       <tr>
         <th>Name</th>
