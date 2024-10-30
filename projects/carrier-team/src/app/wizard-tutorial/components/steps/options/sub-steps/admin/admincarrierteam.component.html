@@ -17,7 +17,7 @@
   <button style="margin-bottom: 1%;" *ngIf="!isLoading" class="btn btn-primary mt-3" (click)="addNewRow()">Add Carrier</button>
   <div *ngIf="isLoading" class="skeleton-loader skeleton-loader-table"></div>
 
-  <table *ngIf="!isLoading" class="table mb-0">
+  <table *ngIf="!isLoading" class="table table-responsive-xl">
     <thead>
       <tr>
         <th>Carrier</th>
