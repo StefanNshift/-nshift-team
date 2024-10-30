@@ -91,7 +91,7 @@
 
   
 
-  <button class="btn btn-primary mt-3" (click)="syncTier1AndTier2Unassigned()">Sync T1/T2 for Unassigned</button>
+  <button class="btn btn-primary mt-3" (click)="syncTier1AndTier2Unassigned()">Auto-assign T1/T2 tickets</button>
  <!-- Unassigned tickets by tier breakdown -->
    <div class="list-group-bullet li"  style="font-weight: 600;" *ngIf="!isLoading && unassignedTickets.length > 0">
     <li >Total Unassigned Tickets: {{ totalUnassignedCount }}</li>
