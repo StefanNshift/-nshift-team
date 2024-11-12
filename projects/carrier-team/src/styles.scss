@@ -22,8 +22,8 @@
 @import '@sebgroup/bootstrap/scss/styles/spinners';
 @import '@sebgroup/bootstrap/scss/styles/skeleton-loader'; /* styles for skeleton-loader */
 
-.form-control input{
- width:66px;
+.form-control input {
+  width: 66px;
 }
 
 .skeleton-loader {
@@ -45,8 +45,8 @@
   opacity: 0; // Start hidden
 
   &.visible {
-      transform: translateY(0); // Move to visible position
-      opacity: 1; // Fully visible
+    transform: translateY(0); // Move to visible position
+    opacity: 1; // Fully visible
   }
 }
 
@@ -64,10 +64,10 @@
 }
 
 .table thead tr th {
-    font-weight: 500;
-    border-bottom-width: 1px;
-    color: #ffffff;
-    background: #0116a3;
+  font-weight: 500;
+  border-bottom-width: 1px;
+  color: #ffffff;
+  background: #0116a3;
 }
 
 // Toast Content Styles
@@ -100,11 +100,9 @@
     background-image: escape-svg($list-group-bullet-icon);
   }
 }
-.wizard-main{
+.wizard-main {
   max-width: 1500px !important;
 }
-
-
 
 // needed for markup examples
 $exemplify-font-family: SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace !default; // default font-family
@@ -119,12 +117,11 @@ $exemplify-custom-select-height: calc(2.25rem + 2px) !default; // the height for
 $exemplify-custom-toolbar-width: 114px !default; // the width need for copy and toggle show/hide buttons
 $exemplify-copy-notice-duration: 1400ms !default; // duration when copy notice is displayed
 $exemplify-copy-notice-transition-time: 600ms !default; // copy notice transition time
-$primayColor :#0116a3;
-$primayColorHover :#011dd6;
-
+$primayColor: #0116a3;
+$primayColorHover: #011dd6;
 
 .ngx-pagination .current {
-  padding: .1875rem .625rem;
+  padding: 0.1875rem 0.625rem;
   background: #0116a3 !important;
   color: #fefefe;
   cursor: default;
@@ -137,25 +134,23 @@ $primayColorHover :#011dd6;
   border-color: #152ab3;
 }
 
-
 .btn-outline-primary:hover {
   color: #fff;
   background-color: #0116a3 !important;
   border-color: #0116a3 !important;
 }
 
-
 .btn-outline-primary:active {
   color: #fff;
   background-color: #0116a3 !important;
   border-color: #0116a3 !important;
 }
-  .btn-success {
-    color: #fff;
-    background-color: #01a355 !important;
-    border-color: #01a355 !important;
-    box-shadow: 0 
-  }
+.btn-success {
+  color: #fff;
+  background-color: #01a355 !important;
+  border-color: #01a355 !important;
+  box-shadow: 0;
+}
 
 .btn-success:hover {
   color: #fff;
@@ -173,15 +168,12 @@ $primayColorHover :#011dd6;
 
 .btn-success:active {
   color: #fff;
-  background-color: #18aa63  !important;
+  background-color: #18aa63 !important;
   border-color: #01a355 !important;
   box-shadow: 0 0;
 }
 
-
-
-
-
+/* Default State */
 .btn-primary {
   color: #fff;
   background-color: #0116a3 !important;
@@ -189,7 +181,37 @@ $primayColorHover :#011dd6;
   box-shadow: 0 0;
 }
 
- // default colors for code snippet tags
+/* Hover and Focus States */
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:focus-visible {
+  color: #fff;
+  background-color: #0a2ab5 !important; /* Adjust to desired hover color */
+  border-color: #0b3ac5 !important; /* Adjust to desired border color */
+  box-shadow: 0 0;
+}
+
+/* Active State */
+.btn-primary:active,
+.btn-primary.active {
+  color: #fff;
+  background-color: #082592 !important; /* Adjust for active state */
+  border-color: #061a73 !important;
+  box-shadow: 0 0;
+}
+
+/* Disabled State */
+.btn-primary.disabled,
+.btn-primary:disabled {
+  color: #fff;
+  background-color: #adadad !important; /* Adjust for disabled state */
+  border-color: #adadad !important;
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: 0.65; /* Optional: makes the disabled state visually distinct */
+}
+
+// default colors for code snippet tags
 $exemplify-colors: (
   one: #6610f2,
   two: #00a985,
@@ -242,8 +264,8 @@ code[class*='language'] {
   overflow: auto;
 }
 
-.spinner{
-  color:#0116a3;  
+.spinner {
+  color: #0116a3;
 }
 
 /* Inline code */
@@ -338,7 +360,7 @@ code[class*='language'] {
 .navbar {
   padding-left: 3rem !important;
   font-weight: 500;
-  height:4.5rem !important;
+  height: 4.5rem !important;
 }
 
 nav[_ngcontent-itw-c11] {
@@ -348,8 +370,8 @@ nav[_ngcontent-itw-c11] {
   overflow-x: auto;
   overflow-y: hidden;
 }
-.navbar{
-  height:4rem !important;
+.navbar {
+  height: 4rem !important;
 }
 
 .navbar-brand {
@@ -358,12 +380,12 @@ nav[_ngcontent-itw-c11] {
   &::before {
     content: '';
     display: inline-block;
-    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFwAAABcCAMAAADUMSJqAAAAq1BMVEUBFqP///8AAJwAEKMBFqUAAKEBF6FrcrXZ3fO1udyWms0AAJYAGJ7///0AEaEAD6Xr7vpucrErM6AAAJFqca1kZ6xASKYAFqsADKk7Q6IUHZ0fK6tOVqdLVK41QKU/R6vCx97x8/qepdPh5fi6wN91fr3a4OlhZrHIz+J+g77R1+U0PKmLkMmfqMpOUqdZX68qM6kADZEdIZkuOZRcZLzS1NuoqsV2gbOZnMPiTJOvAAACzklEQVRoge2V23LaMBCGvbuSaK1TMIkxR9skEIPDIT0l7/9kXRno5CLpuLns6GNGNhr51+pfaZUkkUgkEolEIpFIJBL5AKFUaIUSIlFvupNEhc7zq/ikuBknzjliXeN98Ufae2/ChM4VSnn/OfmxcpjlkymKhGbzhbl0Uz5fklDalIuSZoeDUn9V+QBF0woA6hUaOQDI6Bz56B4eUMh1DbDBR4Cl/xfRYDWbLBJZWwi/RmIQdyqYoUZf4Cvilvthh0ewrefB/aIXygjvhVFjhU8W9odjA5u2i9wTT2gEndqZN2DrY3vCHwAtJ0X0810Ij88nh5QIbDi0Quq1pCD+TZ9G6HhZEruVfOen+wH2JCW5np4UWTC6WkqDFdxo9EKKzvOuO0Ml16uBTG2dpumabYHVYHCXz/qFPq2DmxZaL2957atWS69Y3Npgf52RDglNw6BzQuFn9eulpD7a2LDRt68WNhz6PkhstuiDOKxuVyG5OiQ05V1U102IvK4eXodtH2OoZREtR1uAhVN4rMIiGgwev0jUqYXsIn5jvBCSd8ty3DOdCZX1DS+xyAAGOE6kfN7eA+zlC+8Kp4oW4PEqrp1JPCe0dYL3WD/xzY7FKbMwxDGiIDnivaiH3SEinvPuKu74CNPC1q3nM9FL3M1e05PrVIbSbQfae72HWg/eExeqyNkuJCr6Rd5WD5m7RN5Y+zQpt7Wt8F1xjljvwD4d5nPVx3Zqd01Ll8gX0GHt/Cp+YvFw/HUQD4W4KG03ZtGnwIjp/DhNLuIy34UPN3Mp12/E77vIaydCncRy11s8meZ5+EZN+NCZQraLxRKlGc/ySbBV5fm0WOaZ41LszheIwmU5yftIc+jufBzIK65dirwPdYkvha7b8D9DngQVheq2t+ALhYj6VcVLheOGq6sKLT+79tob3sS5LIfxXb397F0XiUQikUgkEolEIv8rvwHP8zJyRpJS8AAAAABJRU5ErkJggg==");
-    height:70px !important;
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFwAAABcCAMAAADUMSJqAAAAq1BMVEUBFqP///8AAJwAEKMBFqUAAKEBF6FrcrXZ3fO1udyWms0AAJYAGJ7///0AEaEAD6Xr7vpucrErM6AAAJFqca1kZ6xASKYAFqsADKk7Q6IUHZ0fK6tOVqdLVK41QKU/R6vCx97x8/qepdPh5fi6wN91fr3a4OlhZrHIz+J+g77R1+U0PKmLkMmfqMpOUqdZX68qM6kADZEdIZkuOZRcZLzS1NuoqsV2gbOZnMPiTJOvAAACzklEQVRoge2V23LaMBCGvbuSaK1TMIkxR9skEIPDIT0l7/9kXRno5CLpuLns6GNGNhr51+pfaZUkkUgkEolEIpFIJBL5AKFUaIUSIlFvupNEhc7zq/ikuBknzjliXeN98Ufae2/ChM4VSnn/OfmxcpjlkymKhGbzhbl0Uz5fklDalIuSZoeDUn9V+QBF0woA6hUaOQDI6Bz56B4eUMh1DbDBR4Cl/xfRYDWbLBJZWwi/RmIQdyqYoUZf4Cvilvthh0ewrefB/aIXygjvhVFjhU8W9odjA5u2i9wTT2gEndqZN2DrY3vCHwAtJ0X0810Ij88nh5QIbDi0Quq1pCD+TZ9G6HhZEruVfOen+wH2JCW5np4UWTC6WkqDFdxo9EKKzvOuO0Ml16uBTG2dpumabYHVYHCXz/qFPq2DmxZaL2957atWS69Y3Npgf52RDglNw6BzQuFn9eulpD7a2LDRt68WNhz6PkhstuiDOKxuVyG5OiQ05V1U102IvK4eXodtH2OoZREtR1uAhVN4rMIiGgwev0jUqYXsIn5jvBCSd8ty3DOdCZX1DS+xyAAGOE6kfN7eA+zlC+8Kp4oW4PEqrp1JPCe0dYL3WD/xzY7FKbMwxDGiIDnivaiH3SEinvPuKu74CNPC1q3nM9FL3M1e05PrVIbSbQfae72HWg/eExeqyNkuJCr6Rd5WD5m7RN5Y+zQpt7Wt8F1xjljvwD4d5nPVx3Zqd01Ll8gX0GHt/Cp+YvFw/HUQD4W4KG03ZtGnwIjp/DhNLuIy34UPN3Mp12/E77vIaydCncRy11s8meZ5+EZN+NCZQraLxRKlGc/ySbBV5fm0WOaZ41LszheIwmU5yftIc+jufBzIK65dirwPdYkvha7b8D9DngQVheq2t+ALhYj6VcVLheOGq6sKLT+79tob3sS5LIfxXb397F0XiUQikUgkEolEIv8rvwHP8zJyRpJS8AAAAABJRU5ErkJggg==');
+    height: 70px !important;
     width: 70px !important;
     position: absolute;
     background-repeat: no-repeat;
-       background-repeat: no-repeat;
+    background-repeat: no-repeat;
     background-size: contain; /* Adjust this value according to your needs */
     background-position: left; /* Adjust this value according to your needs */
     top: 0;
@@ -373,7 +395,6 @@ nav[_ngcontent-itw-c11] {
   }
 }
 
-
 @media screen and (max-width: 767px) {
   pre[class*='language-']:before,
   pre[class*='language-']:after {
@@ -381,7 +402,6 @@ nav[_ngcontent-itw-c11] {
     box-shadow: none;
   }
 }
-
 
 /* Plugin styles */
 .token.tab:not(:empty):before,
@@ -424,7 +444,7 @@ div[markdown] {
 
 /* Style for the code field */
 .code-field {
-  font-family: "Fira Code", Consolas, monospace;
+  font-family: 'Fira Code', Consolas, monospace;
   font-size: 14px;
   padding: 10px;
   border: 1px solid #ccc;
@@ -444,8 +464,8 @@ div[markdown] {
   border-color: #999;
 }
 
-#AIList{
-width: 25%;
+#AIList {
+  width: 25%;
 }
 
 /* Focus effect */
@@ -478,7 +498,7 @@ width: 25%;
 }
 
 .code-field::after {
-  content: "";
+  content: '';
   display: block;
   clear: both;
 }
