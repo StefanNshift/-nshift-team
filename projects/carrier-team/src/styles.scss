@@ -519,3 +519,7 @@ div[markdown] {
 .code-field:focus::before {
   background: linear-gradient(to right, #e6f7ff 0%, #e6f7ff 100%);
 }
+
+html:not(.native-scroll) ::-webkit-scrollbar-thumb:active {
+  background-color: #0116a3;
+}
