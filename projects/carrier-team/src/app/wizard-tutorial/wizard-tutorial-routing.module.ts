@@ -61,7 +61,7 @@ const routes: WizardStep[] = [
             path: 'carrierJira',
             component: NewCarrierModuleComponent,
             data: {
-              heading: 'Carrier Field',
+              heading: 'Carrier list in JIRA',
               pageHeading: '',
             },
           },

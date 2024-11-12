@@ -1,10 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { Auth } from '@angular/fire/auth';
-import { Database } from '@angular/fire/database';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { COUNTRIES } from './countries'; // Adjust path if needed
+import { COUNTRIES } from './countries';
 
 @Component({
   selector: 'app-newcarrier',
@@ -17,22 +15,27 @@ export class NewCarrierModuleComponent implements OnInit {
   toastMessage = '';
   toastType = '';
 
-  // List of countries
+  // List of countries and options
   countries = COUNTRIES;
+  customFieldOptions: any[] = [];
+  searchTerm = '';
+  currentPage = 1;
+  itemsPerPage = 10;
 
-  constructor(
-    private fb: FormBuilder,
-    private router: Router,
-    private http: HttpClient,
-    private db: Database,
-    private auth: Auth,
-  ) {
-    // Initialize the form with form controls
+  constructor(private fb: FormBuilder, private router: Router, private http: HttpClient) {
     this.newCarrierForm = this.fb.group({
       id: ['', Validators.required],
       name: ['', Validators.required],
       country: ['', Validators.required],
     });
+  }
+
+  ngOnInit() {
+    const storedAdmin = localStorage.getItem('isAdmin');
+    if (!storedAdmin) {
+      this.router.navigate(['/']);
+    }
+    this.fetchCustomFieldOptions();
   }
 
   showToast(message: string, type: string) {
@@ -46,11 +49,36 @@ export class NewCarrierModuleComponent implements OnInit {
     this.toastVisible = false;
   }
 
-  ngOnInit() {
-    const storedAdmin = localStorage.getItem('isAdmin');
-    if (!storedAdmin) {
-      this.router.navigate(['/']);
+  fetchCustomFieldOptions() {
+    const headers = new HttpHeaders({
+      'x-api-key': 'zoYrWOhSUQ58KZkc2hpZnQuY29tOkFUQVRUM3hGZ', // Replace with your actual API key
+    });
+
+    this.http
+      .get<any>('https://backendchatgpt-050f.onrender.com/GetCustomFieldOptions', { headers })
+      .subscribe(
+        response => {
+          this.customFieldOptions = response.values.sort((a, b) => b.id - a.id);
+          this.isLoading = false;
+        },
+        error => {
+          console.error('Failed to fetch custom field options:', error);
+          this.isLoading = false;
+        },
+      );
+  }
+
+  // Getter for filtered data only
+  get filteredData() {
+    let filteredData = this.customFieldOptions;
+
+    // Apply search term filter
+    if (this.searchTerm) {
+      const lowerCaseSearchTerm = this.searchTerm.toLowerCase();
+      filteredData = filteredData.filter(option => option.value.toLowerCase().includes(lowerCaseSearchTerm));
     }
+
+    return filteredData;
   }
 
   addNewCarrierOption() {
@@ -65,25 +93,22 @@ export class NewCarrierModuleComponent implements OnInit {
     });
 
     const { id, name, country } = this.newCarrierForm.value;
-
-    // Use the user-provided ID directly without padding
     const formattedValue = `${id} ${name} (${country})`; // Format as "ID NAME (COUNTRYCODE)"
 
     const body = {
       optionValue: formattedValue,
     };
 
-    this.http
-      .post('https://backendchatgpt-050f.onrender.com/addCustomFieldOption', body, { headers: headers })
-      .subscribe(
-        (response: any) => {
-          this.showToast('New carrier option added successfully!', 'success');
-          console.log(response);
-        },
-        (error: any) => {
-          this.showToast('Failed to add new carrier option.', 'error');
-          console.error(error);
-        },
-      );
+    this.http.post('https://backendchatgpt-050f.onrender.com/addCustomFieldOption', body, { headers }).subscribe(
+      (response: any) => {
+        this.showToast('New carrier option added successfully!', 'success');
+        console.log(response);
+        this.fetchCustomFieldOptions(); // Call the GET request to refresh the list
+      },
+      (error: any) => {
+        this.showToast('Failed to add new carrier option.', 'error');
+        console.error(error);
+      },
+    );
   }
 }

@@ -27,6 +27,33 @@
   </div>
 </form>
 
+<h4 style="margin-top: 2%">Carriers</h4>
+<div class="overflow-auto mb-3">
+  <div class="mb-3">
+    <input type="text" class="form-control col-md-3" placeholder="Search Carrier..." [(ngModel)]="searchTerm" />
+  </div>
+
+  <div *ngIf="isLoading" class="skeleton-loader skeleton-loader-table"></div>
+
+  <table *ngIf="!isLoading" class="table table-responsive-sm col-md-3">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Carrier</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let option of filteredData | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage }">
+        <td>{{ option.id }}</td>
+        <td>{{ option.value }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Pagination Controls -->
+  <pagination-controls (pageChange)="currentPage = $event"></pagination-controls>
+</div>
+
 <div
   class="toast"
   *ngIf="toastVisible"
