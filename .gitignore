@@ -15,3 +15,5 @@
 /node_modules/@babel
 /node_modules/@ampproject
 /node_modules
+/projects/seb-ng-wizard/src/lib
+/projects/seb-ng-wizard

@@ -1,12 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { WizardStep } from '@sebgroup/ng-wizard';
-import { ZendeskModuleComponent } from './components/steps/getting-started/sub-steps/zendesk-module/zendesk-module.component';
 import { teamComponent } from './components/steps/carrierteam/carrierteam.component';
+import { NewCarrierModuleComponent } from './components/steps/getting-started/sub-steps/newcarrier/newcarrier.component';
+import { ZendeskModuleComponent } from './components/steps/getting-started/sub-steps/zendesk-module/zendesk-module.component';
 import { OptionsComponent } from './components/steps/options/options.component';
 import { AdminModuleComponent } from './components/steps/options/sub-steps/admin/admincarrierteam.component';
-import { WizardTutorialComponent } from './wizard-tutorial.component';
 import { LoginComponent } from './components/steps/options/sub-steps/login/login.component';
+import { WizardTutorialComponent } from './wizard-tutorial.component';
 const routes: WizardStep[] = [
   {
     path: '',
@@ -20,14 +21,14 @@ const routes: WizardStep[] = [
           heading: 'Carrier Team',
         },
       },
-      
+
       {
         path: 'admin',
         component: OptionsComponent,
         data: {
           heading: 'Carrier Admin',
           pageHeading: '',
-          subSteps: ['team','tickets'],
+          subSteps: ['team', 'tickets', 'carrierJira'],
         },
         children: [
           {
@@ -46,8 +47,6 @@ const routes: WizardStep[] = [
               heading: 'Carrier Team',
               pageHeading: '',
             },
-            
-            
           },
           {
             path: 'tickets',
@@ -55,11 +54,17 @@ const routes: WizardStep[] = [
             data: {
               heading: 'Carrier Tickets',
               pageHeading: '',
-            }
-          
+            },
           },
-       
-   
+
+          {
+            path: 'carrierJira',
+            component: NewCarrierModuleComponent,
+            data: {
+              heading: 'Carrier Field',
+              pageHeading: '',
+            },
+          },
         ],
       },
       /*
