@@ -1,12 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { WizardStep } from '@sebgroup/ng-wizard';
+import { AdminModuleComponent } from './components/steps/admin/admincarrierteam.component';
+import { NewCarrierModuleComponent } from './components/steps/adminsteps/newcarrier/newcarrier.component';
+import { PybookingComponent } from './components/steps/adminsteps/pybooking/pybooking.component';
+import { ZendeskModuleComponent } from './components/steps/adminsteps/zendesk-module/zendesk-module.component';
 import { teamComponent } from './components/steps/carrierteam/carrierteam.component';
-import { NewCarrierModuleComponent } from './components/steps/getting-started/sub-steps/newcarrier/newcarrier.component';
-import { ZendeskModuleComponent } from './components/steps/getting-started/sub-steps/zendesk-module/zendesk-module.component';
+import { LoginComponent } from './components/steps/login/login.component';
 import { OptionsComponent } from './components/steps/options/options.component';
-import { AdminModuleComponent } from './components/steps/options/sub-steps/admin/admincarrierteam.component';
-import { LoginComponent } from './components/steps/options/sub-steps/login/login.component';
 import { WizardTutorialComponent } from './wizard-tutorial.component';
 const routes: WizardStep[] = [
   {
@@ -16,9 +17,9 @@ const routes: WizardStep[] = [
       { path: '', redirectTo: 'carrier-team', pathMatch: 'full' },
       {
         path: 'carrier-team',
-        component: teamComponent,
+        component: LoginComponent,
         data: {
-          heading: 'Carrier Team',
+          heading: 'Carrier Team View Closed',
         },
       },
 
@@ -28,7 +29,7 @@ const routes: WizardStep[] = [
         data: {
           heading: 'Carrier Admin',
           pageHeading: '',
-          subSteps: ['team', 'tickets', 'carrierJira'],
+          subSteps: ['team', 'tickets', 'carrierJira', 'pymapping'],
         },
         children: [
           {
@@ -62,6 +63,14 @@ const routes: WizardStep[] = [
             component: NewCarrierModuleComponent,
             data: {
               heading: 'Carrier list in JIRA',
+              pageHeading: '',
+            },
+          },
+          {
+            path: 'pymapping',
+            component: PybookingComponent,
+            data: {
+              heading: 'Python AI - Beta',
               pageHeading: '',
             },
           },

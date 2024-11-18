@@ -6,14 +6,14 @@ import { SharedModule } from '../shared/shared.module';
 
 import { NgxPaginationModule } from 'ngx-pagination';
 
-import { AddStepsComponent } from './components/steps/getting-started/sub-steps/add-steps/add-steps.component';
-import { NewCarrierModuleComponent } from './components/steps/getting-started/sub-steps/newcarrier/newcarrier.component';
-import { ZendeskModuleComponent } from './components/steps/getting-started/sub-steps/zendesk-module/zendesk-module.component';
+import { NewCarrierModuleComponent } from './components/steps/adminsteps/newcarrier/newcarrier.component';
+import { ZendeskModuleComponent } from './components/steps/adminsteps/zendesk-module/zendesk-module.component';
 
+import { AdminModuleComponent } from './components/steps/admin/admincarrierteam.component';
+import { PybookingComponent } from './components/steps/adminsteps/pybooking/pybooking.component';
 import { teamComponent } from './components/steps/carrierteam/carrierteam.component';
+import { LoginComponent } from './components/steps/login/login.component';
 import { OptionsComponent } from './components/steps/options/options.component';
-import { AdminModuleComponent } from './components/steps/options/sub-steps/admin/admincarrierteam.component';
-import { LoginComponent } from './components/steps/options/sub-steps/login/login.component';
 import { StepControlsComponent } from './components/steps/options/sub-steps/step-controls/step-controls.component';
 import { WizardTutorialRoutingModule } from './wizard-tutorial-routing.module';
 import { WizardTutorialComponent } from './wizard-tutorial.component';
@@ -36,12 +36,12 @@ const TRANSLATIONS_PROVIDER: ClassProvider = {
     WizardTutorialComponent,
     teamComponent,
     OptionsComponent,
-    AddStepsComponent,
     StepControlsComponent,
     AdminModuleComponent,
     NewCarrierModuleComponent,
     ZendeskModuleComponent,
     LoginComponent,
+    PybookingComponent,
   ],
   imports: [
     CommonModule,

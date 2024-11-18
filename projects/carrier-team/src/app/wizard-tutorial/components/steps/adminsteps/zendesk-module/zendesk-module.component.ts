@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Database, ref, get, update } from '@angular/fire/database';
+import { Component, OnInit } from '@angular/core';
 import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth'; // Firebase Auth modules
+import { Database, get, ref, update } from '@angular/fire/database';
 import { Router } from '@angular/router';
 
 @Component({
@@ -9,32 +9,34 @@ import { Router } from '@angular/router';
   templateUrl: './zendesk-module.component.html',
 })
 export class ZendeskModuleComponent implements OnInit {
+
+  // To store the retrieved members data
+  constructor(private router: Router, private http: HttpClient, private db: Database, private auth: Auth) {}
   tickets: any[] = []; // Array to hold ticket data
   collectedData: any[] = []; // Holds the data retrieved from Firebase
-  isLoading: boolean = true;
+  isLoading = true;
   members: any[] = [];
   members1: any[] = [];
   toastVisible = false; // Control visibility of the toast
   toastMessage = ''; // Message to display in the toast
   toastType = ''; // To control the type of toast
-
-  // To store the retrieved members data
-  constructor(private router: Router, private http: HttpClient, private db: Database, private auth: Auth) { }
   probIssues: any[] = []; // Array to hold PROB issues data
-  probIssueCount: number = 0; // Count of PROB issues
-  zendeskTicketCount: number = 0; // Count of Zendesk tickets
+  probIssueCount = 0; // Count of PROB issues
+  zendeskTicketCount = 0; // Count of Zendesk tickets
   assignedTickets: any[] = [];
   unassignedTickets: any[] = [];
 
-  unassignedTier1Count: number = 0;
-  unassignedTier2Count: number = 0;
-  unassignedTier3Count: number = 0;
-  unassignedPriorityLowCount: number = 0;
-  unassignedPriorityMediumCount: number = 0;
-  unassignedPriorityHighCount: number = 0;
-  unassignedPriorityUrgentCount: number = 0;
-  totalUnassignedCount: number = 0;
+  unassignedTier1Count = 0;
+  unassignedTier2Count = 0;
+  unassignedTier3Count = 0;
+  unassignedPriorityLowCount = 0;
+  unassignedPriorityMediumCount = 0;
+  unassignedPriorityHighCount = 0;
+  unassignedPriorityUrgentCount = 0;
+  totalUnassignedCount = 0;
   filteredUnassignedTickets: any[] = [];
+
+  displayMembers: any[] = []; // Array to store filtered members for display
 
   showToast(message: string, type: string) {
     this.toastMessage = message;
@@ -60,8 +62,6 @@ export class ZendeskModuleComponent implements OnInit {
     } else {
       this.router.navigate(['/  ']);
     }
-
-   
   }
 
   getSelectValue(event: Event): string {
@@ -114,8 +114,6 @@ export class ZendeskModuleComponent implements OnInit {
         });
     }
   }
-
-  displayMembers: any[] = []; // Array to store filtered members for display
 
   retrieveMembers() {
     const membersRef = ref(this.db, 'members');
@@ -197,7 +195,6 @@ export class ZendeskModuleComponent implements OnInit {
         this.showToast('Error updating vacation status!', 'error'); // Show error toast
       });
   }
-
 
   retrieveCollectedData(): Promise<void> {
     const dataRef = ref(this.db, 'Collected Data');
@@ -314,7 +311,7 @@ export class ZendeskModuleComponent implements OnInit {
         return ticket;
       });
 
-    if(this.filteredUnassignedTickets.length == 0){
+    if (this.filteredUnassignedTickets.length == 0) {
       this.showToast(`No T1/T2 tickets to asignee`, 'warning'); // Show warning toast
     }
     this.isLoading = false;
@@ -330,25 +327,27 @@ export class ZendeskModuleComponent implements OnInit {
       ticket.created_at = this.formatDate(ticket.created_at);
       ticket.updated_at = this.formatDate(ticket.updated_at);
       ticket.carrierName = this.getCarrierName(ticket.carrier_id);
-      if(ticket.carrier_id == null){
-        ticket.carrier_id = 'N/a'
+      if (ticket.carrier_id == null) {
+        ticket.carrier_id = 'N/a';
       }
 
-      
       // Assign responsibility based on carrierCIS
       const carrierCIS = this.getCarrierCIS(ticket.carrier_id);
       ticket.assigned_to = carrierCIS !== 'Not Found' ? carrierCIS : 'All';
 
       // Now check if tier is missing, and retrieve it from collectedData if necessary
       let tier = ticket.tier || 'Not found';
-        const carrierEntry = this.collectedData.find(data =>
-          data.carrierConceptID != null && ticket.carrier_id != null && data.carrierConceptID.toString() === ticket.carrier_id.toString()
-        );
+      const carrierEntry = this.collectedData.find(
+        data =>
+          data.carrierConceptID != null &&
+          ticket.carrier_id != null &&
+          data.carrierConceptID.toString() === ticket.carrier_id.toString(),
+      );
 
-        if (carrierEntry) {
-          tier = typeof carrierEntry.tier === 'number' ? `tier ${carrierEntry.tier}` : carrierEntry.tier;
-        }
-      
+      if (carrierEntry) {
+        tier = typeof carrierEntry.tier === 'number' ? `tier ${carrierEntry.tier}` : carrierEntry.tier;
+      }
+
       ticket.tier = tier;
     });
 
@@ -415,7 +414,7 @@ export class ZendeskModuleComponent implements OnInit {
         console.log('Filtered Tickets Response:', response); // Log response from API
         this.tickets = response.filteredTickets.map(ticket => {
           const carrierCIS = this.getCarrierCIS(ticket.carrier_number);
-          
+
           console.log('Mapped Ticket:', { ...ticket, carrierCIS }); // Log mapped tickets
           return { ...ticket, carrierCIS };
         });
@@ -433,15 +432,15 @@ export class ZendeskModuleComponent implements OnInit {
     if (!carrierID) {
       return 'N/a'; // Return 'Not Found' if carrierID is invalid
     }
-  
+
     // Find the carrier entry with a matching carrier ID
     const carrierEntry = this.collectedData.find(
-      data => data.carrierConceptID && data.carrierConceptID.toString() === carrierID.toString()
+      data => data.carrierConceptID && data.carrierConceptID.toString() === carrierID.toString(),
     );
-  
+
     return carrierEntry ? carrierEntry.carrier : 'Not Found'; // Return carrier name or 'Not Found'
   }
-  
+
   // Method to get CIS responsible for a carrier from Firebase data
   getCarrierCIS(carrierNumber: number) {
     if (!carrierNumber) {
