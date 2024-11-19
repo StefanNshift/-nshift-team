@@ -9,7 +9,6 @@ import { Router } from '@angular/router';
   templateUrl: './zendesk-module.component.html',
 })
 export class ZendeskModuleComponent implements OnInit {
-
   // To store the retrieved members data
   constructor(private router: Router, private http: HttpClient, private db: Database, private auth: Auth) {}
   tickets: any[] = []; // Array to hold ticket data

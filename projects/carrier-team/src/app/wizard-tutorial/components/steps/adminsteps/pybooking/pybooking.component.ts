@@ -1,5 +1,5 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'app-pybooking',
@@ -9,12 +9,15 @@ import { Component } from '@angular/core';
 export class PybookingComponent {
   selectedCarrier: any = null;
 
-  carrierId = '';
-  filePart = '';
+  carrierId: string = '';
+  filePart: string = '';
   response: string | null = null;
+  carrierServer: any;
   error: string | null = null;
   isLoading = false;
+  tabsBool = false;
   toastVisible = false;
+  activeTab: string = 'carrierRequest'; // Default tab
   toastMessage = '';
   toastType = '';
   analyzedCarrier: string;
@@ -1117,12 +1120,204 @@ export class PybookingComponent {
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
+    console.log('test');
     // Preprocess the carriers
     this.carrierspyt = this.carrierspyt.map(carrier => ({
       ...carrier,
       title: carrier.title.replace(/^\d+\s*/, ''), // Remove leading numbers
     }));
     this.filteredCarriers = [...this.carrierspyt]; // Initialize filtered carriers
+
+    // Load response from localStorage for testing
+    const storageKey = `carrier_analysis`;
+    const storedResponse = localStorage.getItem(storageKey);
+
+    /*if (storedResponse) {
+      this.response = storedResponse;
+      const responseBody = this.extractBody(storedResponse);
+
+    const cleanedResponse = this.removeInvalidJSON(responseBody);
+      this.tabsBool = true;
+    const cleanedResponseJSON = JSON.parse(cleanedResponse);
+    const list = this.getAllValues(cleanedResponseJSON);
+     this.carrierServer = this.parseListToJSON(list)
+    ;    console.log(this.carrierServer);
+
+
+      this.showToast('Loaded previous response from localStorage.', 'success');
+    }
+
+  */
+  }
+
+  switchTab(tab: string): void {
+    this.activeTab = tab;
+  }
+
+  copyCarrierServerToClipboard(): void {
+    const formattedJson = JSON.stringify(this.carrierServer, null, 2); // Pre-format as JSON
+    navigator.clipboard.writeText(formattedJson).then(
+      () => {
+        this.showToast('Carrier Server data copied to clipboard!', 'success');
+      },
+      err => {
+        console.error('Failed to copy text: ', err);
+        this.showToast('Failed to copy Carrier Server data. Please try again.', 'error');
+      },
+    );
+  }
+
+  parseListToJSON(list: string[]): any {
+    const result = {
+      data: {
+        ProdConceptID: '',
+        Services: [],
+        Addresses: [] as any[],
+        References: [] as any[],
+        Lines: [] as any[],
+        DetailGroups: [] as any[],
+      },
+      options: {
+        TimeLog: 0,
+        UseShippingRules: 0,
+        Visibility: 'extended',
+      },
+      configuration: {
+        Configuration: {
+          ShipperAccount: {
+            Shipper: {
+              Account: '',
+            },
+          },
+        },
+      },
+    };
+
+    list.forEach(item => {
+      if (item.startsWith('References.KindID[')) {
+        const kindID = item.match(/\[(\d+)\]/)?.[1];
+        if (kindID) {
+          result.data.References.push({
+            Kind: parseInt(kindID, 10),
+            Value: 'xxx',
+          });
+        }
+      } else if (item.startsWith('Kind')) {
+        const match = item.match(/Kind(\d+)\.(\w+)/);
+        if (match) {
+          const kind = match[1];
+          const field = match[2];
+          let address = result.data.Addresses.find((addr: any) => addr.Kind === kind);
+          if (!address) {
+            address = { Kind: kind };
+            result.data.Addresses.push(address);
+          }
+          address[field] = 'xxx'; // Placeholder value
+        }
+      } else if (item.startsWith('DetailGroups.GroupID')) {
+        const match = item.match(/GroupID(\d+)\.KindID\[(\d+)\]/);
+        if (match) {
+          const groupID = parseInt(match[1], 10);
+          const kindID = parseInt(match[2], 10);
+          let group = result.data.DetailGroups.find((grp: any) => grp.GroupID === groupID);
+          if (!group) {
+            group = {
+              GroupID: groupID,
+              GroupDisplayName: `Group ${groupID}`,
+              Details: [],
+            };
+            result.data.DetailGroups.push(group);
+          }
+          group.Details.push({
+            KindID: kindID,
+            Value: 'xxx',
+          });
+        }
+      } else if (item.startsWith('Lines.')) {
+        const field = item.split('.')[1];
+        if (!result.data.Lines[0]) {
+          result.data.Lines[0] = {}; // Ensure the first line exists
+        }
+        result.data.Lines[0][field] = 'xxx';
+      } else if (item === 'ProdConceptID') {
+        result.data.ProdConceptID = 'xxx';
+      } else if (item === 'ShipperAccount.Shipper.Account') {
+        result.configuration.Configuration.ShipperAccount.Shipper.Account = 'xxx';
+      }
+    });
+
+    return result;
+  }
+
+  extractBody(jsonString) {
+    var body = '"body":'; // Key to locate the Body section
+
+    const bodyKey = '"body":'; // Key to locate the Body section
+    const BodyKey = '"Body":'; // Key to locate the Body section
+    const BODYKey = '"BODY":'; // Key to locate the Body section
+
+    const bodyStart = jsonString.indexOf(bodyKey);
+    const BodyStart = jsonString.indexOf(BodyKey);
+    const BODYStart = jsonString.indexOf(BODYKey);
+
+    if (bodyStart > -1) {
+      body = bodyStart;
+    }
+    if (BodyStart > -1) {
+      body = BodyStart;
+    }
+    if (BODYStart > -1) {
+      body = BODYStart;
+    }
+
+    // Find the start of the actual object after "Body":
+    const objectStart = jsonString.indexOf('{', body);
+    const closingBraceIndex = jsonString.lastIndexOf('}');
+    if (objectStart === -1 || closingBraceIndex === -1) return null; // Return null if braces are missing
+
+    // Extract and return the content within the braces
+    return jsonString.slice(objectStart, closingBraceIndex); // Include the opening brace, exclude the last }
+  }
+
+  private getAllValues(jsonObject: any): any[] {
+    let values: any[] = [];
+
+    function extractValues(obj: any): void {
+      if (Array.isArray(obj)) {
+        // Handle arrays
+        obj.forEach(item => extractValues(item));
+      } else if (typeof obj === 'object' && obj !== null) {
+        // Handle objects
+        Object.values(obj).forEach(value => extractValues(value));
+      } else if (
+        typeof obj !== 'number' && // Exclude integers
+        obj !== '' && // Exclude empty strings
+        typeof obj === 'string' && // Ensure it's a string
+        (obj.includes('.') || obj === 'ProdConceptID') // Include strings with periods or 'ProdConceptID'
+      ) {
+        // Remove unwanted patterns like '{{' and '}}'
+        const cleanedValue = obj.replace(/{{|}}/g, '').trim();
+        values.push(cleanedValue);
+      }
+    }
+
+    extractValues(jsonObject);
+
+    // Remove duplicates by converting to a Set and back to an array
+    return Array.from(new Set(values));
+  }
+
+  private removeInvalidJSON(jsonString: string): string {
+    // Remove all single-line comments
+    const singleLineCommentRegex = /\/\/.*$/gm;
+    jsonString = jsonString.replace(singleLineCommentRegex, '');
+
+    // Remove all multi-line comments
+    const multiLineCommentRegex = /\/\*[\s\S]*?\*\//g;
+    jsonString = jsonString.replace(multiLineCommentRegex, '');
+
+    // Trim and return the sanitized string
+    return jsonString.trim();
   }
 
   filterCarriers(): void {
@@ -1162,6 +1357,7 @@ export class PybookingComponent {
   }
 
   analyzeCarrier(carrier: any): void {
+    this.tabsBool = false;
     this.activeCarrier = carrier; // Set the active carrier
     this.showToast(`Starting analysis for carrier: ${carrier.title}`, 'success');
     this.analyzedCarrier = carrier.title + ' (' + carrier.number + ')';
@@ -1193,12 +1389,27 @@ export class PybookingComponent {
         (res: string) => {
           this.response = res;
           this.isLoading = false;
+          const storageKey = `carrier_analysis`;
+          localStorage.setItem(storageKey, res);
+          this.tabsBool = true;
+
+          const responseBody = this.extractBody(res);
+          const cleanedResponse = this.removeInvalidJSON(responseBody);
+
+          const cleanedResponseJSON = JSON.parse(cleanedResponse);
+          const list = this.getAllValues(cleanedResponseJSON);
+          this.carrierServer = this.parseListToJSON(list);
+
+          // Save the response to localStorage for testing
+
+          // Show success toast
         },
         err => {
           console.error('Error:', err);
           this.error = err.error || 'Failed to analyze files. Please try again.';
           this.showToast(`Error: ${this.error}`, 'error');
           this.isLoading = false;
+          this.tabsBool = true;
         },
       );
   }

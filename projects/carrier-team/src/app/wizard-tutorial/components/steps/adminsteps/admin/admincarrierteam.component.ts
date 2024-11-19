@@ -71,8 +71,12 @@ export class AdminModuleComponent implements OnInit {
               ...member,
             }))
             .sort((a: any, b: any) => {
-              if (a.name === 'All') { return 1; } // Move "All" to the end of the list
-              if (b.name === 'All') { return -1; }
+              if (a.name === 'All') {
+                return 1;
+              } // Move "All" to the end of the list
+              if (b.name === 'All') {
+                return -1;
+              }
               return a.name.localeCompare(b.name); // Sort others alphabetically
             });
         } else {
@@ -184,10 +188,16 @@ export class AdminModuleComponent implements OnInit {
 
   validateTierNumber(value: any): number {
     const num = Number(value);
-    if (isNaN(num)) { return 1; } // Default to 1 if the value is not a number
+    if (isNaN(num)) {
+      return 1;
+    } // Default to 1 if the value is not a number
     // Ensure the value is between 1 and 3
-    if (num < 1) { return 1; }
-    if (num > 3) { return 3; }
+    if (num < 1) {
+      return 1;
+    }
+    if (num > 3) {
+      return 3;
+    }
     return num;
   }
 
