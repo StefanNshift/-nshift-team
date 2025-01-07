@@ -1,5 +1,7 @@
 export const environment = {
   production: true,
+  apiUrl: 'http://ticketguru.nshiftcarrier.com/api', // Utvecklingsmiljöns API-URL
+  apiKey: 'zoYrWOhSUQ58KZkc2hpZnQuY29tOkFUQVRUM3hGZ', // Utvecklingsmiljöns API-nyckel
   firebase : {
     apiKey: "AIzaSyBM86VHgV1DFkvty7easa9qwZO9AuJvrvY",
     authDomain: "carriers-83992.firebaseapp.com",

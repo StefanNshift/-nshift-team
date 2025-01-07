@@ -1,0 +1,122 @@
+/* Ensure the dropdown menu has a nice appearance */
+.dropdown-menu {
+    max-height: 300px;
+    overflow-y: auto;
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    z-index: 1000;
+    width: 100%;
+    padding: 0;
+    margin-top: 0.25rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Dropdown items styling */
+  .dropdown-item {
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  nav-tabs > .nav-item > .nav-link:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.2rem #0116a3;
+    background: #0116a3;
+    border-color: #0116a3 !important;
+}
+
+  .nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link{
+    background: #0116a3;
+    border-color: #0116a3 !important;
+
+    color: white;
+    }
+
+    .nav-tabs .nav-link:active{
+      background:#0621d0 !important;
+      border-color: #0621d0 !important;
+      color: white;
+      }
+
+    .nav-tabs .nav-link:hover{
+      background:#0621d0 !important;
+      border-color: #0621d0 !important;
+
+      color: white;
+      }
+
+      .nav-tabs .nav-link:active{
+        background:#0621d0 !important;
+        border-color: #0621d0 !important;
+  
+        color: white;
+        }
+
+        .nav-tabs .nav-link:focus{
+          background:#0621d0 !important;
+          border-color: #0621d0 !important;
+    
+          color: white;
+          }
+
+      .nav-tabs .nav-link{
+        color: white;
+        background:rgb(154, 154, 154);
+      }
+
+  /* Highlight item on hover */
+  .dropdown-item:hover {
+    background-color: #f7f7f7;
+  }
+  
+  /* Align buttons inside dropdown items */
+  .dropdown-item .btn {
+    margin-left: 10px;
+    font-size: 12px;
+  }
+  
+  /* Ensure the input box looks clean */
+  #carrierSearch {
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Styling for the no results message */
+  .text-muted {
+    font-size: 14px;
+    text-align: center;
+    padding: 10px;
+    color: #777;
+  }
+  
+  /* Additional responsiveness */
+  @media (max-width: 768px) {
+    .dropdown-menu {
+      max-height: 200px;
+    }
+  
+    .dropdown-item {
+      font-size: 12px;
+    }
+  }
+  
+
+  /* Active row styling */
+.active-row {
+  background-color: #f0f8ff; /* Light blue background */
+  color: #000; /* Black text color */
+  font-weight: bold; /* Highlight font weight */
+}
+
+/* Hover effect */
+.dropdown-item:hover {
+  background-color: #0116a3 ; /* Slightly darker blue for hover */
+  color:white;
+  cursor: pointer;
+}

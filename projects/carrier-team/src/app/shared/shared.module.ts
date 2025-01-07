@@ -11,20 +11,14 @@ import { MarkdownModule } from 'ngx-markdown';
 
 @NgModule({
   declarations: [],
-  imports: [
-    CommonModule,
-    FormsModule,
-    FontAwesomeModule,
-    NgxPaginationModule,
-    ReactiveFormsModule,
-    MarkdownModule.forRoot(),
-  ],
-  exports: [CommonModule, FormsModule, FontAwesomeModule, ReactiveFormsModule, NgxPaginationModule, MarkdownModule],
+  imports: [CommonModule, FormsModule, FontAwesomeModule, NgxPaginationModule, ReactiveFormsModule, MarkdownModule.forRoot()],
+  exports: [CommonModule, FormsModule, FontAwesomeModule, ReactiveFormsModule,NgxPaginationModule, MarkdownModule],
 })
 export class SharedModule {
   constructor(library: FaIconLibrary) {
     // add icons that should be available in the app/module
     library.addIcons(<any>faGithub);
     library.addIcons(<any>faJira);
+
   }
 }

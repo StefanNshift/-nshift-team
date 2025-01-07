@@ -1,0 +1,270 @@
+<div class="sprint-selection">
+
+  <div class="row">
+    <div class="col-auto">
+      <select class="form-control" (change)="onSprintSelect($event)">
+        <option value="" disabled selected>Select a sprint</option>
+        <option *ngFor="let sprint of sprints" [value]="sprint.id">
+          {{ sprint.name }} ({{ sprint.state }})
+        </option>
+      </select>
+    </div>
+
+    <div *ngIf="selectedSprintDetails && !loadingDetails" class="col-auto d-flex align-items-center gap-2">
+      <button style="
+      margin-right: 5%;
+  " class="btn btn-primary" (click)="analyzeSprintData()" [disabled]="analyzingData">
+        {{ analyzingData ? 'Analyzing...' : 'Analyze Sprint Data' }}
+      </button>
+      <!-- Past Sprints Checkbox -->
+
+
+     
+    </div>
+  </div>
+
+  <div *ngIf="loadingDetails" class="skeleton-loader skeleton-loader-table"></div>
+
+  <div *ngIf="SummarySprintData" class="analysis-container mt-4">
+    <markdown>{{ analysisResult.analysis }}</markdown>
+  </div>
+
+  <div *ngIf="selectedSprintDetails && !loadingDetails" class="sprint-details">
+    <hr>
+    <!-- Total Tickets -->
+    <div>
+      <h4 class="card-title mb-3">Total Tickets</h4>
+
+
+      <div class="table-responsive">
+        <table class="table table-striped mb-0">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Total Jira Tickets In The Sprint</td>
+              <td>{{ ticketSummary.totalJiraTickets }}</td>
+            </tr>
+            <tr>
+              <td>Total Carriers Affected In the Sprint</td>
+              <td>{{ ticketSummary.totalJiraCarriers }}</td>
+            </tr>
+            <tr>
+              <td>Total Jira Tickets Released</td>
+              <td>{{ ticketSummary.jiraReleasedTicketInProduction }}</td>
+            </tr>
+            <tr>
+              <td>Total Zendesk Closed Tickets </td>
+              <td>{{ ticketSummary.zendeskSummary.totalZendeskTickets }} </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+    <hr>
+
+    <!-- Summary -->
+    <div class="row">
+      <!-- Jira Column -->
+      <div class="col-md-6">
+        <div class="jira-tickets">
+
+          <h3>Jira Tickets in Sprint</h3>
+
+          <!-- Tickets by Status -->
+          <h4 class="mt-4">Tickets by Status</h4>
+          <div class="table-responsive">
+            <table class="table table-striped mb-0">
+              <thead>
+                <tr>
+                  <th style="background: #004f7f	; color: #fff;">Status</th>
+                  <th style="background: #004f7f	; color: #fff;">Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let status of objectKeys(ticketSummary.jiraStatusCounts)">
+                  <td>{{ status }}</td>
+                  <td>{{ ticketSummary.jiraStatusCounts[status] }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Tickets by Type -->
+          <h4 class="mt-4">Jira Tickets by Type</h4>
+          <div class="table-responsive">
+            <table class="table table-striped mb-0">
+              <thead>
+                <tr>
+                  <th style="background: #004f7f	; color: #fff;">Type</th>
+                  <th style="background: #004f7f	; color: #fff;">Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let type of objectKeys(ticketSummary.jiraTypeCounts)">
+                  <td>{{ type }}</td>
+                  <td>{{ ticketSummary.jiraTypeCounts[type] }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Tickets by Priority -->
+          <h4 class="mt-4">Jira Tickets by Priority</h4>
+          <div class="table-responsive">
+            <table class="table table-striped mb-0">
+              <thead>
+                <tr>
+                  <th style="background: #004f7f	; color: #fff;">Priority</th>
+                  <th style="background: #004f7f	; color: #fff;">Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Blocker</td>
+                  <td>{{ ticketSummary.jiraPriorityCounts.blocker }}</td>
+                </tr>
+                <tr>
+                  <td>Critical</td>
+                  <td>{{ ticketSummary.jiraPriorityCounts.critical }}</td>
+                </tr>
+                <tr>
+                  <td>Major</td>
+                  <td>{{ ticketSummary.jiraPriorityCounts.major }}</td>
+                </tr>
+                <tr>
+                  <td>Normal</td>
+                  <td>{{ ticketSummary.jiraPriorityCounts.normal }}</td>
+                </tr>
+                <tr>
+                  <td>Low</td>
+                  <td>{{ ticketSummary.jiraPriorityCounts.low }}</td>
+                </tr>
+                <tr>
+                  <td>N/A</td>
+                  <td>{{ ticketSummary.jiraPriorityCounts.undefined }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Tickets by Carrier -->
+          <h4 class="mt-4">Jira Tickets by Carrier</h4>
+          <div class="table-responsive">
+            <table class="table table-striped mb-0">
+              <thead>
+                <tr>
+                  <th style="background: #004f7f	; color: #fff;">Carrier</th>
+                  <th style="background: #004f7f	; color: #fff;">Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Use keyvalue pipe with compareCarrierCounts -->
+                <tr *ngFor="let item of ticketSummary.jiraCarrierCounts | keyvalue:compareCarrierCounts">
+                  <td>{{ item.key }}</td>
+                  <td>{{ item.value }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+
+        </div>
+      </div>
+
+      <!-- Zendesk Column -->
+      <div class="col-md-6">
+        <div class="zendesk-tickets">
+          <h3>Zendesk Tickets Solved in Sprint</h3>
+
+
+
+          <!-- Tickets by Tier -->
+          <h4 class="mt-4">Tickets by Tier</h4>
+          <div class="table-responsive">
+            <table class="table table-striped mb-0">
+              <thead>
+                <tr>
+                  <th style="background: #014f3f; color: #fff;">Tier</th>
+                  <th style="background: #014f3f; color: #fff;">Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Tier 1</td>
+                  <td>{{ ticketSummary.zendeskSummary.zendeskTierCounts.tier1 }}</td>
+                </tr>
+                <tr>
+                  <td>Tier 2</td>
+                  <td>{{ ticketSummary.zendeskSummary.zendeskTierCounts.tier2 }}</td>
+                </tr>
+                <tr>
+                  <td>Tier 3</td>
+                  <td>{{ ticketSummary.zendeskSummary.zendeskTierCounts.tier3 }}</td>
+                </tr>
+                <tr>
+                  <td>Tier N/A</td>
+                  <td>{{ ticketSummary.zendeskSummary.zendeskTierCounts.undefined }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Tickets by Priority -->
+          <h4 class="mt-4">Zendesk Tickets by Priority</h4>
+          <div class="table-responsive">
+            <table class="table table-striped mb-0">
+              <thead>
+                <tr>
+                  <th style="background: #014f3f; color: #fff;">Priority</th>
+                  <th style="background: #014f3f; color: #fff;">Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Low</td>
+                  <td>{{ ticketSummary.zendeskSummary.zendeskPriorityCounts.low }}</td>
+                </tr>
+                <tr>
+                  <td>Normal</td>
+                  <td>{{ ticketSummary.zendeskSummary.zendeskPriorityCounts.normal }}</td>
+                </tr>
+                <tr>
+                  <td>High</td>
+                  <td>{{ ticketSummary.zendeskSummary.zendeskPriorityCounts.high }}</td>
+                </tr>
+                <tr>
+                  <td>Urgent</td>
+                  <td>{{ ticketSummary.zendeskSummary.zendeskPriorityCounts.urgent }}</td>
+                </tr>
+                <tr>
+                  <td>N/A</td>
+                  <td>{{ ticketSummary.zendeskSummary.zendeskPriorityCounts.undefined }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+</div>
+
+<div class="toast" *ngIf="toastVisible" [ngClass]="{
+  visible: toastVisible,
+  'toast-success': toastType === 'success',
+  'toast-error': toastType === 'error',
+  'toast-warning': toastType === 'warning'
+}">
+  <div class="toast-content">
+    <span class="toast-message">{{ toastMessage }}</span>
+    <button class="close-toast" (click)="hideToast()">×</button>
+  </div>
+</div>

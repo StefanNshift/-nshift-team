@@ -1,0 +1,135 @@
+<div class="pybooking-container">
+  <!-- Dropdown Section -->
+
+  <!-- Model Selection -->
+  <div style="width: 30%" class="form-group mb-3">
+    <label for="modelSelect">Select Model </label>
+    <select
+      id="modelSelect"
+      class="form-control"
+      [(ngModel)]="selectedModel"
+    >
+      <option *ngFor="let model of models" [value]="model.value">
+        {{ model.label }}
+      </option>
+    </select>
+  </div>
+  <hr>
+
+
+  <div style="width: 30%" class="form-group">
+    <label *ngIf="!isLoading" for="carrierSearch">Analyze Carrier<i class="fa-solid fa-user"></i></label>
+    <label *ngIf="isLoading" for="carrierSearch">Analyzing {{ analyzedCarrier }}...</label>
+
+    <input
+      id="carrierSearch"
+      type="text"
+      *ngIf="!isLoading"
+      class="form-control"
+      autocomplete="off"
+      placeholder="Search Carrier"
+      [(ngModel)]="searchTerm"
+      (input)="filterCarriers()"
+    />
+    <ul
+      class="dropdown-menu w-100"
+      *ngIf="searchTerm && filteredCarriers.length > 0"
+      style="max-height: 300px; overflow-y: auto; width:30% !important"
+    >
+      <li
+        *ngFor="let carrier of filteredCarriers"
+        class="dropdown-item d-flex justify-content-between align-items-center"
+        [ngClass]="{ 'active-row': activeCarrier === carrier }"
+        style="cursor: pointer;"
+        (click)="analyzeCarrier(carrier)"
+      >
+        <span>{{ carrier.title }} ({{ carrier.number }})</span>
+      </li>
+    </ul>
+
+    <p *ngIf="searchTerm && filteredCarriers.length === 0" class="text-muted mt-2">
+      No carriers found.
+    </p>
+  </div>
+
+  <!-- Response and Error Section -->
+  <div >
+    <div *ngIf="isLoading" class="skeleton-loader skeleton-loader-table mb-3"></div>
+
+    <!-- Tab Navigation -->
+     <div *ngIf="tabsBool">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a
+          class="nav-link"
+          [ngClass]="{ active: activeTab === 'carrierRequest' }"
+          (click)="switchTab('carrierRequest')"
+          href="javascript:void(0)"
+        >
+          Carrier Request
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link"
+          [ngClass]="{ active: activeTab === 'carrierServer' }"
+          (click)="switchTab('carrierServer')"
+          href="javascript:void(0)"
+        >
+          Carrier Server
+        </a>
+      </li>
+    </ul>
+  </div>
+<div>
+  <div style="margin-top:1%" *ngIf="tabsBool">
+    <div *ngIf="activeTab === 'carrierRequest'" class="response-container mb-3">
+      <h4>Python Mapping For: {{ analyzedCarrier }}</h4>
+      <div class="text-start">
+        <button
+        class="btn btn-primary btn-sm mt-3"
+          (click)="copyToClipboard(response)"
+        >
+          Copy
+        </button>
+      </div>
+      <pre class="bg-light p-3 border">{{ response }}</pre>
+    </div>
+
+    <div *ngIf="activeTab === 'carrierServer'" class="response-container mb-3">
+      <h4>Carrier Server Request For: {{ analyzedCarrier }}</h4>
+      <div class="text-start">
+        <button
+        class="btn btn-primary btn-sm mt-3"
+        (click)="copyCarrierServerToClipboard()"
+        >
+          Copy
+        </button>
+      </div>
+      <pre class="bg-light p-3 border">{{ carrierServer | json }}</pre>
+    </div>
+
+    <!-- Error Section -->
+    <div *ngIf="error" class="error-container">
+      <h5>Error</h5>
+      <p class="text-danger">{{ error }}</p>
+    </div>
+  </div>
+</div>
+</div>
+<!-- Toast Notification -->
+<div
+  class="toast"
+  *ngIf="toastVisible"
+  [ngClass]="{
+    visible: toastVisible,
+    'toast-success': toastType === 'success',
+    'toast-error': toastType === 'error',
+    'toast-warning': toastType === 'warning'
+  }"
+>
+  <div class="toast-content">
+    <span class="toast-message">{{ toastMessage }}</span>
+    <button class="close-toast" (click)="hideToast()">×</button>
+  </div>
+</div>
