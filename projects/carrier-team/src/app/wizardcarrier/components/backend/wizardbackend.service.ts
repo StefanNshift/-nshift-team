@@ -1,22 +1,21 @@
-import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
-
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class WizardbackendService {
   private readonly WIZARD_BACKEND_URL = environment.apiUrl;
   private readonly API_KEY = environment.apiKey;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Content-Type': 'application/json',
-      'x-api-key': this.API_KEY
+      'x-api-key': this.API_KEY,
     });
   }
 
@@ -31,13 +30,13 @@ export class WizardbackendService {
     const headers = this.getHeaders();
     return this.http.get(url, { headers });
   }
-  
+
   getAllTicketsClosed(startDate: string, endDate: string): Observable<any> {
     const url = `${this.WIZARD_BACKEND_URL}/GetAllTicketsClosed?startDate=${startDate}&endDate=${endDate}`;
     const headers = this.getHeaders();
     return this.http.get(url, { headers });
   }
-  
+
   getAllTickets(): Observable<any> {
     const url = `${this.WIZARD_BACKEND_URL}/GetAllTickets`;
     return this.http.get(url, { headers: this.getHeaders() });
@@ -52,7 +51,7 @@ export class WizardbackendService {
     const url = `${this.WIZARD_BACKEND_URL}/assignTicket`;
     const body = {
       ticketId: ticketId,
-      userId: userId
+      userId: userId,
     };
     return this.http.post(url, body, { headers: this.getHeaders() });
   }
@@ -66,7 +65,7 @@ export class WizardbackendService {
     const url = `${this.WIZARD_BACKEND_URL}/GetCustomFieldOptions`;
     return this.http.get(url, { headers: this.getHeaders() });
   }
-  
+
   addCustomFieldOption(optionValue: string): Observable<any> {
     const url = `${this.WIZARD_BACKEND_URL}/addCustomFieldOption`;
     const headers = this.getHeaders();
@@ -79,7 +78,7 @@ export class WizardbackendService {
     const headers = this.getHeaders();
     return this.http.post(url, sprintData, { headers });
   }
-  
+
   analyzeCarrier(params: { id: string; model: string }): Observable<string> {
     const url = `${this.WIZARD_BACKEND_URL}/pyAI`;
     const headers = this.getHeaders();
@@ -89,6 +88,4 @@ export class WizardbackendService {
       headers,
     });
   }
-  
-
 }

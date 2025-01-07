@@ -4,18 +4,13 @@
   <!-- Model Selection -->
   <div style="width: 30%" class="form-group mb-3">
     <label for="modelSelect">Select Model </label>
-    <select
-      id="modelSelect"
-      class="form-control"
-      [(ngModel)]="selectedModel"
-    >
+    <select id="modelSelect" class="form-control" [(ngModel)]="selectedModel">
       <option *ngFor="let model of models" [value]="model.value">
         {{ model.label }}
       </option>
     </select>
   </div>
-  <hr>
-
+  <hr />
 
   <div style="width: 30%" class="form-group">
     <label *ngIf="!isLoading" for="carrierSearch">Analyze Carrier<i class="fa-solid fa-user"></i></label>
@@ -53,83 +48,78 @@
   </div>
 
   <!-- Response and Error Section -->
-  <div >
+  <div>
     <div *ngIf="isLoading" class="skeleton-loader skeleton-loader-table mb-3"></div>
 
     <!-- Tab Navigation -->
-     <div *ngIf="tabsBool">
-    <ul class="nav nav-tabs">
-      <li class="nav-item">
-        <a
-          class="nav-link"
-          [ngClass]="{ active: activeTab === 'carrierRequest' }"
-          (click)="switchTab('carrierRequest')"
-          href="javascript:void(0)"
-        >
-          Carrier Request
-        </a>
-      </li>
-      <li class="nav-item">
-        <a
-          class="nav-link"
-          [ngClass]="{ active: activeTab === 'carrierServer' }"
-          (click)="switchTab('carrierServer')"
-          href="javascript:void(0)"
-        >
-          Carrier Server
-        </a>
-      </li>
-    </ul>
-  </div>
-<div>
-  <div style="margin-top:1%" *ngIf="tabsBool">
-    <div *ngIf="activeTab === 'carrierRequest'" class="response-container mb-3">
-      <h4>Python Mapping For: {{ analyzedCarrier }}</h4>
-      <div class="text-start">
-        <button
-        class="btn btn-primary btn-sm mt-3"
-          (click)="copyToClipboard(response)"
-        >
-          Copy
-        </button>
-      </div>
-      <pre class="bg-light p-3 border">{{ response }}</pre>
+    <div *ngIf="tabsBool">
+      <ul class="nav nav-tabs">
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            [ngClass]="{ active: activeTab === 'carrierRequest' }"
+            (click)="switchTab('carrierRequest')"
+            href="javascript:void(0)"
+          >
+            Carrier Request
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            [ngClass]="{ active: activeTab === 'carrierServer' }"
+            (click)="switchTab('carrierServer')"
+            href="javascript:void(0)"
+          >
+            Carrier Server
+          </a>
+        </li>
+      </ul>
     </div>
+    <div>
+      <div style="margin-top:1%" *ngIf="tabsBool">
+        <div *ngIf="activeTab === 'carrierRequest'" class="response-container mb-3">
+          <h4>Python Mapping For: {{ analyzedCarrier }}</h4>
+          <div class="text-start">
+            <button class="btn btn-primary btn-sm mt-3" (click)="copyToClipboard(response)">
+              Copy
+            </button>
+          </div>
+          <pre class="bg-light p-3 border">{{ response }}</pre>
+        </div>
 
-    <div *ngIf="activeTab === 'carrierServer'" class="response-container mb-3">
-      <h4>Carrier Server Request For: {{ analyzedCarrier }}</h4>
-      <div class="text-start">
-        <button
-        class="btn btn-primary btn-sm mt-3"
-        (click)="copyCarrierServerToClipboard()"
-        >
-          Copy
-        </button>
+        <div *ngIf="activeTab === 'carrierServer'" class="response-container mb-3">
+          <h4>Carrier Server Request For: {{ analyzedCarrier }}</h4>
+          <div class="text-start">
+            <button class="btn btn-primary btn-sm mt-3" (click)="copyCarrierServerToClipboard()">
+              Copy
+            </button>
+          </div>
+          <pre class="bg-light p-3 border">{{ carrierServer | json }}</pre>
+        </div>
+
+        <!-- Error Section -->
+        <div *ngIf="error" class="error-container">
+          <h5>Error</h5>
+          <p class="text-danger">{{ error }}</p>
+        </div>
       </div>
-      <pre class="bg-light p-3 border">{{ carrierServer | json }}</pre>
-    </div>
-
-    <!-- Error Section -->
-    <div *ngIf="error" class="error-container">
-      <h5>Error</h5>
-      <p class="text-danger">{{ error }}</p>
     </div>
   </div>
-</div>
-</div>
-<!-- Toast Notification -->
-<div
-  class="toast"
-  *ngIf="toastVisible"
-  [ngClass]="{
-    visible: toastVisible,
-    'toast-success': toastType === 'success',
-    'toast-error': toastType === 'error',
-    'toast-warning': toastType === 'warning'
-  }"
->
-  <div class="toast-content">
-    <span class="toast-message">{{ toastMessage }}</span>
-    <button class="close-toast" (click)="hideToast()">×</button>
+  <!-- Toast Notification -->
+  <div
+    class="toast"
+    *ngIf="toastVisible"
+    [ngClass]="{
+      visible: toastVisible,
+      'toast-success': toastType === 'success',
+      'toast-error': toastType === 'error',
+      'toast-warning': toastType === 'warning'
+    }"
+  >
+    <div class="toast-content">
+      <span class="toast-message">{{ toastMessage }}</span>
+      <button class="close-toast" (click)="hideToast()">×</button>
+    </div>
   </div>
 </div>

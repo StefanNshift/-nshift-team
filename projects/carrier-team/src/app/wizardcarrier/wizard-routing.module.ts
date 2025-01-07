@@ -1,22 +1,22 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { LocationStrategy, HashLocationStrategy } from '@angular/common'; // Lägg till detta
 import { WizardStep } from '@sebgroup/ng-wizard';
-import { authGuard  } from '../shared/auth-guard.service';
-import { CarrierTeamComponent } from './components/carrierteam-step/carrierteam/carrierteam.component';
+import { authGuard } from '../shared/auth-guard.service';
+import { AdminStepComponent } from './components/admin-step/admin-step.component';
+import { IndexComponent as AdminIndexComponent } from './components/admin-step/index/index.component';
+import { AdminModuleComponent } from './components/admin-step/sub-steps/adminteam/admincarrierteam.component';
 import { CarrierFieldModuleComponent } from './components/admin-step/sub-steps/carrierjirafield/carrierfield.component';
 import { CarrierTicketComponent } from './components/admin-step/sub-steps/carriertickets/carriertickets.component';
-import { AdminModuleComponent } from './components/admin-step/sub-steps/adminteam/admincarrierteam.component';
-import { LoginComponent } from './components/login-step/login.component';
 import { SprintreviewComponent } from './components/admin-step/sub-steps/sprintreview/sprintreview.component';
-import { WizardTutorialComponent } from './wizard.component';
-import { AdminStepComponent } from './components/admin-step/admin-step.component';
+import { CarrierTeamComponent } from './components/carrierteam-step/carrierteam/carrierteam.component';
+import { IndexComponent as CarrierIndexComponent } from './components/carrierteam-step/index/index.component';
 import { IpsumComponent } from './components/carrierteam-step/sub-steps/ipsum/ipsum.component';
 import { LoremComponent } from './components/carrierteam-step/sub-steps/lorem/lorem.component';
-import { IndexComponent as AdminIndexComponent } from './components/admin-step/index/index.component';
-import { IndexComponent as CarrierIndexComponent } from './components/carrierteam-step/index/index.component';
+import { LoginComponent } from './components/login-step/login.component';
+import { WizardTutorialComponent } from './wizard.component';
 
 const routes: WizardStep[] = [
-
   {
     path: '',
     component: WizardTutorialComponent,
@@ -28,11 +28,8 @@ const routes: WizardStep[] = [
         data: {
           heading: 'Carrier Wizard',
           pageHeading: 'Login',
-          controls: [
-     
-          ],
+          controls: [],
         },
-        
       },
       {
         path: 'carrier-team',
@@ -60,8 +57,7 @@ const routes: WizardStep[] = [
         data: {
           heading: 'Carrier Team',
           subSteps: [],
-          controls: [
-          ],
+          controls: [],
         },
       },
       {
@@ -69,33 +65,29 @@ const routes: WizardStep[] = [
         component: AdminStepComponent,
         data: {
           heading: 'Admin',
-          subSteps: ['team', 'tickets', 'carrierjira','sprint'],
+          subSteps: ['team', 'tickets', 'carrierjira', 'sprint'],
 
-            controls: [
-              {
-                type: 'next',
-              },
-            ],
-          
+          controls: [
+            {
+              type: 'next',
+            },
+          ],
         },
         children: [
           {
             path: '',
             component: AdminIndexComponent,
           },
-      
+
           {
             path: 'team',
             component: AdminModuleComponent,
             canActivate: [authGuard],
 
-            
             data: {
               heading: 'Carrier Team',
               pageHeading: '',
-              
             },
-            
           },
           {
             path: 'tickets',
@@ -116,7 +108,7 @@ const routes: WizardStep[] = [
               pageHeading: '',
             },
           },
-          
+
           {
             path: 'sprint',
             component: SprintreviewComponent,
@@ -128,23 +120,23 @@ const routes: WizardStep[] = [
               controls: [
                 {
                   type: 'prev',
-                }
+                },
               ],
             },
           },
         ],
-        
-        
       },
-  
+
       { path: '**', pathMatch: 'full', redirectTo: 'login' },
     ],
   },
-
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
+  providers: [
+    { provide: LocationStrategy, useClass: HashLocationStrategy }, 
+  ],
 })
 export class WizardTutorialRoutingModule {}

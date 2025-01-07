@@ -2,8 +2,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { COUNTRIES } from './countries';
 import { WizardbackendService } from '../../../backend/wizardbackend.service';
+import { COUNTRIES } from './countries';
 
 @Component({
   selector: 'app-carrierfield',
@@ -23,7 +23,12 @@ export class CarrierFieldModuleComponent implements OnInit {
   currentPage = 1;
   itemsPerPage = 10;
 
-  constructor(private fb: FormBuilder, private router: Router, private http: HttpClient,private wizardBackendService: WizardbackendService) {
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private http: HttpClient,
+    private wizardBackendService: WizardbackendService,
+  ) {
     this.newCarrierForm = this.fb.group({
       id: ['', Validators.required],
       name: ['', Validators.required],
@@ -52,7 +57,7 @@ export class CarrierFieldModuleComponent implements OnInit {
 
   fetchCustomFieldOptions() {
     this.isLoading = true;
-  
+
     this.wizardBackendService.getCustomFieldOptions().subscribe(
       response => {
         this.customFieldOptions = response.values.sort((a, b) => b.id - a.id);
@@ -64,7 +69,6 @@ export class CarrierFieldModuleComponent implements OnInit {
       },
     );
   }
-  
 
   // Getter for filtered data only
   get filteredData() {
@@ -84,10 +88,10 @@ export class CarrierFieldModuleComponent implements OnInit {
       this.showToast('Please fill out all fields correctly.', 'warning');
       return;
     }
-  
+
     const { id, name, country } = this.newCarrierForm.value;
     const formattedValue = `${id} ${name} (${country})`; // Format as "ID NAME (COUNTRYCODE)"
-  
+
     this.wizardBackendService.addCustomFieldOption(formattedValue).subscribe(
       (response: any) => {
         this.showToast('New carrier option added successfully!', 'success');
@@ -100,5 +104,4 @@ export class CarrierFieldModuleComponent implements OnInit {
       },
     );
   }
-  
 }

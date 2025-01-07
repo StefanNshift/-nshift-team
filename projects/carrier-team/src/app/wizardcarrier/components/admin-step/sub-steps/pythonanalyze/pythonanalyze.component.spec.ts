@@ -8,9 +8,8 @@ describe('PythonAnalyze', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ PythonAnalyze ]
-    })
-    .compileComponents();
+      declarations: [PythonAnalyze],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(PythonAnalyze);
     component = fixture.componentInstance;

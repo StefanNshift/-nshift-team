@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Database, ref, get, update } from '@angular/fire/database';
+import { Component, OnInit } from '@angular/core';
 import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth'; // Firebase Auth modules
+import { Database, get, ref, update } from '@angular/fire/database';
 import { Router } from '@angular/router';
 import { WizardbackendService } from '../../../backend/wizardbackend.service';
 
@@ -10,33 +10,40 @@ import { WizardbackendService } from '../../../backend/wizardbackend.service';
   templateUrl: './carriertickets.component.html',
 })
 export class CarrierTicketComponent implements OnInit {
+
+  // To store the retrieved members data
+  constructor(
+    private router: Router,
+    private http: HttpClient,
+    private db: Database,
+    private auth: Auth,
+    private wizardBackendService: WizardbackendService, // Lägg till denna
+  ) {}
   tickets: any[] = []; // Array to hold ticket data
   collectedData: any[] = []; // Holds the data retrieved from Firebase
-  isLoading: boolean = true;
+  isLoading = true;
   members: any[] = [];
   members1: any[] = [];
   toastVisible = false; // Control visibility of the toast
   toastMessage = ''; // Message to display in the toast
   toastType = ''; // To control the type of toast
-
-  // To store the retrieved members data
-  constructor(private router: Router, private http: HttpClient, private db: Database, private auth: Auth,  private wizardBackendService: WizardbackendService // Lägg till denna
-  ) { }
   probIssues: any[] = []; // Array to hold PROB issues data
-  probIssueCount: number = 0; // Count of PROB issues
-  zendeskTicketCount: number = 0; // Count of Zendesk tickets
+  probIssueCount = 0; // Count of PROB issues
+  zendeskTicketCount = 0; // Count of Zendesk tickets
   assignedTickets: any[] = [];
   unassignedTickets: any[] = [];
 
-  unassignedTier1Count: number = 0;
-  unassignedTier2Count: number = 0;
-  unassignedTier3Count: number = 0;
-  unassignedPriorityLowCount: number = 0;
-  unassignedPriorityMediumCount: number = 0;
-  unassignedPriorityHighCount: number = 0;
-  unassignedPriorityUrgentCount: number = 0;
-  totalUnassignedCount: number = 0;
+  unassignedTier1Count = 0;
+  unassignedTier2Count = 0;
+  unassignedTier3Count = 0;
+  unassignedPriorityLowCount = 0;
+  unassignedPriorityMediumCount = 0;
+  unassignedPriorityHighCount = 0;
+  unassignedPriorityUrgentCount = 0;
+  totalUnassignedCount = 0;
   filteredUnassignedTickets: any[] = [];
+
+  displayMembers: any[] = []; // Array to store filtered members for display
 
   showToast(message: string, type: string) {
     this.toastMessage = message;
@@ -62,8 +69,6 @@ export class CarrierTicketComponent implements OnInit {
     } else {
       this.router.navigate(['/  ']);
     }
-
-   
   }
 
   getSelectValue(event: Event): string {
@@ -74,13 +79,13 @@ export class CarrierTicketComponent implements OnInit {
     this.isLoading = true;
     this.retrieveMembers();
     let vacation = false;
-  
+
     if (assigneeId === '1') {
       this.showToast('No valid assignee selected!', 'warning'); // Show warning toast
       this.isLoading = false;
       return;
     }
-  
+
     // Kontrollera om tilldelad person är på semester
     this.displayMembers.forEach(user => {
       if (user.zendeskID === assigneeId && user.vacation) {
@@ -89,7 +94,7 @@ export class CarrierTicketComponent implements OnInit {
         this.isLoading = false;
       }
     });
-  
+
     if (!vacation) {
       // Använd WizardbackendService för att tilldela ticket
       this.wizardBackendService.assignTicket(ticketId, assigneeId).subscribe({
@@ -108,9 +113,6 @@ export class CarrierTicketComponent implements OnInit {
       });
     }
   }
-  
-
-  displayMembers: any[] = []; // Array to store filtered members for display
 
   retrieveMembers() {
     const membersRef = ref(this.db, 'members');
@@ -145,7 +147,7 @@ export class CarrierTicketComponent implements OnInit {
         this.probIssues = response.issues.map(issue => {
           const tier = this.getCarrierTier(issue.carrierID);
           const carrierCIS = this.getCarrierCIS(issue.carrierID);
-  
+
           return {
             ...issue,
             carrierID: issue.carrierID || 'N/A',
@@ -163,7 +165,6 @@ export class CarrierTicketComponent implements OnInit {
       },
     );
   }
-  
 
   getCarrierTier(carrierID: number) {
     if (!carrierID) {
@@ -193,7 +194,6 @@ export class CarrierTicketComponent implements OnInit {
       });
   }
 
-
   retrieveCollectedData(): Promise<void> {
     const dataRef = ref(this.db, 'Collected Data');
 
@@ -221,11 +221,11 @@ export class CarrierTicketComponent implements OnInit {
     // Check if data is stored in localStorage and if it is still valid
     const storedData = localStorage.getItem('zendeskTickets');
     const storedTimestamp = localStorage.getItem('zendeskTicketsTimestamp');
-  
+
     if (storedData && storedTimestamp) {
       const now = new Date().getTime();
       const thirtyMinutes = 30 * 60 * 1000; // 30 minutes in milliseconds
-  
+
       // If the stored data is still within the 30-minute window, use it
       if (now - parseInt(storedTimestamp) < thirtyMinutes) {
         const response = JSON.parse(storedData);
@@ -236,7 +236,7 @@ export class CarrierTicketComponent implements OnInit {
         localStorage.removeItem('zendeskTicketsTimestamp');
       }
     }
-  
+
     // If not in localStorage or expired, call the API using WizardbackendService
     this.wizardBackendService.getAllTickets().subscribe(
       (response: any) => {
@@ -250,7 +250,6 @@ export class CarrierTicketComponent implements OnInit {
       },
     );
   }
-  
 
   syncTier1AndTier2Unassigned() {
     this.isLoading = true;
@@ -258,10 +257,10 @@ export class CarrierTicketComponent implements OnInit {
       .filter(ticket => ticket.tier === 'tier 1' || ticket.tier === 'tier 2')
       .map(ticket => {
         const assignedMember = this.members.find(member => member.name === ticket.assigned_to);
-  
+
         if (assignedMember) {
           ticket.zendeskID = assignedMember.zendeskID;
-  
+
           // Kontrollera om tilldelad person är på semester
           let vacation = false;
           this.displayMembers.forEach(user => {
@@ -271,10 +270,10 @@ export class CarrierTicketComponent implements OnInit {
               vacation = true;
             }
           });
-  
+
           if (!vacation) {
             console.log('Updating ticket:', ticket.ticket_id, 'to assignee:', assignedMember.zendeskID);
-  
+
             // Använd WizardbackendService för att tilldela tickets
             this.wizardBackendService.assignTicket(ticket.ticket_id, assignedMember.zendeskID).subscribe({
               next: (response: any) => {
@@ -293,16 +292,16 @@ export class CarrierTicketComponent implements OnInit {
         } else {
           console.log(`Zendesk ID not found for ${ticket.assigned_to} in ticket ${ticket.ticket_id}`);
         }
-  
+
         return ticket;
       });
-  
+
     if (this.filteredUnassignedTickets.length === 0) {
       this.showToast(`No T1/T2 tickets to assign`, 'warning'); // Show warning toast
     }
     this.isLoading = false;
   }
-  
+
   // Separate method to process the ticket response data
   processTicketResponse(response: any) {
     this.assignedTickets = response.assignedTickets;
@@ -313,25 +312,27 @@ export class CarrierTicketComponent implements OnInit {
       ticket.created_at = this.formatDate(ticket.created_at);
       ticket.updated_at = this.formatDate(ticket.updated_at);
       ticket.carrierName = this.getCarrierName(ticket.carrier_id);
-      if(ticket.carrier_id == null){
-        ticket.carrier_id = 'N/a'
+      if (ticket.carrier_id == null) {
+        ticket.carrier_id = 'N/a';
       }
 
-      
       // Assign responsibility based on carrierCIS
       const carrierCIS = this.getCarrierCIS(ticket.carrier_id);
       ticket.assigned_to = carrierCIS !== 'Not Found' ? carrierCIS : 'All';
 
       // Now check if tier is missing, and retrieve it from collectedData if necessary
       let tier = ticket.tier || 'Not found';
-        const carrierEntry = this.collectedData.find(data =>
-          data.carrierConceptID != null && ticket.carrier_id != null && data.carrierConceptID.toString() === ticket.carrier_id.toString()
-        );
+      const carrierEntry = this.collectedData.find(
+        data =>
+          data.carrierConceptID != null &&
+          ticket.carrier_id != null &&
+          data.carrierConceptID.toString() === ticket.carrier_id.toString(),
+      );
 
-        if (carrierEntry) {
-          tier = typeof carrierEntry.tier === 'number' ? `tier ${carrierEntry.tier}` : carrierEntry.tier;
-        }
-      
+      if (carrierEntry) {
+        tier = typeof carrierEntry.tier === 'number' ? `tier ${carrierEntry.tier}` : carrierEntry.tier;
+      }
+
       ticket.tier = tier;
     });
 
@@ -392,7 +393,7 @@ export class CarrierTicketComponent implements OnInit {
 
   fetchFilteredUnassignedTickets() {
     this.isLoading = true;
-  
+
     // Använd WizardbackendService för att hämta filtrerade obemannade tickets
     this.wizardBackendService.getFilteredUnassignedTickets().subscribe(
       (response: any) => {
@@ -409,21 +410,20 @@ export class CarrierTicketComponent implements OnInit {
       },
     );
   }
-  
 
   getCarrierName(carrierID: number): string {
     if (!carrierID) {
       return 'N/a'; // Return 'Not Found' if carrierID is invalid
     }
-  
+
     // Find the carrier entry with a matching carrier ID
     const carrierEntry = this.collectedData.find(
-      data => data.carrierConceptID && data.carrierConceptID.toString() === carrierID.toString()
+      data => data.carrierConceptID && data.carrierConceptID.toString() === carrierID.toString(),
     );
-  
+
     return carrierEntry ? carrierEntry.carrier : 'Not Found'; // Return carrier name or 'Not Found'
   }
-  
+
   // Method to get CIS responsible for a carrier from Firebase data
   getCarrierCIS(carrierNumber: number) {
     if (!carrierNumber) {

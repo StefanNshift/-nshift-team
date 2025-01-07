@@ -1,4 +1,4 @@
-import { Component, ElementRef, AfterViewInit, Renderer2 } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Renderer2 } from '@angular/core';
 
 @Component({
   selector: 'app-take-over',
@@ -30,10 +30,9 @@ export class WizardTutorialComponent implements AfterViewInit {
    * Hide specific elements like "Carrier Admin" and its sub-items
    */
   private hideSpecificElements() {
-    const selectors = [
-    ];
+    const selectors = [];
 
-    selectors.forEach((selector) => {
+    selectors.forEach(selector => {
       const elements = this.el.nativeElement.querySelectorAll(selector);
       elements.forEach((element: HTMLElement) => {
         const linkText = element.textContent?.trim();

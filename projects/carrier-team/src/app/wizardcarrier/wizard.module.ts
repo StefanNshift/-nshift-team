@@ -9,20 +9,19 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { CarrierFieldModuleComponent } from './components/admin-step/sub-steps/carrierjirafield/carrierfield.component';
 import { CarrierTicketComponent } from './components/admin-step/sub-steps/carriertickets/carriertickets.component';
 
-import { CarrierTeamComponent } from './components/carrierteam-step/carrierteam/carrierteam.component';
+import { AdminStepComponent } from './components/admin-step/admin-step.component';
+import { IndexComponent } from './components/admin-step/index/index.component';
+import { AdminstepComponent } from './components/admin-step/sub-steps/adminstep/adminstep.component';
 import { AdminModuleComponent } from './components/admin-step/sub-steps/adminteam/admincarrierteam.component';
+import { PythonAnalyze } from './components/admin-step/sub-steps/pythonanalyze/pythonanalyze.component';
+import { SprintreviewComponent } from './components/admin-step/sub-steps/sprintreview/sprintreview.component';
+import { CarrierTeamStepComponent } from './components/carrierteam-step/carrierteam-step.component';
+import { CarrierTeamComponent } from './components/carrierteam-step/carrierteam/carrierteam.component';
+import { IpsumComponent } from './components/carrierteam-step/sub-steps/ipsum/ipsum.component';
+import { LoremComponent } from './components/carrierteam-step/sub-steps/lorem/lorem.component';
 import { LoginComponent } from './components/login-step/login.component';
 import { WizardTutorialRoutingModule } from './wizard-routing.module';
 import { WizardTutorialComponent } from './wizard.component';
-import { PythonAnalyze } from './components/admin-step/sub-steps/pythonanalyze/pythonanalyze.component';
-import { SprintreviewComponent } from './components/admin-step/sub-steps/sprintreview/sprintreview.component';
-import { AdminstepComponent } from './components/admin-step/sub-steps/adminstep/adminstep.component';
-import { IndexComponent } from './components/admin-step/index/index.component';
-import { AdminStepComponent } from './components/admin-step/admin-step.component';
-import { IpsumComponent } from './components/carrierteam-step/sub-steps/ipsum/ipsum.component';
-import { LoremComponent } from './components/carrierteam-step/sub-steps/lorem/lorem.component';
-import { CarrierTeamStepComponent } from './components/carrierteam-step/carrierteam-step.component';
-
 
 // service for custom translations implementing wizard translations
 @Injectable()
@@ -57,7 +56,7 @@ const TRANSLATIONS_PROVIDER: ClassProvider = {
   imports: [
     CommonModule,
     WizardTutorialRoutingModule,
-    SebNgWizardModule.forRoot({ hideClose: true,markPassedAsSuccess	:false }, TRANSLATIONS_PROVIDER),
+    SebNgWizardModule.forRoot({ hideClose: true, markPassedAsSuccess: false }, TRANSLATIONS_PROVIDER),
     SharedModule,
   ],
   providers: [WizardSteps, NgxPaginationModule],

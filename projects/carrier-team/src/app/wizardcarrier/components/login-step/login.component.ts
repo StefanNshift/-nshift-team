@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Database, ref, get } from '@angular/fire/database';
 import { Auth, signInWithEmailAndPassword, User } from '@angular/fire/auth';
+import { Database, get, ref } from '@angular/fire/database';
 
 @Component({
   selector: 'app-login',
@@ -8,12 +8,12 @@ import { Auth, signInWithEmailAndPassword, User } from '@angular/fire/auth';
   styles: [],
 })
 export class LoginComponent implements OnInit {
-  email: string = '';                // Stores the user's email
-  password: string = '';             // Stores the user's password
-  user: User | null = null;          // Stores the logged-in user
-  isAdmin: boolean = false;          // Checks if the user is an admin
-  wrongPassword: boolean = false;    // Flag for incorrect password
-  noAdminAccess: boolean = false;    // Flag for non-admin access
+  email = ''; // Stores the user's email
+  password = ''; // Stores the user's password
+  user: User | null = null; // Stores the logged-in user
+  isAdmin = false; // Checks if the user is an admin
+  wrongPassword = false; // Flag for incorrect password
+  noAdminAccess = false; // Flag for non-admin access
 
   constructor(private db: Database, private auth: Auth) {}
 
@@ -36,11 +36,11 @@ export class LoginComponent implements OnInit {
     this.resetErrors(); // Reset error flags
 
     signInWithEmailAndPassword(this.auth, this.email, this.password)
-      .then((userCredential) => {
+      .then(userCredential => {
         this.user = userCredential.user;
         this.checkAdminStatus(this.user); // Check admin status
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Error signing in:', error);
         this.wrongPassword = true; // Show error for incorrect password
       });
@@ -65,7 +65,7 @@ export class LoginComponent implements OnInit {
     const adminRef = ref(this.db, `admins/${user.uid}`);
 
     get(adminRef)
-      .then((snapshot) => {
+      .then(snapshot => {
         // Check if user is an admin
         this.isAdmin = snapshot.exists() && snapshot.val() === true;
 
@@ -78,10 +78,9 @@ export class LoginComponent implements OnInit {
         } else {
           this.noAdminAccess = true; // Show message for non-admin access
           location.reload(); // Reload page after logout
-
         }
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Error checking admin status:', error);
       });
   }

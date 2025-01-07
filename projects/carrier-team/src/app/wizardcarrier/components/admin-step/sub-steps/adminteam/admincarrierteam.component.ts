@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Database, ref, get, update, push, remove } from '@angular/fire/database'; // Firebase Database modules
 import { Auth, signInWithEmailAndPassword, User } from '@angular/fire/auth'; // Firebase Auth modules
+import { Database, get, push, ref, remove, update } from '@angular/fire/database'; // Firebase Database modules
 
 interface CollectedDataItem {
   key: string;
@@ -15,23 +15,21 @@ interface CollectedDataItem {
   selector: 'app-admincarrierteam',
   templateUrl: './admincarrierteam.component.html',
 })
-
-
 export class AdminModuleComponent implements OnInit {
   user: User | null = null; // Hold the logged-in user
-  isAdmin: boolean = false; // Check if the user is admin
+  isAdmin = false; // Check if the user is admin
   collectedData: any[] = []; // Holds the data retrieved from Firebase
-  searchTerm: string = ''; // Holds the search term for filtering
-  currentPage: number = 1; // Tracks the current page
-  itemsPerPage: number = 10; // Controls how many items per page
+  searchTerm = ''; // Holds the search term for filtering
+  currentPage = 1; // Tracks the current page
+  itemsPerPage = 10; // Controls how many items per page
   members: any[] = []; // To store the retrieved members data
-  isLoading: boolean = true;
-  showTable: boolean = false
+  isLoading = true;
+  showTable = false;
   toastVisible = false; // Control visibility of the toast
   toastMessage = ''; // Message to display in the toast
   toastType = ''; // To control the type of toast
 
-  constructor(private db: Database, private auth: Auth) { } // Inject Database and Auth
+  constructor(private db: Database, private auth: Auth) {} // Inject Database and Auth
 
   ngOnInit() {
     this.retrieveMembers();
@@ -45,7 +43,7 @@ export class AdminModuleComponent implements OnInit {
       this.isAdmin = JSON.parse(storedAdmin) === true;
 
       if (this.isAdmin) {
-        this.retrieveCollectedData(this.user!)// Assert that user is not null
+        this.retrieveCollectedData(this.user!); // Assert that user is not null
       }
     }
   }
@@ -65,7 +63,7 @@ export class AdminModuleComponent implements OnInit {
     const membersRef = ref(this.db, 'members');
 
     get(membersRef)
-      .then((snapshot) => {
+      .then(snapshot => {
         if (snapshot.exists()) {
           this.members = Object.entries(snapshot.val())
             .map(([key, member]: [string, any]) => ({
@@ -73,16 +71,15 @@ export class AdminModuleComponent implements OnInit {
               ...member,
             }))
             .sort((a: any, b: any) => {
-              if (a.name === 'All') return 1; // Move "All" to the end of the list
-              if (b.name === 'All') return -1;
+              if (a.name === 'All') { return 1; } // Move "All" to the end of the list
+              if (b.name === 'All') { return -1; }
               return a.name.localeCompare(b.name); // Sort others alphabetically
             });
-
         } else {
           console.log('No members data available.');
         }
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Error retrieving members data:', error);
       });
   }
@@ -94,17 +91,16 @@ export class AdminModuleComponent implements OnInit {
       .then(() => {
         console.log(`Updated CIS to '${selectedMemberName}' for entry with key '${key}'`);
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Error updating CIS:', error);
       });
   }
-
 
   checkAdminStatus(user: User) {
     const adminRef = ref(this.db, `admins/${user.uid}`);
 
     get(adminRef)
-      .then((snapshot) => {
+      .then(snapshot => {
         if (snapshot.exists()) {
           this.isAdmin = snapshot.val();
           localStorage.setItem('user', JSON.stringify(this.user));
@@ -112,12 +108,11 @@ export class AdminModuleComponent implements OnInit {
 
           if (this.isAdmin) {
             location.reload();
-
           }
         } else {
         }
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Error checking admin status:', error);
       });
   }
@@ -126,31 +121,29 @@ export class AdminModuleComponent implements OnInit {
     const dataRef = ref(this.db, 'Collected Data');
 
     get(dataRef)
-      .then((snapshot) => {
+      .then(snapshot => {
         if (snapshot.exists()) {
           const data = snapshot.val();
           this.collectedData = Object.entries(data)
             .map(([key, value]) => {
               return {
-                key,  // Capture the Firebase key to identify each entry
-                ...(typeof value === 'object' && value !== null ? value : {}) // Safely spread only if it's an object
+                key, // Capture the Firebase key to identify each entry
+                ...(typeof value === 'object' && value !== null ? value : {}), // Safely spread only if it's an object
               } as CollectedDataItem; // Cast each entry as CollectedDataItem
             })
             .sort((a, b) => (a.tier ?? Number.MAX_SAFE_INTEGER) - (b.tier ?? Number.MAX_SAFE_INTEGER)); // Sort by tier
           this.isLoading = false;
-
         } else {
           console.log('No data available at the specified path.');
         }
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Error retrieving data from Firebase Realtime Database:', error);
       });
-
   }
 
   // Update Firebase using the key from carrierData directly
-  updateFirebase({ carrierData, field, value }: { carrierData: CollectedDataItem, field: string, value: any }) {
+  updateFirebase({ carrierData, field, value }: { carrierData: CollectedDataItem; field: string; value: any }) {
     if (!carrierData.key) {
       console.error('No key provided in carrierData:', carrierData);
       return;
@@ -168,13 +161,14 @@ export class AdminModuleComponent implements OnInit {
     update(dataRef, { [field]: validatedValue })
       .then(() => {
         console.log(`Updated field '${field}' with value '${validatedValue}' for key '${carrierData.key}'`);
-        this.showToast(`Updated field '${field}' with value '${validatedValue}' for key '${carrierData.key}'`, 'success');
-
+        this.showToast(
+          `Updated field '${field}' with value '${validatedValue}' for key '${carrierData.key}'`,
+          'success',
+        );
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Error updating Firebase:', error);
         this.showToast('Error Updating!', 'error'); // Show error toast
-
       });
   }
 
@@ -189,10 +183,10 @@ export class AdminModuleComponent implements OnInit {
 
   validateTierNumber(value: any): number {
     const num = Number(value);
-    if (isNaN(num)) return 1; // Default to 1 if the value is not a number
+    if (isNaN(num)) { return 1; } // Default to 1 if the value is not a number
     // Ensure the value is between 1 and 3
-    if (num < 1) return 1;
-    if (num > 3) return 3;
+    if (num < 1) { return 1; }
+    if (num > 3) { return 3; }
     return num;
   }
 
@@ -200,7 +194,7 @@ export class AdminModuleComponent implements OnInit {
     const dataRef = ref(this.db, 'Collected Data');
 
     get(dataRef)
-      .then((snapshot) => {
+      .then(snapshot => {
         if (snapshot.exists()) {
           const data = snapshot.val();
           const keys = Object.keys(data).filter(key => !isNaN(Number(key))); // Filter only numeric keys
@@ -213,7 +207,7 @@ export class AdminModuleComponent implements OnInit {
             carrierConceptID: 0,
             cis: '',
             team: '',
-            tier: 0
+            tier: 0,
           };
 
           const newEntryRef = ref(this.db, `Collected Data/${newKey}`);
@@ -221,15 +215,14 @@ export class AdminModuleComponent implements OnInit {
             .then(() => {
               this.retrieveCollectedData(this.user!); // Reload data after adding the new row
               this.showToast(`Added Row  '${newKey}'`, 'success');
-
             })
-            .catch((error) => {
+            .catch(error => {
               console.error('Error adding new row:', error);
             });
         } else {
         }
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Error fetching data for new key:', error);
       });
   }
@@ -242,15 +235,12 @@ export class AdminModuleComponent implements OnInit {
       .then(() => {
         this.retrieveCollectedData(this.user!); // Reload the data after removing
         this.showToast(`Removed Carrier '${key}'`, 'success');
-
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Error removing row:', error);
         this.showToast(`Error removing '${key}'`, 'warning');
       });
   }
-
-
 
   filteredData() {
     if (!this.searchTerm) {
@@ -259,16 +249,20 @@ export class AdminModuleComponent implements OnInit {
 
     const lowerCaseSearchTerm = this.searchTerm.toLowerCase();
 
-    return this.collectedData.filter((carrierData) => {
+    return this.collectedData.filter(carrierData => {
       return (
-        (carrierData.carrier && typeof carrierData.carrier === 'string' && carrierData.carrier.toLowerCase().includes(lowerCaseSearchTerm)) ||
+        (carrierData.carrier &&
+          typeof carrierData.carrier === 'string' &&
+          carrierData.carrier.toLowerCase().includes(lowerCaseSearchTerm)) ||
         (carrierData.carrierConceptID && carrierData.carrierConceptID.toString().includes(lowerCaseSearchTerm)) ||
-        (carrierData.cis && typeof carrierData.cis === 'string' && carrierData.cis.toLowerCase().includes(lowerCaseSearchTerm)) ||
-        (carrierData.team && typeof carrierData.team === 'string' && carrierData.team.toLowerCase().includes(lowerCaseSearchTerm)) ||
+        (carrierData.cis &&
+          typeof carrierData.cis === 'string' &&
+          carrierData.cis.toLowerCase().includes(lowerCaseSearchTerm)) ||
+        (carrierData.team &&
+          typeof carrierData.team === 'string' &&
+          carrierData.team.toLowerCase().includes(lowerCaseSearchTerm)) ||
         (carrierData.tier && carrierData.tier.toString().includes(lowerCaseSearchTerm))
       );
     });
   }
-
-
 }

@@ -1,18 +1,12 @@
-
 <p>Below are all the carriers and team.</p>
 <div class="overflow-auto mb-3">
   <div class="mb-3">
-    <input
-    type="text"
-    class="form-control"
-    placeholder="Search Carrier..."
-    [(ngModel)]="searchTerm"
-  />
+    <input type="text" class="form-control" placeholder="Search Carrier..." [(ngModel)]="searchTerm" />
   </div>
-  
+
   <div *ngIf="isLoading" class="skeleton-loader skeleton-loader-table"></div>
-  <table  *ngIf="showTable" class="table mb-0">
-   <thead >
+  <table *ngIf="showTable" class="table mb-0">
+    <thead>
       <tr>
         <th>Carrier</th>
         <th>Carrier Concept ID</th>
@@ -39,4 +33,4 @@
       </tr>
     </tbody>
   </table>
-  
+</div>
