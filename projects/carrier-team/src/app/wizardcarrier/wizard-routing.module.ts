@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { LocationStrategy, HashLocationStrategy } from '@angular/common'; // Lägg till detta
 import { WizardStep } from '@sebgroup/ng-wizard';
 import { authGuard } from '../shared/auth-guard.service';
 import { AdminStepComponent } from './components/admin-step/admin-step.component';
@@ -135,8 +134,5 @@ const routes: WizardStep[] = [
 @NgModule({
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
-  providers: [
-    { provide: LocationStrategy, useClass: HashLocationStrategy }, 
-  ],
 })
 export class WizardTutorialRoutingModule {}

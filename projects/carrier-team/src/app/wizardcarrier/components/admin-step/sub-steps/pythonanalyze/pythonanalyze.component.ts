@@ -1273,7 +1273,9 @@ export class PythonAnalyze {
     // Find the start of the actual object after "Body":
     const objectStart = jsonString.indexOf('{', body);
     const closingBraceIndex = jsonString.lastIndexOf('}');
-    if (objectStart === -1 || closingBraceIndex === -1) { return null; } // Return null if braces are missing
+    if (objectStart === -1 || closingBraceIndex === -1) {
+      return null;
+    } // Return null if braces are missing
 
     // Extract and return the content within the braces
     return jsonString.slice(objectStart, closingBraceIndex); // Include the opening brace, exclude the last }

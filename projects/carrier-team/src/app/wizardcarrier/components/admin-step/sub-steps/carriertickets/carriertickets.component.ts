@@ -10,7 +10,6 @@ import { WizardbackendService } from '../../../backend/wizardbackend.service';
   templateUrl: './carriertickets.component.html',
 })
 export class CarrierTicketComponent implements OnInit {
-
   // To store the retrieved members data
   constructor(
     private router: Router,
