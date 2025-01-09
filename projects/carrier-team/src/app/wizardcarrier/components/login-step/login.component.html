@@ -1,8 +1,10 @@
 <div class="row">
   <div class="col-md-10 mb-3">
-    <p *ngIf="user" class="lead">Welcome, {{ user.email }}!</p>
+    <p *ngIf="LoggedIn" class="lead">
+      <strong> {{ currentUser }} </strong>
+    </p>
 
-    <form (ngSubmit)="onLogin()" *ngIf="!user">
+    <form (ngSubmit)="onLogin()" *ngIf="!LoggedIn">
       <div class="form-row mt-3">
         <div class="form-group col-sm-6 col-xl-4">
           <input
@@ -39,7 +41,7 @@
     </form>
 
     <div class="form-row mt-2">
-      <div *ngIf="user">
+      <div *ngIf="LoggedIn">
         <button class="btn btn-primary" (click)="logout()">Logout</button>
       </div>
     </div>

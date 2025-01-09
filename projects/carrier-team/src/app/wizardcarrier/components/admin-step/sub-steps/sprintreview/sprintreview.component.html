@@ -4,7 +4,7 @@
 
     <form>
       <div class="form-row mt-3">
-        <div class="form-group col-sm-6 col-xl-4">
+        <div class="form-group col-sm-6 col-xl-3">
           <select class="form-control" (change)="onSprintSelect($event)">
             <option value="" disabled selected>Select a sprint</option>
             <option *ngFor="let sprint of sprints" [value]="sprint.id"> {{ sprint.name }} ({{ sprint.state }}) </option>

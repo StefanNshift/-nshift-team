@@ -9,11 +9,13 @@ import { Database, get, ref } from '@angular/fire/database';
 })
 export class LoginComponent implements OnInit {
   email = ''; // Stores the user's email
+  currentUser = '';
   password = ''; // Stores the user's password
   user: User | null = null; // Stores the logged-in user
   isAdmin = false; // Checks if the user is an admin
   wrongPassword = false; // Flag for incorrect password
   noAdminAccess = false; // Flag for non-admin access
+  LoggedIn = false;
 
   constructor(private db: Database, private auth: Auth) {}
 
@@ -25,7 +27,8 @@ export class LoginComponent implements OnInit {
     if (storedUser) {
       this.user = JSON.parse(storedUser);
       this.isAdmin = storedAdmin === 'true';
-      console.log(this.user);
+      this.LoggedIn = true;
+      this.currentUser = this.formatEmailToName('Welcome' + ' ' + this.user.email);
     }
   }
 
@@ -91,5 +94,14 @@ export class LoginComponent implements OnInit {
   resetErrors() {
     this.wrongPassword = false;
     this.noAdminAccess = false;
+  }
+
+  formatEmailToName(email: string): string {
+    return email
+      .split('@')[0] // Dela upp e-posten på "@" och ta bara den första delen
+      .replace(/\./g, ' ') // Ta bort alla punkter
+      .split(' ') // Dela upp på mellanrum
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Gör första bokstaven stor
+      .join(' '); // Slå ihop tillbaka till en sträng
   }
 }

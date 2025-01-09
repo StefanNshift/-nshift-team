@@ -23,8 +23,7 @@ const routes: WizardStep[] = [
         path: 'login',
         component: LoginComponent,
         data: {
-          heading: 'Carrier Wizard',
-          pageHeading: 'Login',
+          heading: 'Login',
           controls: [],
         },
       },
