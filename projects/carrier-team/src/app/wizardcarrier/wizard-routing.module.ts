@@ -10,8 +10,6 @@ import { CarrierTicketComponent } from './components/admin-step/sub-steps/carrie
 import { SprintreviewComponent } from './components/admin-step/sub-steps/sprintreview/sprintreview.component';
 import { CarrierTeamComponent } from './components/carrierteam-step/carrierteam/carrierteam.component';
 import { IndexComponent as CarrierIndexComponent } from './components/carrierteam-step/index/index.component';
-import { IpsumComponent } from './components/carrierteam-step/sub-steps/ipsum/ipsum.component';
-import { LoremComponent } from './components/carrierteam-step/sub-steps/lorem/lorem.component';
 import { LoginComponent } from './components/login-step/login.component';
 import { WizardTutorialComponent } from './wizard.component';
 
@@ -37,20 +35,6 @@ const routes: WizardStep[] = [
           {
             path: '',
             component: CarrierIndexComponent,
-          },
-          {
-            path: 'lorem',
-            data: {
-              heading: 'Lorem step',
-            },
-            component: LoremComponent,
-          },
-          {
-            path: 'ipsum',
-            data: {
-              heading: 'Ipsum step',
-            },
-            component: IpsumComponent,
           },
         ],
         data: {

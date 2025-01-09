@@ -1,36 +1,41 @@
-<p>Below are all the carriers and team.</p>
-<div class="overflow-auto mb-3">
-  <div class="mb-3">
-    <input type="text" class="form-control" placeholder="Search Carrier..." [(ngModel)]="searchTerm" />
-  </div>
+<div class="row">
+  <div class="col-md-12 mb-3">
+    <p class="lead">Carrier Responsibilities: Assigned specialists, tiers, and configuration details</p>
 
-  <div *ngIf="isLoading" class="skeleton-loader skeleton-loader-table"></div>
-  <table *ngIf="showTable" class="table mb-0">
-    <thead>
-      <tr>
-        <th>Carrier</th>
-        <th>Carrier Concept ID</th>
-        <th>CIS</th>
-        <th>Tier</th>
-        <th>CIS Apport</th>
-        <th>CIS Online</th>
-        <th>CIS Transmart</th>
-        <th>CPM</th>
-        <th>TAL</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let carrierData of filteredData()">
-        <td>{{ carrierData.carrier || 'Not Specified' }}</td>
-        <td>{{ carrierData.carrierConceptID || 'Not Specified' }}</td>
-        <td>{{ carrierData.cis || 'Not Specified' }}</td>
-        <td>{{ carrierData.tier || 'Not Specified' }}</td>
-        <td>{{ carrierData.cisapport || 'Not Specified' }}</td>
-        <td>{{ carrierData.cisonline || 'Not Specified' }}</td>
-        <td>{{ carrierData.cistransmart || 'Not Specified' }}</td>
-        <td>{{ carrierData.cpm || 'Not Specified' }}</td>
-        <td>{{ carrierData.tal || 'Not Specified' }}</td>
-      </tr>
-    </tbody>
-  </table>
+    <div class="form-row mt-3">
+      <div class="form-group col-sm-6 col-xl-4">
+        <input type="text" class="form-control" placeholder="Search Carrier..." [(ngModel)]="searchTerm" />
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="skeleton-loader skeleton-loader-table"></div>
+    <table *ngIf="showTable" class="table mb-0">
+      <thead>
+        <tr>
+          <th>Carrier</th>
+          <th>Carrier Concept ID</th>
+          <th>CIS</th>
+          <th>Tier</th>
+          <th>CIS Apport</th>
+          <th>CIS Online</th>
+          <th>CIS Transmart</th>
+          <th>CPM</th>
+          <th>TAL</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let carrierData of filteredData()">
+          <td>{{ carrierData.carrier || 'Not Specified' }}</td>
+          <td>{{ carrierData.carrierConceptID || 'Not Specified' }}</td>
+          <td>{{ carrierData.cis || 'Not Specified' }}</td>
+          <td>{{ carrierData.tier || 'Not Specified' }}</td>
+          <td>{{ carrierData.cisapport || 'Not Specified' }}</td>
+          <td>{{ carrierData.cisonline || 'Not Specified' }}</td>
+          <td>{{ carrierData.cistransmart || 'Not Specified' }}</td>
+          <td>{{ carrierData.cpm || 'Not Specified' }}</td>
+          <td>{{ carrierData.tal || 'Not Specified' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>

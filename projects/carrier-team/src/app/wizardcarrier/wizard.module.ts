@@ -17,8 +17,7 @@ import { PythonAnalyze } from './components/admin-step/sub-steps/pythonanalyze/p
 import { SprintreviewComponent } from './components/admin-step/sub-steps/sprintreview/sprintreview.component';
 import { CarrierTeamStepComponent } from './components/carrierteam-step/carrierteam-step.component';
 import { CarrierTeamComponent } from './components/carrierteam-step/carrierteam/carrierteam.component';
-import { IpsumComponent } from './components/carrierteam-step/sub-steps/ipsum/ipsum.component';
-import { LoremComponent } from './components/carrierteam-step/sub-steps/lorem/lorem.component';
+
 import { LoginComponent } from './components/login-step/login.component';
 import { WizardTutorialRoutingModule } from './wizard-routing.module';
 import { WizardTutorialComponent } from './wizard.component';
@@ -50,8 +49,6 @@ const TRANSLATIONS_PROVIDER: ClassProvider = {
     AdminStepComponent,
     CarrierTeamStepComponent,
     IndexComponent,
-    LoremComponent,
-    IpsumComponent,
   ],
   imports: [
     CommonModule,
