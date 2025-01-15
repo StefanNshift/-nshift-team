@@ -1,0 +1,259 @@
+/* Container for tickets */
+.ticket-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+/* Individual ticket card */
+.ticket-card {
+  background: #dedede1c;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.ticket-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Header styling */
+.ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.id-label {
+  font-weight: bold;
+  color: #555;
+}
+
+.id-value {
+  font-size: 16px;
+  color: #000;
+}
+
+.ticket-priority {
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtil skugga */
+}
+.ticket-priority.urgent {
+  background: #d90429;
+  color: white;
+}
+
+.ticket-priority.high {
+  background: #e91e63;
+  color: white;
+}
+
+.ticket-priority.normal {
+  background: #2b9a3d;
+  color: white;
+}
+
+.ticket-priority.low {
+  background: #286bca;
+  color: white;
+}
+
+/* Body styling */
+.ticket-body {
+  margin-bottom: 10px;
+}
+
+.ticket-subject {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.ticket-details p {
+  font-size: 14px;
+  color: #555;
+  margin: 5px 0;
+}
+
+/* Footer styling */
+.ticket-footer {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 10px;
+}
+
+.jira-item {
+  font-size: 14px;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 6px;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #444;
+}
+
+.loading-container {
+  text-align: center;
+  padding: 50px 0;
+  font-size: 18px;
+  color: #777;
+}
+
+.jira-list {
+  list-style-type: none; /* Ta bort punkter */
+  margin: 0;
+  padding: 0;
+}
+.jira-item {
+  background-color: #f8f9fa; /* Ljus bakgrundsfärg */
+  border: 1px solid #dee2e6; /* Tunn kant */
+  border-radius: 8px; /* Rundade hörn */
+  padding: 15px;
+  margin-bottom: 15px; /* Avstånd mellan korten */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtil skugga */
+}
+
+.jira-header {
+  display: flex;
+  justify-content: space-between; /* Jämn fördelning mellan länk och status */
+  align-items: center; /* Vertikal centrering */
+  margin-bottom: 10px; /* Avstånd mellan header och detaljer */
+}
+
+.jira-link {
+  color: #0056b3; /* Blå länkfärg */
+  font-weight: bold; /* Fet stil */
+  text-decoration: none; /* Ingen understrykning */
+}
+
+.jira-link:hover {
+  text-decoration: underline; /* Understrykning vid hovring */
+}
+
+.jira-status {
+  color: #6c757d; /* Grå färg för status */
+  font-size: 0.9rem; /* Mindre textstorlek */
+}
+
+.jira-details p {
+  margin: 5px 0; /* Avstånd mellan rader */
+  color: #495057; /* Mörkgrå textfärg */
+  font-size: 0.95rem; /* Normal textstorlek */
+}
+
+.jira-details p strong {
+  color: #212529; /* Svart text för starka etiketter */
+}
+
+.ticket-priority-container {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Mellanrum mellan badges */
+}
+
+.badge-to-be-answered {
+  background-color: #ff6e39; /* Stark orange varningsfärg */
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtil skugga */
+}
+
+.ticket-priority.badge {
+  font-size: 0.85rem;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+
+.ticket-summary-container {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.ticket-summary-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+  transition: transform 0.2s ease-in-out;
+  min-width: 100px;
+}
+
+.summary-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+}
+
+.summary-value {
+  display: block;
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.jira-status {
+  font-size: 0.9rem;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.status-resolved {
+  color: #62a187;
+  border: 1px solid #dee2e6;
+  background: #dcfff1;
+}
+
+.status-open {
+  border: 1px solid #dee2e6;
+  color: #4c5b76;
+  background-color: #f1f2f4; /* Grå bakgrund för closed */
+}
+
+.status-closed {
+  color: #62a187;
+  background: #dcfff1;
+  border: 1px solid #dee2e6;
+}
+
+.status-draft {
+  border: 1px solid #dee2e6;
+  color: #4c5b76;
+  background-color: #f1f2f4; /* Grå bakgrund för closed */
+}
+
+.status-testing {
+  color: #ffffff;
+  background-color: #0a11e0; /* Cyan bakgrund för testing */
+}
+
+.status-verified {
+  color: #62a187;
+  border: 1px solid #dee2e6;
+  background: #dcfff1;
+}

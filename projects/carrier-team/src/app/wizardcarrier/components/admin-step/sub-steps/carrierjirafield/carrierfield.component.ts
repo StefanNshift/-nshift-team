@@ -2,8 +2,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { COUNTRIES } from '../../../../../shared/countries';
 import { WizardbackendService } from '../../../backend/wizardbackend.service';
-import { COUNTRIES } from './countries';
 
 @Component({
   selector: 'app-carrierfield',
@@ -55,12 +55,62 @@ export class CarrierFieldModuleComponent implements OnInit {
     this.toastVisible = false;
   }
 
+  editCarrier(carrier: any) {
+    carrier.isEditing = true;
+    carrier.editedValue = carrier.carrier;
+    carrier.editedConceptID = carrier.conceptID;
+  }
+
+  saveCarrierEdit(carrier: any) {
+    if (!carrier.editedValue || carrier.editedValue.trim() === '' || !carrier.editedConceptID) {
+      this.showToast('Please provide valid values to save.', 'warning');
+      return;
+    }
+
+    if (carrier.carrier === carrier.editedValue && carrier.conceptID === carrier.editedConceptID) {
+      this.showToast('No changes were made to the carrier.', 'warning');
+      return;
+    } else {
+      this.wizardBackendService
+        .updateJiraCustomFieldOption({
+          value: carrier.value,
+          newValue: `${carrier.editedConceptID} ${carrier.editedValue.trim()}`,
+        })
+        .subscribe(
+          (response: any) => {
+            this.fetchCustomFieldOptions();
+            this.showToast('Carrier List Updated Successfully!', 'success');
+          },
+          (error: any) => {
+            this.showToast('Failed to update carrier.', 'error');
+            console.error('Update error:', error);
+          },
+        );
+    }
+    carrier.isEditing = false;
+  }
+
+  cancelEdit(carrier: any) {
+    carrier.isEditing = false;
+    carrier.editedValue = null;
+    carrier.editedConceptID = null;
+  }
+
   fetchCustomFieldOptions() {
     this.isLoading = true;
-
-    this.wizardBackendService.getCustomFieldOptions().subscribe(
+    this.wizardBackendService.GetJiraCustomFieldOptions().subscribe(
       response => {
-        this.customFieldOptions = response.values.sort((a, b) => b.id - a.id);
+        this.customFieldOptions = response.values.map(option => {
+          const [conceptID, ...carrierParts] = option.value.split(' ');
+          const carrier = carrierParts.join(' ');
+
+          return {
+            ...option,
+            conceptID: parseInt(conceptID, 10),
+            carrier,
+          };
+        });
+        this.customFieldOptions.sort((a, b) => b.conceptID - a.conceptID);
         this.isLoading = false;
       },
       error => {
@@ -70,11 +120,8 @@ export class CarrierFieldModuleComponent implements OnInit {
     );
   }
 
-  // Getter for filtered data only
   get filteredData() {
     let filteredData = this.customFieldOptions;
-
-    // Apply search term filter
     if (this.searchTerm) {
       const lowerCaseSearchTerm = this.searchTerm.toLowerCase();
       filteredData = filteredData.filter(option => option.value.toLowerCase().includes(lowerCaseSearchTerm));
@@ -90,13 +137,12 @@ export class CarrierFieldModuleComponent implements OnInit {
     }
 
     const { id, name, country } = this.newCarrierForm.value;
-    const formattedValue = `${id} ${name} (${country})`; // Format as "ID NAME (COUNTRYCODE)"
+    const formattedValue = `${id} ${name} (${country})`;
 
-    this.wizardBackendService.addCustomFieldOption(formattedValue).subscribe(
+    this.wizardBackendService.addJiraCustomFieldOption(formattedValue).subscribe(
       (response: any) => {
+        this.fetchCustomFieldOptions();
         this.showToast('New carrier option added successfully!', 'success');
-        console.log(response);
-        this.fetchCustomFieldOptions(); // Uppdatera listan med nya alternativ
       },
       (error: any) => {
         this.showToast('Failed to add new carrier option.', 'error');

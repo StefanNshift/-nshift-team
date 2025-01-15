@@ -1,19 +1,19 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CarrierTicketComponent } from './carriertickets.component';
+import { ZendeskFieldModuleComponent } from './zendeskfield.component';
 
-describe('CarrierTicketComponent', () => {
-  let component: CarrierTicketComponent;
-  let fixture: ComponentFixture<CarrierTicketComponent>;
+describe('ZendeskFieldModuleComponent', () => {
+  let component: ZendeskFieldModuleComponent;
+  let fixture: ComponentFixture<ZendeskFieldModuleComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CarrierTicketComponent],
+      declarations: [ZendeskFieldModuleComponent],
     }).compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CarrierTicketComponent);
+    fixture = TestBed.createComponent(ZendeskFieldModuleComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

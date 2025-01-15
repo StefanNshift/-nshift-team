@@ -1,0 +1,148 @@
+<div *ngIf="isLoading" class="loading-container">
+  <p>Loading tickets...</p>
+</div>
+
+<div class="row">
+  <div class="col-md-12 mb-3">
+    <div *ngIf="!isLoading && assignedTickets.length > 0">
+      <p class="lead">Assigned Tickets</p>
+      <div class="ticket-summary-container">
+        <div class="ticket-summary-card">
+          <span class="summary-title">Tier 1</span>
+          <span class="summary-value">{{ tier1Tickets }}</span>
+        </div>
+        <div class="ticket-summary-card">
+          <span class="summary-title">Tier 2</span>
+          <span class="summary-value">{{ tier2Tickets }}</span>
+        </div>
+        <div class="ticket-summary-card">
+          <span class="summary-title">Tier 3</span>
+          <span class="summary-value">{{ tier3Tickets }}</span>
+        </div>
+        <div class="ticket-summary-card">
+          <span class="summary-title">Total Tickets</span>
+          <span class="summary-value">{{ zendeskTicketCount }}</span>
+        </div>
+        <div class="ticket-summary-card">
+          <span class="summary-title">Tickets to be Answered</span>
+          <span class="summary-value">{{ ticketsToBeAnsweredCount }}</span>
+        </div>
+      </div>
+
+      <div class="form-row mt-3">
+        <div class="form-group col-sm-6 col-xl-3">
+          <select id="sort-select" (change)="onSortChange($event)" class="form-control">
+            <option value="">-- Select sorting --</option>
+            <option value="priority:asc">Priority (ascending)</option>
+            <option value="priority:desc">Priority (descending)</option>
+            <option value="tier:asc">Tier (ascending)</option>
+            <option value="tier:desc">Tier (descending)</option>
+            <option value="updated_at:asc">Updated At (ascending)</option>
+            <option value="updated_at:desc">Updated At (descending)</option>
+            <option value="eta:asc">ETA (ascending)</option>
+            <option value="eta:desc">ETA (descending)</option>
+            <option value="toBeAnswered:asc">To Be Answered (ascending)</option>
+            <option value="toBeAnswered:desc">To Be Answered (descending)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="ticket-container">
+        <div *ngFor="let ticket of assignedTickets; let i = index" class="ticket-card">
+          <div class="ticket-header">
+            <div class="ticket-id">
+              <span class="id-label">Ticket ID:</span>
+              <a
+                [href]="'https://nshift.zendesk.com/agent/tickets/' + ticket.ticket_id"
+                target="_blank"
+                class="id-value"
+                style="color: #0116a3;"
+              >
+                {{ ticket.ticket_id }}
+              </a>
+            </div>
+
+            <div class="ticket-priority-container">
+              <span
+                class="ticket-priority"
+                [ngClass]="{
+                  urgent: ticket.priority === 'urgent',
+                  high: ticket.priority === 'high',
+                  normal: ticket.priority === 'normal',
+                  low: ticket.priority === 'low'
+                }"
+              >
+                {{ ticket.priority | uppercase }}
+              </span>
+              <!-- Snyggare badge för To Be Answered -->
+              <span *ngIf="isToBeAnswered(ticket.updated_at)" class="badge badge-to-be-answered">
+                Update Needed
+              </span>
+            </div>
+          </div>
+
+          <div class="ticket-body">
+            <p class="ticket-subject">{{ ticket.subject }}</p>
+            <div class="ticket-details">
+              <p><strong>Created At:</strong> {{ ticket.created_at | date: 'MMMM d, y' }}</p>
+              <p><strong>Updated At:</strong> {{ ticket.updated_at | date: 'MMMM d, y' }}</p>
+              <p><strong>Tier:</strong> {{ ticket.tier }}</p>
+              <p><strong>Carrier ID:</strong> {{ ticket.carrier_id }}</p>
+              <p><strong>ETA:</strong> {{ ticket.eta ? (ticket.eta | date: 'MMMM d, y') : 'N/A' }}</p>
+            </div>
+          </div>
+          <div class="ticket-footer">
+            <button style="margin-right:5%" class="btn btn-primary btn-sm">Update ETA</button>
+            <button class="btn btn-info btn-sm" (click)="toggleJiraVisibility(i)">
+              {{ jiraVisibility[i] ? 'Hide JIRA Tickets' : 'Show JIRA Tickets' }}
+            </button>
+            <div style="margin-top:4%" *ngIf="jiraVisibility[i]">
+              <ul class="jira-list">
+                <li *ngFor="let jira of ticket.jiraData" class="jira-item">
+                  <div class="jira-header">
+                    <a
+                      [href]="'https://nshiftgroup.atlassian.net/browse/' + jira.ticket"
+                      target="_blank"
+                      class="jira-link"
+                    >
+                      {{ jira.ticket }}
+                    </a>
+                    <span
+                      class="jira-status"
+                      [ngClass]="{
+                        'status-resolved': jira.sprints.ticketStatus === 'Resolved',
+                        'status-open': jira.sprints.ticketStatus === 'Open',
+                        'status-closed': jira.sprints.ticketStatus === 'Closed',
+                        'status-draft': jira.sprints.ticketStatus === 'Draft',
+                        'status-testing': jira.sprints.ticketStatus === 'Testing',
+                        'status-verified': jira.sprints.ticketStatus === 'Verified Fix'
+                      }"
+                    >
+                      - Status: {{ jira.sprints.ticketStatus }}
+                    </span>
+                  </div>
+                  <div *ngIf="jira.sprints.currentSprint" class="jira-details">
+                    <p><strong>Sprint:</strong> {{ jira.sprints.currentSprint.name }}</p>
+                    <p><strong>Start:</strong> {{ jira.sprints.currentSprint.startDate | date: 'MMMM d, y' }}</p>
+                    <p><strong>End:</strong> {{ jira.sprints.currentSprint.endDate | date: 'MMMM d, y' }}</p>
+                    <p>
+                      <strong>Complete:</strong>
+                      {{
+                        jira.sprints.currentSprint.completeDate
+                          ? (jira.sprints.currentSprint.completeDate | date: 'MMMM d, y')
+                          : 'Not Completed'
+                      }}
+                    </p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="!isLoading && assignedTickets.length === 0">
+  <p>No tickets assigned.</p>
+</div>

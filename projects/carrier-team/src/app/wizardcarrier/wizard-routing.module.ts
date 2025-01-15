@@ -8,9 +8,12 @@ import { AdminModuleComponent } from './components/admin-step/sub-steps/admintea
 import { CarrierFieldModuleComponent } from './components/admin-step/sub-steps/carrierjirafield/carrierfield.component';
 import { CarrierTicketComponent } from './components/admin-step/sub-steps/carriertickets/carriertickets.component';
 import { SprintreviewComponent } from './components/admin-step/sub-steps/sprintreview/sprintreview.component';
+import { ZendeskFieldModuleComponent } from './components/admin-step/sub-steps/zendeskfield/zendeskfield.component';
 import { CarrierTeamComponent } from './components/carrierteam-step/carrierteam/carrierteam.component';
 import { IndexComponent as CarrierIndexComponent } from './components/carrierteam-step/index/index.component';
 import { LoginComponent } from './components/login-step/login.component';
+import { IndexComponent as UserIndexComponent } from './components/user-step/index/index.component';
+import { UserComponent } from './components/user-step/user/user.component';
 import { WizardTutorialComponent } from './wizard.component';
 
 const routes: WizardStep[] = [
@@ -24,6 +27,21 @@ const routes: WizardStep[] = [
         component: LoginComponent,
         data: {
           heading: 'Login',
+          controls: [],
+        },
+      },
+      {
+        path: 'user',
+        component: UserComponent,
+        children: [
+          {
+            path: '',
+            component: UserIndexComponent,
+          },
+        ],
+        data: {
+          heading: 'User',
+          subSteps: [],
           controls: [],
         },
       },
@@ -47,7 +65,7 @@ const routes: WizardStep[] = [
         component: AdminStepComponent,
         data: {
           heading: 'Admin',
-          subSteps: ['team', 'tickets', 'carrierjira', 'sprint'],
+          subSteps: ['team', 'tickets', 'carrierjira', 'carrierzendesk', 'sprint'],
 
           controls: [
             {
@@ -86,7 +104,15 @@ const routes: WizardStep[] = [
             path: 'carrierjira',
             component: CarrierFieldModuleComponent,
             data: {
-              heading: 'Carrier list in JIRA',
+              heading: 'Carrier list in Jira',
+              pageHeading: '',
+            },
+          },
+          {
+            path: 'carrierzendesk',
+            component: ZendeskFieldModuleComponent,
+            data: {
+              heading: 'Carrier list in Zendesk',
               pageHeading: '',
             },
           },

@@ -6,8 +6,13 @@ import { SharedModule } from '../shared/shared.module';
 
 import { NgxPaginationModule } from 'ngx-pagination';
 
+// Login Step
+import { LoginComponent } from './components/login-step/login.component';
+
+// Admin Steps
 import { CarrierFieldModuleComponent } from './components/admin-step/sub-steps/carrierjirafield/carrierfield.component';
 import { CarrierTicketComponent } from './components/admin-step/sub-steps/carriertickets/carriertickets.component';
+import { ZendeskFieldModuleComponent } from './components/admin-step/sub-steps/zendeskfield/zendeskfield.component';
 
 import { AdminStepComponent } from './components/admin-step/admin-step.component';
 import { IndexComponent } from './components/admin-step/index/index.component';
@@ -17,10 +22,14 @@ import { PythonAnalyze } from './components/admin-step/sub-steps/pythonanalyze/p
 import { SprintreviewComponent } from './components/admin-step/sub-steps/sprintreview/sprintreview.component';
 import { CarrierTeamStepComponent } from './components/carrierteam-step/carrierteam-step.component';
 import { CarrierTeamComponent } from './components/carrierteam-step/carrierteam/carrierteam.component';
+import { UserComponent } from './components/user-step/user/user.component';
 
-import { LoginComponent } from './components/login-step/login.component';
 import { WizardTutorialRoutingModule } from './wizard-routing.module';
 import { WizardTutorialComponent } from './wizard.component';
+
+// AI Steps
+import { AIStepComponent } from './components/ai-step/ai-step.component';
+import { TicketComponent } from './components/ai-step/sub-steps/ticket/ticket.component';
 
 // service for custom translations implementing wizard translations
 @Injectable()
@@ -41,14 +50,19 @@ const TRANSLATIONS_PROVIDER: ClassProvider = {
     CarrierTeamComponent,
     AdminModuleComponent,
     CarrierFieldModuleComponent,
+    ZendeskFieldModuleComponent,
     CarrierTicketComponent,
     LoginComponent,
     PythonAnalyze,
+    UserComponent,
     SprintreviewComponent,
     AdminstepComponent,
     AdminStepComponent,
     CarrierTeamStepComponent,
     IndexComponent,
+    TicketComponent,
+    // AI Step
+    AIStepComponent,
   ],
   imports: [
     CommonModule,

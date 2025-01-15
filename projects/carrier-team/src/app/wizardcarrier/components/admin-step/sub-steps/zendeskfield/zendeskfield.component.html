@@ -1,11 +1,12 @@
 <div class="row">
   <div class="col-md-9 mb-3">
-    <p class="lead">Add a new carrier field in Jira</p>
-    <form [formGroup]="newCarrierForm" (ngSubmit)="addNewCarrierOption()">
+    <p class="lead">Add a new carrier field in Zendesk</p>
+
+    <form [formGroup]="newZendeskFieldForm" (ngSubmit)="addNewZendeskTicketFieldOption()">
       <div class="form-row mt-3">
         <div class="form-group col-sm-6 col-xl-3">
           <div>
-            <label class="col-form" for="name">Carrier Name</label>
+            <label class="col-form" for="name"> Carrier Name</label>
             <input class="form-control" type="text" id="name" formControlName="name" />
           </div>
 
@@ -23,21 +24,24 @@
             </select>
           </div>
 
-          <button type="submit" style="margin-top: 4%;" class="btn btn-primary" [disabled]="newCarrierForm.invalid">
+          <button
+            type="submit"
+            style="margin-top: 4%;"
+            class="btn btn-primary"
+            [disabled]="newZendeskFieldForm.invalid"
+          >
             Create Carrier Field
           </button>
         </div>
       </div>
     </form>
 
-    <h4 style="margin-top: 2%">Jira Carriers</h4>
+    <h4 style="margin-top: 2%">Zendesk Carriers</h4>
     <div class="overflow-auto mb-3">
       <div class="mb-3">
         <input type="text" class="form-control col-md-3" placeholder="Search Carrier..." [(ngModel)]="searchTerm" />
       </div>
-
       <div *ngIf="isLoading" class="skeleton-loader skeleton-loader-table"></div>
-
       <table *ngIf="!isLoading" class="table table-responsive-sm col-md-8">
         <thead>
           <tr>
@@ -48,7 +52,6 @@
         </thead>
         <tbody>
           <tr *ngFor="let option of filteredData | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage }">
-            <!-- Concept ID -->
             <td>
               <div *ngIf="!option.isEditing">{{ option.conceptID }}</div>
               <div *ngIf="option.isEditing">
@@ -60,30 +63,38 @@
                 />
               </div>
             </td>
-
-            <!-- Carrier -->
             <td>
-              <div *ngIf="!option.isEditing">{{ option.carrier }}</div>
+              <div *ngIf="!option.isEditing">{{ option.carrierName }}</div>
               <div *ngIf="option.isEditing">
                 <input
                   type="text"
                   class="form-control"
-                  [(ngModel)]="option.editedValue"
-                  placeholder="Enter new Carrier value"
+                  [(ngModel)]="option.editedName"
+                  placeholder="Enter new Carrier Name"
                 />
               </div>
             </td>
-
-            <!-- Action buttons -->
             <td>
-              <button *ngIf="!option.isEditing" class="btn btn-sm btn-primary" (click)="editCarrier(option)">
+              <button
+                style="margin-right: 10%;"
+                *ngIf="!option.isEditing"
+                class="btn btn-sm btn-primary"
+                (click)="editZendeskField(option)"
+              >
                 Edit
               </button>
+              <button *ngIf="!option.isEditing" class="btn btn-sm btn-danger" (click)="deleteZendeskField(option)">
+                Delete
+              </button>
               <div *ngIf="option.isEditing" class="d-flex gap-2">
-                <button style="margin-right: 10%;" class="btn btn-sm btn-primary" (click)="saveCarrierEdit(option)">
+                <button
+                  style="margin-right: 10%;"
+                  class="btn btn-sm btn-primary"
+                  (click)="saveFieldEditZendesk(option)"
+                >
                   Save
                 </button>
-                <button class="btn btn-sm btn-secondary btn-outline-primary" (click)="cancelEdit(option)">
+                <button class="btn btn-sm btn-secondary btn-outline-primary" (click)="cancelZendeskEdit(option)">
                   Cancel
                 </button>
               </div>
@@ -97,6 +108,7 @@
     </div>
   </div>
 </div>
+
 <div
   class="toast"
   *ngIf="toastVisible"

@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
@@ -42,6 +42,12 @@ export class WizardbackendService {
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
+  getAllUserTickets(email: string): Observable<any> {
+    const url = `${this.WIZARD_BACKEND_URL}/GetUserTickets`;
+    const params = new HttpParams().set('email', email); // Lägg till e-post som query-param
+    return this.http.get(url, { headers: this.getHeaders(), params });
+  }
+
   getPROBIssues(): Observable<any> {
     const url = `${this.WIZARD_BACKEND_URL}/GetPROBIssues`;
     return this.http.get(url, { headers: this.getHeaders() });
@@ -61,16 +67,34 @@ export class WizardbackendService {
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
-  getCustomFieldOptions(): Observable<any> {
-    const url = `${this.WIZARD_BACKEND_URL}/GetCustomFieldOptions`;
+  GetJiraCustomFieldOptions(): Observable<any> {
+    const url = `${this.WIZARD_BACKEND_URL}/GetJiraCustomFieldOptions`;
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
-  addCustomFieldOption(optionValue: string): Observable<any> {
-    const url = `${this.WIZARD_BACKEND_URL}/addCustomFieldOption`;
+  addJiraCustomFieldOption(optionValue: string): Observable<any> {
+    const url = `${this.WIZARD_BACKEND_URL}/addJiraCustomFieldOption`;
     const headers = this.getHeaders();
     const body = { optionValue };
     return this.http.post(url, body, { headers });
+  }
+
+  updateJiraCustomFieldOption(data: { value: string; newValue: string }): Observable<any> {
+    const url = `${this.WIZARD_BACKEND_URL}/updateJiraCustomFieldOption`;
+    const headers = this.getHeaders();
+    return this.http.put(url, data, { headers });
+  }
+
+  GetZendeskTicketFieldOption(): Observable<any> {
+    const url = `${this.WIZARD_BACKEND_URL}/GetZendeskTicketFieldOption`;
+    const headers = this.getHeaders();
+    return this.http.get(url, { headers });
+  }
+
+  updateZendeskTicketFieldOption(ticketField: any): Observable<any> {
+    const url = `${this.WIZARD_BACKEND_URL}/UpdateZendeskTicketFieldOption`;
+    const headers = this.getHeaders();
+    return this.http.put(url, { ticket_field: ticketField }, { headers });
   }
 
   analyzeSprintData(sprintData: any): Observable<any> {
