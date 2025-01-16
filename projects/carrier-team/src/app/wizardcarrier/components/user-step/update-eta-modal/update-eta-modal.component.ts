@@ -6,7 +6,7 @@ import { Component, EventEmitter, Output } from '@angular/core';
   styleUrls: ['./update-eta-modal.component.scss'],
 })
 export class UpdateEtaModalComponent {
-  newEta: string = '';
+  newEta = '';
 
   @Output() etaUpdated = new EventEmitter<string>();
 

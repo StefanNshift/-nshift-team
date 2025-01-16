@@ -26,20 +26,20 @@ export class UserComponent implements OnInit {
   unassignedTickets: any[] = [];
   jiraVisibility: boolean[] = []; // Håller reda på synligheten för JIRA-sektionerna
   ticketsToBeAnsweredCount = 0; // Variabel för att lagra antal ärenden
-  allExpanded: boolean = false;
+  allExpanded = false;
   user: any;
 
-  ///Modal
+  /// Modal
 
   selectedTicket: any = null;
 
   selectedTemplate: string | null = null;
-  newETA: string = '';
-  customMessage: string = '';
-  includeRequesterName: boolean = false; // Toggle for including requester name
-  ShouldBeInternal: boolean = false; // Toggle for including requester name
+  newETA = '';
+  customMessage = '';
+  includeRequesterName = false; // Toggle for including requester name
+  ShouldBeInternal = false; // Toggle for including requester name
 
-  requesterName: string = ''; // Latest public message sender
+  requesterName = ''; // Latest public message sender
   messageTemplates: { label: string; value: string }[] = [
     {
       label: 'Delayed Message',
@@ -331,7 +331,7 @@ export class UserComponent implements OnInit {
     this.sortTickets();
   }
 
-  ///Modal
+  /// Modal
 
   openModal(ticket: any) {
     this.selectedTicket = ticket;
@@ -416,7 +416,7 @@ export class UserComponent implements OnInit {
       this.showToast('Please provide an ETA before sending the update.', 'error');
       return;
     }
-    var sendPublic;
+    let sendPublic;
     if (this.ShouldBeInternal == true) {
       sendPublic = false;
     } else {
