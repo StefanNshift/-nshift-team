@@ -40,7 +40,7 @@ const routes: WizardStep[] = [
           },
         ],
         data: {
-          heading: 'User',
+          heading: 'User Dashboard',
           subSteps: [],
           controls: [],
         },

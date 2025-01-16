@@ -30,6 +30,7 @@ import { WizardTutorialComponent } from './wizard.component';
 // AI Steps
 import { AIStepComponent } from './components/ai-step/ai-step.component';
 import { TicketComponent } from './components/ai-step/sub-steps/ticket/ticket.component';
+import { UpdateEtaModalComponent } from './components/user-step/update-eta-modal/update-eta-modal.component';
 
 // service for custom translations implementing wizard translations
 @Injectable()
@@ -63,6 +64,7 @@ const TRANSLATIONS_PROVIDER: ClassProvider = {
     TicketComponent,
     // AI Step
     AIStepComponent,
+    UpdateEtaModalComponent,
   ],
   imports: [
     CommonModule,

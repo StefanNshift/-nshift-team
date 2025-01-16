@@ -26,6 +26,62 @@ export class UserComponent implements OnInit {
   unassignedTickets: any[] = [];
   jiraVisibility: boolean[] = []; // Håller reda på synligheten för JIRA-sektionerna
   ticketsToBeAnsweredCount = 0; // Variabel för att lagra antal ärenden
+  allExpanded: boolean = false;
+  user: any;
+
+  ///Modal
+
+  selectedTicket: any = null;
+
+  selectedTemplate: string | null = null;
+  newETA: string = '';
+  customMessage: string = '';
+  includeRequesterName: boolean = false; // Toggle for including requester name
+  ShouldBeInternal: boolean = false; // Toggle for including requester name
+
+  requesterName: string = ''; // Latest public message sender
+  messageTemplates: { label: string; value: string }[] = [
+    {
+      label: 'Delayed Message',
+      value:
+        'Hi{{sender}}, we would like to inform you that the estimated resolution time for your case has been updated to {{newETA}}. Thank you for your understanding and patience.',
+    },
+    {
+      label: 'Working on Issue',
+      value:
+        'Hi{{sender}}, our team is actively working on resolving your issue, and the new estimated resolution time is {{newETA}}. We appreciate your patience and understanding.',
+    },
+    {
+      label: 'Updated Resolution Date',
+      value:
+        'Hi{{sender}}, thank you for your continued trust in us. Please note that the updated resolution date for your ticket is {{newETA}}.',
+    },
+    {
+      label: 'Urgent Attention Required',
+      value:
+        'Hi{{sender}}, this issue requires urgent attention. The updated resolution date is {{newETA}}. Please let us know if you need further assistance.',
+    },
+    {
+      label: 'Further Updates',
+      value:
+        'Hi{{sender}}, we are continuing to investigate your issue and will provide updates as they become available. The estimated resolution date is {{newETA}}.',
+    },
+    {
+      label: 'Follow-Up Required',
+      value:
+        'Hi{{sender}}, we would like to follow up regarding your case. The updated resolution date is {{newETA}}. Please let us know if you have any further questions.',
+    },
+    {
+      label: 'Case Resolution Timeline',
+      value:
+        'Hi{{sender}}, we are diligently working to resolve your case. The current estimated timeline for resolution is {{newETA}}. Thank you for your understanding and patience.',
+    },
+    {
+      label: 'Thank You for Your Patience',
+      value:
+        'Hi{{sender}}, thank you for your patience while we resolve your issue. The updated resolution date is {{newETA}}. Please feel free to reach out if you need further information.',
+    },
+  ];
 
   tier1Tickets = 0;
   tier2Tickets = 0;
@@ -69,10 +125,9 @@ export class UserComponent implements OnInit {
     const storedAdmin = localStorage.getItem('isAdmin');
 
     if (storedUser) {
-      let user = JSON.parse(storedUser);
-      console.log(user);
+      this.user = JSON.parse(storedUser);
 
-      this.fetchAllTickets(user.email);
+      this.fetchAllTickets(this.user.email);
     }
   }
 
@@ -123,6 +178,11 @@ export class UserComponent implements OnInit {
     });
   }
 
+  toggleAllJiraSections(): void {
+    this.allExpanded = !this.allExpanded;
+    this.jiraVisibility = this.assignedTickets.map(() => this.allExpanded);
+  }
+
   isToBeAnswered(updatedAt: string): boolean {
     const today = new Date().getTime();
     const updatedDate = new Date(updatedAt).getTime();
@@ -169,9 +229,15 @@ export class UserComponent implements OnInit {
         const indexA = priorityOrder.indexOf(valueA);
         const indexB = priorityOrder.indexOf(valueB);
 
-        if (indexA === -1 && indexB === -1) { return 0; }
-        if (indexA === -1) { return 1; }
-        if (indexB === -1) { return -1; }
+        if (indexA === -1 && indexB === -1) {
+          return 0;
+        }
+        if (indexA === -1) {
+          return 1;
+        }
+        if (indexB === -1) {
+          return -1;
+        }
 
         return this.sortDirection === 'asc' ? indexA - indexB : indexB - indexA;
       }
@@ -181,9 +247,15 @@ export class UserComponent implements OnInit {
         const indexA = tierOrder.indexOf(valueA);
         const indexB = tierOrder.indexOf(valueB);
 
-        if (indexA === -1 && indexB === -1) { return 0; }
-        if (indexA === -1) { return 1; }
-        if (indexB === -1) { return -1; }
+        if (indexA === -1 && indexB === -1) {
+          return 0;
+        }
+        if (indexA === -1) {
+          return 1;
+        }
+        if (indexB === -1) {
+          return -1;
+        }
 
         return this.sortDirection === 'asc' ? indexA - indexB : indexB - indexA;
       }
@@ -200,8 +272,12 @@ export class UserComponent implements OnInit {
         const isOlderA = daysDiffA > 5;
         const isOlderB = daysDiffB > 5;
 
-        if (isOlderA && !isOlderB) { return this.sortDirection === 'asc' ? -1 : 1; }
-        if (!isOlderA && isOlderB) { return this.sortDirection === 'asc' ? 1 : -1; }
+        if (isOlderA && !isOlderB) {
+          return this.sortDirection === 'asc' ? -1 : 1;
+        }
+        if (!isOlderA && isOlderB) {
+          return this.sortDirection === 'asc' ? 1 : -1;
+        }
 
         return 0;
       }
@@ -211,18 +287,30 @@ export class UserComponent implements OnInit {
         valueA = valueA ? new Date(valueA).getTime() : null;
         valueB = valueB ? new Date(valueB).getTime() : null;
 
-        if (valueA === null || valueA === undefined) { return 1; }
-        if (valueB === null || valueB === undefined) { return -1; }
+        if (valueA === null || valueA === undefined) {
+          return 1;
+        }
+        if (valueB === null || valueB === undefined) {
+          return -1;
+        }
 
         return this.sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
       }
 
       // Sortera övriga värden
-      if (valueA === null || valueA === undefined) { return 1; }
-      if (valueB === null || valueB === undefined) { return -1; }
+      if (valueA === null || valueA === undefined) {
+        return 1;
+      }
+      if (valueB === null || valueB === undefined) {
+        return -1;
+      }
 
-      if (valueA > valueB) { return this.sortDirection === 'asc' ? 1 : -1; }
-      if (valueA < valueB) { return this.sortDirection === 'asc' ? -1 : 1; }
+      if (valueA > valueB) {
+        return this.sortDirection === 'asc' ? 1 : -1;
+      }
+      if (valueA < valueB) {
+        return this.sortDirection === 'asc' ? -1 : 1;
+      }
 
       return 0;
     });
@@ -241,5 +329,153 @@ export class UserComponent implements OnInit {
     this.sortDirection = direction;
 
     this.sortTickets();
+  }
+
+  ///Modal
+
+  openModal(ticket: any) {
+    this.selectedTicket = ticket;
+    this.newETA = ticket?.eta ? new Date(ticket.eta).toISOString().split('T')[0] : '';
+    this.customMessage = '';
+    this.requesterName = '';
+
+    this.wizardBackendService.GetZendeskTicketRequesterName(ticket.ticket_id).subscribe(
+      response => {
+        this.requesterName = response.requesterName || 'Customer';
+        console.log('Requester Name:', this.requesterName);
+        this.updateEmailText(); // Uppdatera med rätt mall
+      },
+      error => {
+        console.error('Error fetching ticket data:', error);
+        this.requesterName = 'Customer';
+      },
+    );
+
+    const modal = document.getElementById('customModal');
+    if (modal) {
+      modal.classList.add('show');
+      modal.style.display = 'block';
+      document.body.classList.add('modal-open');
+    }
+  }
+
+  closeModal() {
+    const modal = document.getElementById('customModal');
+    if (modal) {
+      modal.classList.remove('show');
+      modal.style.display = 'none';
+      document.body.classList.remove('modal-open');
+    }
+
+    // Återställ `selectedTemplate` och `customMessage`
+    this.selectedTemplate = null;
+    this.customMessage = '';
+    this.newETA = ''; // Återställ ETA också om du vill
+  }
+
+  updateEmailText() {
+    if (this.selectedTemplate && this.newETA) {
+      let message = this.selectedTemplate.replace(/{{newETA}}/g, this.newETA);
+      if (this.includeRequesterName && this.requesterName) {
+        message = message.replace(/{{sender}}/g, ` ${this.requesterName}`);
+      } else {
+        message = message.replace(/{{sender}}/g, '');
+      }
+
+      this.customMessage = message.trim(); // Trimma för att undvika extra blanksteg
+      console.log('Updated customMessage:', this.customMessage);
+    }
+  }
+
+  onETAChange(event: Event) {
+    const inputValue = (event.target as HTMLInputElement).value;
+    if (inputValue) {
+      this.newETA = inputValue;
+      console.log('New ETA:', this.newETA);
+      this.updateEmailText(); // Uppdatera med det nya datumet
+    }
+  }
+
+  onTemplateSelect(event: Event) {
+    if (!this.newETA) {
+      this.showToast('Please provide an ETA before selecting a message.', 'error');
+      return;
+    }
+
+    const selectedValue = (event.target as HTMLSelectElement).value;
+    console.log('Selected template:', selectedValue);
+
+    if (selectedValue) {
+      this.selectedTemplate = selectedValue;
+      this.updateEmailText(); // Uppdatera meddelandet med den valda mallen
+    }
+  }
+
+  sendETAUpdate() {
+    if (!this.newETA) {
+      this.showToast('Please provide an ETA before sending the update.', 'error');
+      return;
+    }
+    var sendPublic;
+    if (this.ShouldBeInternal == true) {
+      sendPublic = false;
+    } else {
+      sendPublic = true;
+    }
+    if (this.newETA && this.customMessage) {
+      const updatePayload = {
+        ticketId: this.selectedTicket.ticket_id,
+        email: this.user.email,
+        message: this.customMessage,
+        public: sendPublic,
+      };
+
+      this.closeModal();
+
+      // Call the ReplyZendeskTicket method
+      this.wizardBackendService
+        .ReplyZendeskTicket(updatePayload.ticketId, updatePayload.email, updatePayload.message, updatePayload.public)
+        .subscribe(
+          response => {
+            console.log('Update successful:', response);
+            this.showToast('ETA updated successfully for ' + this.selectedTicket.ticket_id, 'success');
+            this.fetchAllTickets(this.user.email);
+          },
+          error => {
+            console.error('Error updating ETA:', error);
+            this.showToast('Failed to update ETA.', 'error');
+          },
+        );
+    } else {
+      this.showToast('Please provide an ETA and message.', 'error');
+    }
+  }
+
+  updateETA() {
+    if (this.newETA && this.selectedTicket) {
+      this.selectedTicket.eta = this.newETA;
+
+      this.updateTicketETA(this.selectedTicket.ticket_id, this.newETA).subscribe(
+        () => {
+          console.log('ETA updated successfully!');
+          this.showToast('ETA updated successfully!', 'success');
+          this.closeModal();
+        },
+        error => {
+          console.error('Error updating ETA:', error);
+          this.showToast('Fawiled to update ETA!', 'error');
+        },
+      );
+    }
+  }
+
+  updateTicketETA(ticketId: string, eta: string) {
+    const url = `https://your-backend-api/tickets/${ticketId}/update-eta`;
+    return this.http.post(url, { eta });
+  }
+
+  confirmAction() {
+    console.log('Confirm button clicked!');
+    this.closeModal();
   }
 }

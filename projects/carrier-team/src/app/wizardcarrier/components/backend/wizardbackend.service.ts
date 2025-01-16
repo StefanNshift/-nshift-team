@@ -91,6 +91,31 @@ export class WizardbackendService {
     return this.http.get(url, { headers });
   }
 
+  getZendeskTicket(ticketId: string): Observable<any> {
+    const url = `${this.WIZARD_BACKEND_URL}/GetZendeskTicket`;
+    const headers = this.getHeaders();
+    const params = new HttpParams().set('ticketID', ticketId);
+    return this.http.get(url, { headers, params });
+  }
+
+  GetZendeskTicketRequesterName(ticketId: string): Observable<any> {
+    const url = `${this.WIZARD_BACKEND_URL}/GetZendeskRequesterName`;
+    const headers = this.getHeaders();
+    const params = new HttpParams().set('ticketID', ticketId);
+    return this.http.get(url, { headers, params });
+  }
+
+  ReplyZendeskTicket(ticketId: number, email: string, message: string, isPublic: boolean): Observable<any> {
+    const url = `${this.WIZARD_BACKEND_URL}/ReplyZendeskTicket`;
+    const body = {
+      ticketId: ticketId,
+      email: email,
+      message: message,
+      public: isPublic,
+    };
+    return this.http.post(url, body, { headers: this.getHeaders() });
+  }
+
   updateZendeskTicketFieldOption(ticketField: any): Observable<any> {
     const url = `${this.WIZARD_BACKEND_URL}/UpdateZendeskTicketFieldOption`;
     const headers = this.getHeaders();
