@@ -13,7 +13,7 @@ import { CarrierTeamComponent } from './components/carrierteam-step/carrierteam/
 import { IndexComponent as CarrierIndexComponent } from './components/carrierteam-step/index/index.component';
 import { LoginComponent } from './components/login-step/login.component';
 import { IndexComponent as UserIndexComponent } from './components/user-step/index/index.component';
-import { UserComponent } from './components/user-step/user/user.component';
+import { UserComponent } from './components/user-step/userticket/userticket.component';
 import { WizardTutorialComponent } from './wizard.component';
 
 const routes: WizardStep[] = [
@@ -40,7 +40,7 @@ const routes: WizardStep[] = [
           },
         ],
         data: {
-          heading: 'User Dashboard',
+          heading: 'My Dashboard',
           subSteps: [],
           controls: [],
         },

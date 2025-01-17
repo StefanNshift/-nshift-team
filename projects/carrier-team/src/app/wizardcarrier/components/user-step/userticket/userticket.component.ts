@@ -7,8 +7,8 @@ import { WizardbackendService } from '../../backend/wizardbackend.service';
 
 @Component({
   selector: 'app-introduction',
-  templateUrl: './user.component.html',
-  styleUrls: ['./user.component.scss'],
+  templateUrl: './userticket.component.html',
+  styleUrls: ['./userticket.component.scss'],
 })
 export class UserComponent implements OnInit {
   tickets: any[] = []; // Array to hold ticket data
@@ -28,17 +28,16 @@ export class UserComponent implements OnInit {
   ticketsToBeAnsweredCount = 0; // Variabel för att lagra antal ärenden
   allExpanded = false;
   user: any;
+  ticketCountsByPriority: { [key: string]: number } = {};
 
   /// Modal
 
   selectedTicket: any = null;
-
   selectedTemplate: string | null = null;
   newETA = '';
   customMessage = '';
   includeRequesterName = false; // Toggle for including requester name
   ShouldBeInternal = false; // Toggle for including requester name
-
   requesterName = ''; // Latest public message sender
   messageTemplates: { label: string; value: string }[] = [
     {
@@ -120,7 +119,6 @@ export class UserComponent implements OnInit {
   }
 
   ngOnInit() {
-    // Check if user data is stored in localStorage
     const storedUser = localStorage.getItem('user');
     const storedAdmin = localStorage.getItem('isAdmin');
 
@@ -135,27 +133,62 @@ export class UserComponent implements OnInit {
     this.wizardBackendService.getAllUserTickets(user).subscribe(
       (response: any) => {
         console.log('Fetched user ticket data:', response);
-
-        // Assign ticket counts
         this.tier1Tickets = response.assignedTickets[0]?.tier1Tickets || 0;
         this.tier2Tickets = response.assignedTickets[0]?.tier2Tickets || 0;
         this.tier3Tickets = response.assignedTickets[0]?.tier3Tickets || 0;
         this.zendeskTicketCount = response.assignedTickets[0]?.ticket_count || 0;
-        const processedTickets = this.calculateETA(response.assignedTickets[0]?.tickets || []);
-        this.assignedTickets = processedTickets;
 
-        // Sort tickets by priority (default order)
+        // Översätt "tier" till numeriskt värde
+        const processedTickets = this.calculateETA(
+          (response.assignedTickets[0]?.tickets || []).map(ticket => {
+            return {
+              ...ticket,
+              tier: this.convertTierToNumber(ticket.tier),
+            };
+          }),
+        );
+
+        // Räkna antalet biljetter per prioritet
+        this.ticketCountsByPriority = this.countTicketsByPriority(processedTickets);
+
+        this.assignedTickets = processedTickets;
         this.sortKey = 'priority';
         this.sortDirection = 'asc';
         this.sortTickets();
         this.countTicketsToBeAnswered();
         this.isLoading = false;
+
+        // Skriv ut resultat i loggen
+        console.log('Ticket counts by priority:', this.ticketCountsByPriority);
       },
       error => {
         console.error('Error fetching tickets:', error);
         this.isLoading = false;
       },
     );
+  }
+
+  // Ny metod för att konvertera tier
+  private convertTierToNumber(tier: string): number | null {
+    switch (tier) {
+      case 'tier 1':
+        return 1;
+      case 'tier 2':
+        return 2;
+      case 'tier 3':
+        return 3;
+      default:
+        return null; // Om tier är okänd
+    }
+  }
+
+  // Ny metod för att räkna biljetter per prioritet
+  private countTicketsByPriority(tickets: any[]): { [key: string]: number } {
+    return tickets.reduce((counts, ticket) => {
+      const priority = ticket.priority || 'Unknown';
+      counts[priority] = (counts[priority] || 0) + 1;
+      return counts;
+    }, {});
   }
 
   private calculateETA(tickets: any[]): any[] {
@@ -332,7 +365,6 @@ export class UserComponent implements OnInit {
   }
 
   /// Modal
-
   openModal(ticket: any) {
     this.selectedTicket = ticket;
     this.newETA = ticket?.eta ? new Date(ticket.eta).toISOString().split('T')[0] : '';

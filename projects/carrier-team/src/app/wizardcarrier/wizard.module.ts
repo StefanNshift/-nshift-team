@@ -22,7 +22,7 @@ import { PythonAnalyze } from './components/admin-step/sub-steps/pythonanalyze/p
 import { SprintreviewComponent } from './components/admin-step/sub-steps/sprintreview/sprintreview.component';
 import { CarrierTeamStepComponent } from './components/carrierteam-step/carrierteam-step.component';
 import { CarrierTeamComponent } from './components/carrierteam-step/carrierteam/carrierteam.component';
-import { UserComponent } from './components/user-step/user/user.component';
+import { UserComponent } from './components/user-step/userticket/userticket.component';
 
 import { WizardTutorialRoutingModule } from './wizard-routing.module';
 import { WizardTutorialComponent } from './wizard.component';
@@ -30,7 +30,6 @@ import { WizardTutorialComponent } from './wizard.component';
 // AI Steps
 import { AIStepComponent } from './components/ai-step/ai-step.component';
 import { TicketComponent } from './components/ai-step/sub-steps/ticket/ticket.component';
-import { UpdateEtaModalComponent } from './components/user-step/update-eta-modal/update-eta-modal.component';
 
 // service for custom translations implementing wizard translations
 @Injectable()
@@ -64,7 +63,6 @@ const TRANSLATIONS_PROVIDER: ClassProvider = {
     TicketComponent,
     // AI Step
     AIStepComponent,
-    UpdateEtaModalComponent,
   ],
   imports: [
     CommonModule,
