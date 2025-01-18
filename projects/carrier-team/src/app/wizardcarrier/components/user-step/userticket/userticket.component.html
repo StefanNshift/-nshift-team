@@ -46,42 +46,34 @@
           </div>
              -->
         </div>
-        <div class="row text-center small-stats mx-auto">
-          <div>
-            <div class="stat-box">
-              <p><strong>Total</strong></p>
-              <h4>{{ zendeskTicketCount || 0 }}</h4>
-            </div>
+        <div class="row text-center small-stats mx-auto mb-2">
+          <div class="stat-box" [class.active]="activeFilter === 'total'" (click)="filterTickets('total')">
+            <p><strong>Total</strong></p>
+            <h4>{{ zendeskTicketCount || 0 }}</h4>
           </div>
-          <div>
-            <div class="stat-box">
-              <p><strong>Need Update</strong></p>
-              <h4>{{ ticketsToBeAnsweredCount || 0 }}</h4>
-            </div>
+          <div class="stat-box" [class.active]="activeFilter === 'needUpdate'" (click)="filterTickets('needUpdate')">
+            <p><strong>Need Update</strong></p>
+            <h4>{{ ticketsToBeAnsweredCount || 0 }}</h4>
           </div>
-          <div>
-            <div class="stat-box">
-              <p><strong>Urgent</strong></p>
-              <h4>{{ ticketCountsByPriority['urgent'] || 0 }}</h4>
-            </div>
+          <div class="stat-box" [class.active]="activeFilter === 'missingETA'" (click)="filterTickets('missingETA')">
+            <p><strong>Missing ETA</strong></p>
+            <h4>{{ ticketsMissingETACount || 0 }}</h4>
           </div>
-          <div>
-            <div class="stat-box">
-              <p><strong>High</strong></p>
-              <h4>{{ ticketCountsByPriority['high'] || 0 }}</h4>
-            </div>
+          <div class="stat-box" [class.active]="activeFilter === 'urgent'" (click)="filterTickets('urgent')">
+            <p><strong>Urgent</strong></p>
+            <h4>{{ ticketCountsByPriority['urgent'] || 0 }}</h4>
           </div>
-          <div>
-            <div class="stat-box">
-              <p><strong>Normal</strong></p>
-              <h4>{{ ticketCountsByPriority['normal'] || 0 }}</h4>
-            </div>
+          <div class="stat-box" [class.active]="activeFilter === 'high'" (click)="filterTickets('high')">
+            <p><strong>High</strong></p>
+            <h4>{{ ticketCountsByPriority['high'] || 0 }}</h4>
           </div>
-          <div>
-            <div class="stat-box">
-              <p><strong>Low</strong></p>
-              <h4>{{ ticketCountsByPriority['low'] || 0 }}</h4>
-            </div>
+          <div class="stat-box" [class.active]="activeFilter === 'normal'" (click)="filterTickets('normal')">
+            <p><strong>Normal</strong></p>
+            <h4>{{ ticketCountsByPriority['normal'] || 0 }}</h4>
+          </div>
+          <div class="stat-box" [class.active]="activeFilter === 'low'" (click)="filterTickets('low')">
+            <p><strong>Low</strong></p>
+            <h4>{{ ticketCountsByPriority['low'] || 0 }}</h4>
           </div>
         </div>
 
@@ -135,12 +127,30 @@
             </div>
             <div class="card-body d-flex flex-column align-items-stretch">
               <ul class="ticket-details">
-                <li><strong>Subject:</strong> {{ ticket.subject }}</li>
-                <li><strong>ETA:</strong> {{ ticket.eta ? (ticket.eta | date: 'MMMM d, y') : 'N/A' }}</li>
+                <li>
+                  <strong>Subject:</strong>
+                  {{ ticket.subject.length > 40 ? (ticket.subject | slice: 0:40) + '...' : ticket.subject }}
+                </li>
+                <li>
+                  <strong>ETA:</strong>
+                  <span [ngClass]="{ 'missing-eta': !ticket.eta }">
+                    {{ ticket.eta ? (ticket.eta | date: 'MMMM d, y') : 'Missing ETA' }}
+                  </span>
+                </li>
                 <li><strong>Updated At:</strong> {{ ticket.updated_at | date: 'MMMM d, y' }}</li>
                 <li><strong>Created At:</strong> {{ ticket.created_at | date: 'MMMM d, y' }}</li>
-                <li><strong>Tier:</strong> {{ ticket.tier }}</li>
-                <li><strong>Carrier ID:</strong> {{ ticket.carrier_id }}</li>
+                <li>
+                  <strong>Tier:</strong>
+                  <span [ngClass]="{ 'missing-tier': !ticket.tier }">
+                    {{ ticket.tier ? ticket.tier : 'Tier Missing' }}
+                  </span>
+                </li>
+                <li>
+                  <strong>Carrier ID:</strong>
+                  <span [ngClass]="{ missing: !ticket.carrier_id }">
+                    {{ ticket.carrier_id ? ticket.carrier_id : 'Carrier ID Missing' }}
+                  </span>
+                </li>
               </ul>
             </div>
             <!-- Card Footer -->
@@ -155,7 +165,7 @@
               </ng-container>
               <ng-template #noJira>
                 <button class="btn btn-info btn-sm" disabled>
-                  No Jira Tickets Added
+                  No Jira Tickets
                 </button>
               </ng-template>
             </div>

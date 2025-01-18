@@ -30,21 +30,7 @@ const routes: WizardStep[] = [
           controls: [],
         },
       },
-      {
-        path: 'user',
-        component: UserComponent,
-        children: [
-          {
-            path: '',
-            component: UserIndexComponent,
-          },
-        ],
-        data: {
-          heading: 'My Dashboard',
-          subSteps: [],
-          controls: [],
-        },
-      },
+
       {
         path: 'carrier-team',
         component: CarrierTeamComponent,
@@ -61,11 +47,61 @@ const routes: WizardStep[] = [
         },
       },
       {
+        path: 'user',
+        component: AdminStepComponent,
+        data: {
+          heading: 'Central CIS',
+          subSteps: ['mytickets', 'carrierjira', 'carrierzendesk'],
+
+          controls: [
+            {
+              type: 'next',
+            },
+          ],
+        },
+        children: [
+          {
+            path: '',
+            component: UserIndexComponent,
+          },
+          {
+            path: 'mytickets',
+            component: UserComponent,
+            data: {
+              heading: 'My Dashboard',
+              pageHeading: '',
+            },
+          },
+
+          {
+            path: 'carrierjira',
+            component: CarrierFieldModuleComponent,
+            data: {
+              heading: 'Carrier list in Jira',
+              pageHeading: '',
+            },
+          },
+          {
+            path: 'carrierzendesk',
+            component: ZendeskFieldModuleComponent,
+            data: {
+              heading: 'Carrier list in Zendesk',
+              pageHeading: '',
+              controls: [
+                {
+                  type: 'prev',
+                },
+              ],
+            },
+          },
+        ],
+      },
+      {
         path: 'admin',
         component: AdminStepComponent,
         data: {
           heading: 'Admin',
-          subSteps: ['team', 'tickets', 'carrierjira', 'carrierzendesk', 'sprint'],
+          subSteps: ['team', 'tickets', 'sprint'],
 
           controls: [
             {
@@ -99,24 +135,6 @@ const routes: WizardStep[] = [
               pageHeading: '',
             },
           },
-
-          {
-            path: 'carrierjira',
-            component: CarrierFieldModuleComponent,
-            data: {
-              heading: 'Carrier list in Jira',
-              pageHeading: '',
-            },
-          },
-          {
-            path: 'carrierzendesk',
-            component: ZendeskFieldModuleComponent,
-            data: {
-              heading: 'Carrier list in Zendesk',
-              pageHeading: '',
-            },
-          },
-
           {
             path: 'sprint',
             component: SprintreviewComponent,

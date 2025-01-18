@@ -22,7 +22,12 @@ export class UserComponent implements OnInit {
   probIssues: any[] = []; // Array to hold PROB issues data
   probIssueCount = 0; // Count of PROB issues
   zendeskTicketCount = 0; // Count of Zendesk tickets
+  ticketsMissingETACount = 0; // Count of Zendesk tickets
+
   assignedTickets: any[] = [];
+  assignedTicketsBackup: any[] = [];
+  activeFilter = ''; // Track the current filter
+
   unassignedTickets: any[] = [];
   jiraVisibility: boolean[] = []; // Håller reda på synligheten för JIRA-sektionerna
   ticketsToBeAnsweredCount = 0; // Variabel för att lagra antal ärenden
@@ -85,6 +90,7 @@ export class UserComponent implements OnInit {
   tier1Tickets = 0;
   tier2Tickets = 0;
   tier3Tickets = 0;
+  ticketsMissingTACount = 0;
   unassignedPriorityLowCount = 0;
   unassignedPriorityMediumCount = 0;
   unassignedPriorityHighCount = 0;
@@ -126,6 +132,7 @@ export class UserComponent implements OnInit {
       this.user = JSON.parse(storedUser);
 
       this.fetchAllTickets(this.user.email);
+      this.filterTickets('total');
     }
   }
 
@@ -133,33 +140,43 @@ export class UserComponent implements OnInit {
     this.wizardBackendService.getAllUserTickets(user).subscribe(
       (response: any) => {
         console.log('Fetched user ticket data:', response);
+
+        // Count tickets by tiers
         this.tier1Tickets = response.assignedTickets[0]?.tier1Tickets || 0;
         this.tier2Tickets = response.assignedTickets[0]?.tier2Tickets || 0;
         this.tier3Tickets = response.assignedTickets[0]?.tier3Tickets || 0;
         this.zendeskTicketCount = response.assignedTickets[0]?.ticket_count || 0;
 
-        // Översätt "tier" till numeriskt värde
+        // Process tickets and convert "tier" to numerical value
         const processedTickets = this.calculateETA(
-          (response.assignedTickets[0]?.tickets || []).map(ticket => {
-            return {
-              ...ticket,
-              tier: this.convertTierToNumber(ticket.tier),
-            };
-          }),
+          (response.assignedTickets[0]?.tickets || []).map(ticket => ({
+            ...ticket,
+            tier: this.convertTierToNumber(ticket.tier),
+          })),
         );
 
-        // Räkna antalet biljetter per prioritet
+        // Count tickets by priority
         this.ticketCountsByPriority = this.countTicketsByPriority(processedTickets);
 
+        // Count tickets with null ETA
+        this.ticketsMissingETACount = processedTickets.filter(ticket => !ticket.eta).length;
+
+        // Store processed tickets
         this.assignedTickets = processedTickets;
+        this.assignedTicketsBackup = [...processedTickets];
+
+        // Default sorting
         this.sortKey = 'priority';
         this.sortDirection = 'asc';
         this.sortTickets();
+
+        // Count tickets that need to be answered
         this.countTicketsToBeAnswered();
+
         this.isLoading = false;
 
-        // Skriv ut resultat i loggen
         console.log('Ticket counts by priority:', this.ticketCountsByPriority);
+        console.log('Tickets missing ETA:', this.ticketsMissingETACount);
       },
       error => {
         console.error('Error fetching tickets:', error);
@@ -362,6 +379,37 @@ export class UserComponent implements OnInit {
     this.sortDirection = direction;
 
     this.sortTickets();
+  }
+
+  filterTickets(filter: string) {
+    this.activeFilter = filter;
+
+    switch (filter) {
+      case 'total':
+        this.assignedTickets = [...this.assignedTicketsBackup]; // Show all tickets
+        break;
+      case 'needUpdate':
+        this.assignedTickets = this.assignedTicketsBackup.filter(ticket => this.isToBeAnswered(ticket.updated_at));
+        break;
+      case 'urgent':
+        this.assignedTickets = this.assignedTicketsBackup.filter(ticket => ticket.priority === 'urgent');
+        break;
+      case 'high':
+        this.assignedTickets = this.assignedTicketsBackup.filter(ticket => ticket.priority === 'high');
+        break;
+      case 'normal':
+        this.assignedTickets = this.assignedTicketsBackup.filter(ticket => ticket.priority === 'normal');
+        break;
+      case 'low':
+        this.assignedTickets = this.assignedTicketsBackup.filter(ticket => ticket.priority === 'low');
+        break;
+      case 'missingETA': // Filter tickets with null ETA
+        this.assignedTickets = this.assignedTicketsBackup.filter(ticket => !ticket.eta);
+        break;
+      default:
+        this.assignedTickets = [...this.assignedTicketsBackup]; // Reset to all tickets
+        break;
+    }
   }
 
   /// Modal
