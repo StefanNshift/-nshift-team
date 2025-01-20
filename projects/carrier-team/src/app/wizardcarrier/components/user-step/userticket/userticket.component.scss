@@ -49,7 +49,7 @@
 
 @media (max-width: 1500px) {
   .card-header {
-    height: 130px;
+    height: 150px;
   }
 
   .card-body {
@@ -79,6 +79,11 @@
   color: #fff;
 }
 
+.status-badge.bg-jiracompleted {
+  background: linear-gradient(135deg, #1b5e20, #2e7d32);
+  color: #fff;
+}
+
 .status-badge.bg-high {
   background: linear-gradient(135deg, #d84315, #e64a19);
   color: #fff;
@@ -96,7 +101,12 @@
 
 .status-badge.bg-warning {
   background: linear-gradient(135deg, #f9a825, #fbc02d); /* Golden yellow for warnings */
-  color: #000;
+  color: #000; /* Black text */
+}
+
+.status-badge.bg-delayed {
+  background: linear-gradient(135deg, #9a1b1b, #cb2121);
+  color: #fff !important;
 }
 
 .status-badge.bg-update-needed {
@@ -188,7 +198,7 @@
 
 .jira-status {
   font-size: 0.9rem;
-  font-weight: bold;
+  font-weight: 500;
   padding: 2px 6px;
   border-radius: 4px;
 }
@@ -227,60 +237,94 @@
 --------------------------------------------- */
 
 /* Layout and spacing for small-stats */
-.small-stats {
+/* Container för att lägga alla grupper horisontellt */
+.small-stats-container {
   display: flex;
-  flex-wrap: wrap; /* Allows wrapping for smaller screens */
-  gap: 5px;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 15px;
+  justify-content: flex-start;
+  margin-bottom: 20px;
 }
 
-/* General styling for stat-box */
-.small-stats .stat-box {
+/* Gruppstil för varje sektion */
+.stats-group {
   display: flex;
-  flex-direction: column; /* Stack text and number */
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stats-group h5 {
+  text-align: left;
+  font-size: 14px; /* Mindre textstorlek för rubriker */
+  margin: 0;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Stat-row layout */
+.stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Stat-box styling */
+.stat-box {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   border: 1px solid #ddd;
-  border-radius: 5px;
-  padding: 10px;
-  width: 100px;
-  height: 60px;
-  margin: 5px 0; /* Consistent spacing */
+  font-weight: 500;
+  border-radius: 6px; /* Mindre rundade hörn */
+  padding: 5px; /* Mindre padding */
+  width: 90px; /* Smalare boxar */
+  height: 60px; /* Lägre boxar */
   background-color: #f9f9f9;
-  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
-  cursor: pointer; /* Indicate interactivity */
+  cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
-/* Hover effect for stat-box */
-.small-stats .stat-box:hover {
-  transform: translateY(-5px); /* Slight lift effect */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add emphasis */
-  background-color: #f1f1f1; /* Subtle hover color */
+.stat-box:hover {
+  transform: translateY(-3px); /* Mindre lyft vid hover */
+  box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.2);
+  background-color: #eaf4ff;
 }
 
-/* Active state for stat-box */
-.small-stats .stat-box.active {
-  border: 1px solid #0116a3;
-  background-color: #e9ecef; /* Slightly distinct background */
+.stat-box.active {
+  background-color: #d0e8ff;
+  border-color: #0056b3;
 }
 
-.small-stats .stat-box.active:hover {
-  transform: none; /* Keep active state consistent on hover */
-  background-color: #dbe8ff; /* Slightly brighter active hover */
-}
-
-/* Typography for stat-box */
-.small-stats .stat-box h4 {
-  font-size: 14px;
+.stat-box p {
+  font-size: 12px; /* Mindre textstorlek */
   margin: 0;
-  font-weight: bold; /* Emphasize numbers */
-  color: #333; /* Darker color for contrast */
+  color: #666;
 }
 
-.small-stats .stat-box p {
-  font-size: 12px;
-  margin: 0 0 4px;
-  color: #666; /* Muted text for labels */
+.stat-box h4 {
+  font-size: 14px; /* Mindre textstorlek för siffror */
+  font-weight: bold;
+  color: #333;
+  margin: 5px 0 0;
+}
+
+/* Responsivitet */
+@media (max-width: 768px) {
+  .small-stats-container {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .stats-row {
+    justify-content: center;
+  }
+
+  .stat-box {
+    width: 100%; /* Full bredd på små skärmar */
+    height: auto;
+  }
 }
 
 /* ---------------------------------------------
@@ -340,4 +384,8 @@
 
 .missing-eta {
   color: rgb(161 17 17);
+}
+
+.highlight-internal {
+  background-color: #fff7ed; /* Sätt bakgrundsfärgen till gul */
 }

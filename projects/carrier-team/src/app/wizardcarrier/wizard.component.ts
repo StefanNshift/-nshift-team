@@ -8,43 +8,39 @@ export class WizardTutorialComponent implements AfterViewInit {
   constructor(private renderer: Renderer2, private el: ElementRef) {}
 
   ngAfterViewInit() {
-    const isAdmin = localStorage.getItem('isAdmin');
-    // Case 1: If isAdmin is 'true', do nothing
-    if (isAdmin === 'true') {
+    const userRole = localStorage.getItem('userRole');
+    console.log('Now');
+    console.log(userRole);
+    if (userRole === 'admin') {
+      console.log('Admin detected: No restrictions applied.');
       return;
     }
 
-    // Case 2: If isAdmin is 'false', hide "Carrier Admin" and sub-items
-    if (isAdmin === 'false') {
-      this.hideSpecificElements();
+    // Case 2: If isManager is 'true', hide manager-restricted elements
+    if (userRole === 'manager') {
+      console.log('Manager detected: Hiding specific elements for managers.');
+      this.hideSpecificElementsManager();
       return;
-    }
-
-    // Case 3: If isAdmin is null/undefined, hide everything except "Login"
-    if (isAdmin === null || isAdmin === undefined) {
+    } else {
       this.hideAllExceptLogin();
     }
   }
 
-  /**
-   * Hide specific elements like "Carrier Admin" and its sub-items
-   */
-  private hideSpecificElements() {
-    const selectors = [];
-
+  private hideSpecificElementsManager() {
+    const selectors = ['li.list-group-item'];
     selectors.forEach(selector => {
       const elements = this.el.nativeElement.querySelectorAll(selector);
       elements.forEach((element: HTMLElement) => {
-        const linkText = element.textContent?.trim();
-
+        const spanElement = element.querySelector('span');
+        const linkText = spanElement?.textContent?.trim() || element.textContent?.trim();
         if (
+          linkText === 'Admin' ||
           linkText === 'Carrier Admin' ||
-          linkText === 'Carrier Team' ||
-          linkText === 'Carrier Tickets' ||
+          linkText === 'Central Libary Tickets' ||
           linkText === 'Carrier list in JIRA' ||
           linkText === 'Sprint Review'
         ) {
-          this.renderer.setStyle(element, 'display', 'none'); // Hide element
+          this.renderer.setStyle(element, 'display', 'none');
         }
       });
     });
@@ -57,9 +53,8 @@ export class WizardTutorialComponent implements AfterViewInit {
     const elements = this.el.nativeElement.querySelectorAll('ol.list-group li.list-group-item');
     elements.forEach((element: HTMLElement) => {
       const linkText = element.textContent?.trim();
-
-      // Only keep "Login", hide all other elements
       if (linkText !== 'Login') {
+        console.log('Hiding element with text (Login-only):', linkText);
         this.renderer.setStyle(element, 'display', 'none');
       }
     });

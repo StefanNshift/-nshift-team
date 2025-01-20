@@ -14,6 +14,22 @@
   </div>
 </div>
 
+<div *ngIf="adminEnabled" class="admin-select-container">
+  <div class="form-row mt-3">
+    <div class="form-group col-sm-6 col-xl-2">
+      <select class="form-control" [ngModel]="selectedEmail" (ngModelChange)="handleEmailChange($event)">
+        <option value="" disabled>Select User</option>
+        <option *ngFor="let email of adminEmails" [value]="email">
+          {{ email }}
+        </option>
+      </select>
+    </div>
+  </div>
+  <div *ngIf="!isLoading && assignedTickets.length === 0">
+    <p>No tickets assigned.</p>
+  </div>
+</div>
+
 <div *ngIf="isLoading" class="loading-container">
   <p>Loading tickets...</p>
 </div>
@@ -22,58 +38,88 @@
   <div class="col-md-12 mb-3">
     <div *ngIf="!isLoading && assignedTickets.length > 0">
       <div class="ticket-summary-container">
-        <div class="form-row mt-3">
-          <div class="form-group col-sm-6 col-xl-3">
-            <select id="sort-select" (change)="onSortChange($event)" class="form-control">
-              <option value="">-- Select sorting --</option>
-              <option value="priority:asc">Priority (ascending)</option>
-              <option value="priority:desc">Priority (descending)</option>
-              <option value="tier:asc">Tier (ascending)</option>
-              <option value="tier:desc">Tier (descending)</option>
-              <option value="updated_at:asc">Updated At (ascending)</option>
-              <option value="updated_at:desc">Updated At (descending)</option>
-              <option value="eta:asc">ETA (ascending)</option>
-              <option value="eta:desc">ETA (descending)</option>
-              <option value="toBeAnswered:asc">To Be Answered (ascending)</option>
-              <option value="toBeAnswered:desc">To Be Answered (descending)</option>
-            </select>
-          </div>
-          <!--
-          <div class="form-group col-sm-6 col-xl-3">
-            <button class="btn btn-info btn-md" (click)="toggleAllJiraSections()">
-              {{ allExpanded ? 'Collapse All JIRA' : 'Expand All Jira' }}
-            </button>
-          </div>
-             -->
-        </div>
-        <div class="row text-center small-stats mx-auto mb-2">
-          <div class="stat-box" [class.active]="activeFilter === 'total'" (click)="filterTickets('total')">
-            <p><strong>Total</strong></p>
-            <h4>{{ zendeskTicketCount || 0 }}</h4>
-          </div>
-          <div class="stat-box" [class.active]="activeFilter === 'needUpdate'" (click)="filterTickets('needUpdate')">
-            <p><strong>Need Update</strong></p>
-            <h4>{{ ticketsToBeAnsweredCount || 0 }}</h4>
-          </div>
-          <div class="stat-box" [class.active]="activeFilter === 'missingETA'" (click)="filterTickets('missingETA')">
-            <p><strong>Missing ETA</strong></p>
-            <h4>{{ ticketsMissingETACount || 0 }}</h4>
-          </div>
-          <div class="stat-box" [class.active]="activeFilter === 'urgent'" (click)="filterTickets('urgent')">
-            <p><strong>Urgent</strong></p>
-            <h4>{{ ticketCountsByPriority['urgent'] || 0 }}</h4>
-          </div>
-          <div class="stat-box" [class.active]="activeFilter === 'high'" (click)="filterTickets('high')">
-            <p><strong>High</strong></p>
-            <h4>{{ ticketCountsByPriority['high'] || 0 }}</h4>
-          </div>
-          <div class="stat-box" [class.active]="activeFilter === 'normal'" (click)="filterTickets('normal')">
-            <p><strong>Normal</strong></p>
-            <h4>{{ ticketCountsByPriority['normal'] || 0 }}</h4>
-          </div>
-          <div class="stat-box" [class.active]="activeFilter === 'low'" (click)="filterTickets('low')">
-            <p><strong>Low</strong></p>
-            <h4>{{ ticketCountsByPriority['low'] || 0 }}</h4>
+        <div class="ticket-summary-container mt-3">
+          <div class="small-stats-container d-flex">
+            <!-- Overview -->
+            <div class="stats-group">
+              <h5>Overview</h5>
+              <div class="stats-row">
+                <div class="stat-box" [class.active]="activeFilter === 'total'" (click)="filterTickets('total')">
+                  <p>Total</p>
+                  <h4>{{ zendeskTicketCount || 0 }}</h4>
+                </div>
+                <div
+                  class="stat-box"
+                  [class.active]="activeFilter === 'closedJira'"
+                  (click)="filterTickets('closedJira')"
+                >
+                  <p>Jira Done</p>
+                  <h4>{{ getClosedJiraTicketsCount() }}</h4>
+                </div>
+                <div
+                  class="stat-box"
+                  [class.active]="activeFilter === 'needUpdate'"
+                  (click)="filterTickets('needUpdate')"
+                >
+                  <p>Need Update</p>
+                  <h4>{{ ticketsToBeAnsweredCount || 0 }}</h4>
+                </div>
+                <div class="stat-box" [class.active]="activeFilter === 'delayed'" (click)="filterTickets('delayed')">
+                  <p>Delayed</p>
+                  <h4>{{ getDelayedTicketsCount() }}</h4>
+                </div>
+                <div
+                  class="stat-box"
+                  [class.active]="activeFilter === 'missingETA'"
+                  (click)="filterTickets('missingETA')"
+                >
+                  <p>Missing ETA</p>
+                  <h4>{{ ticketsMissingETACount || 0 }}</h4>
+                </div>
+              </div>
+            </div>
+
+            <!-- Priorities -->
+            <div class="stats-group">
+              <h5>Priorities</h5>
+              <div class="stats-row">
+                <div class="stat-box" [class.active]="activeFilter === 'urgent'" (click)="filterTickets('urgent')">
+                  <p>Urgent</p>
+                  <h4>{{ ticketCountsByPriority['urgent'] || 0 }}</h4>
+                </div>
+                <div class="stat-box" [class.active]="activeFilter === 'high'" (click)="filterTickets('high')">
+                  <p>High</p>
+                  <h4>{{ ticketCountsByPriority['high'] || 0 }}</h4>
+                </div>
+                <div class="stat-box" [class.active]="activeFilter === 'normal'" (click)="filterTickets('normal')">
+                  <p>Normal</p>
+                  <h4>{{ ticketCountsByPriority['normal'] || 0 }}</h4>
+                </div>
+                <div class="stat-box" [class.active]="activeFilter === 'low'" (click)="filterTickets('low')">
+                  <p>Low</p>
+                  <h4>{{ ticketCountsByPriority['low'] || 0 }}</h4>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tiers -->
+            <div class="stats-group">
+              <h5>Tiers</h5>
+              <div class="stats-row">
+                <div class="stat-box" [class.active]="activeFilter === 'tier1'" (click)="filterTickets('tier1')">
+                  <p>Tier 1</p>
+                  <h4>{{ getTierTicketsCount(1) }}</h4>
+                </div>
+                <div class="stat-box" [class.active]="activeFilter === 'tier2'" (click)="filterTickets('tier2')">
+                  <p>Tier 2</p>
+                  <h4>{{ getTierTicketsCount(2) }}</h4>
+                </div>
+                <div class="stat-box" [class.active]="activeFilter === 'tier3'" (click)="filterTickets('tier3')">
+                  <p>Tier 3</p>
+                  <h4>{{ getTierTicketsCount(3) }}</h4>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -107,18 +153,31 @@
                     >
                       {{ ticket.priority }}
                     </span>
-                    <span *ngIf="isToBeAnswered(ticket.updated_at)" class="badge status-badge bg-warning text-dark">
-                      Update Needed
-                    </span>
+
                     <span
                       class="badge status-badge"
                       [ngClass]="{
-                        'bg-assigned': ticket.customStatus === 'Assigned',
-                        'bg-pending': ticket.customStatus.startsWith('Pending'),
-                        'bg-awaiting': ticket.customStatus.startsWith('Awaiting')
-                      }"
+                      'bg-assigned': ticket.customStatus === 'Open',
+                      'bg-pending': isPendingStatus(ticket.customStatus),
+                      'bg-awaiting':isHoldStatus(ticket.customStatus), 
+                    }"
                     >
                       {{ ticket.customStatus }}
+                    </span>
+
+                    <span *ngIf="hasAllJiraClosed(ticket)" class="badge status-badge bg-jiracompleted text-white">
+                      Jira Completed
+                    </span>
+
+                    <span *ngIf="hasPreviousSprints(ticket)" class="badge status-badge bg-delayed text-dark"
+                      >Delayed
+                    </span>
+
+                    <span
+                      *ngIf="isToBeAnswered(ticket.updated_at, ticket)"
+                      class="badge status-badge bg-warning text-dark"
+                    >
+                      Update Needed
                     </span>
                   </div>
                 </div>
@@ -133,8 +192,18 @@
                 </li>
                 <li>
                   <strong>ETA:</strong>
-                  <span [ngClass]="{ 'missing-eta': !ticket.eta }">
-                    {{ ticket.eta ? (ticket.eta | date: 'MMMM d, y') : 'Missing ETA' }}
+                  <span [ngClass]="{ 'missing-eta': ticket.jiraData?.length > 0 && !ticket.eta }">
+                    <ng-container *ngIf="ticket.jiraData?.length > 0; else noJiras">
+                      <ng-container *ngIf="isJiraWithoutSprint(ticket); else hasEtas">
+                        Ticket Missing Sprint
+                      </ng-container>
+                      <ng-template #hasEtas>
+                        {{ ticket.eta | date: 'MMMM d, y' }}
+                      </ng-template>
+                    </ng-container>
+                    <ng-template #noJiras>
+                      No JIRA tickets added
+                    </ng-template>
                   </span>
                 </li>
                 <li><strong>Updated At:</strong> {{ ticket.updated_at | date: 'MMMM d, y' }}</li>
@@ -170,7 +239,7 @@
               </ng-template>
             </div>
             <!-- Jira Tickets Section -->
-            <div *ngIf="jiraVisibility[i] && ticket.jiraData?.length > 0" class="jira-section  p-3">
+            <div *ngIf="jiraVisibility[i] && ticket.jiraData?.length > 0" class="jira-section p-3">
               <ul class="list-group list-group-flush">
                 <li *ngFor="let jira of ticket.jiraData" class="jira-item list-group-item border-0">
                   <!-- Jira Header -->
@@ -186,8 +255,8 @@
                       class="jira-status badge"
                       [ngClass]="{
                         'badge-success': jira.sprints.ticketStatus === 'Resolved',
-                        'badge-primary': jira.sprints.ticketStatus === 'Open',
-                        'badge-danger': jira.sprints.ticketStatus === 'Closed',
+                        'badge-primary': jira.sprints.ticketStatus === 'Open' || jira.sprints.ticketStatus === 'Reopen',
+                        'badge status-badge bg-jiracompleted text-white': jira.sprints.ticketStatus === 'Closed',
                         'badge-warning': jira.sprints.ticketStatus === 'Draft',
                         'badge-info': jira.sprints.ticketStatus === 'Testing',
                         'badge-secondary': jira.sprints.ticketStatus === 'Verified Fix'
@@ -197,16 +266,44 @@
                     </span>
                   </div>
                   <!-- Jira Details -->
-                  <div *ngIf="jira.sprints.currentSprint" class="jira-details mt-2">
-                    <p class="mb-1"><strong>Sprint:</strong> {{ jira.sprints.currentSprint.name }}</p>
-                    <p class="mb-1">
-                      <strong>Start:</strong>
-                      {{ jira.sprints.currentSprint.startDate | date: 'MMMM d, y' }}
-                    </p>
-                    <p class="mb-0">
-                      <strong>End:</strong>
-                      {{ jira.sprints.currentSprint.endDate | date: 'MMMM d, y' }}
-                    </p>
+
+                  <div
+                    *ngIf="jira.sprints.currentSprint || jira.sprints.futureSprints?.length > 0"
+                    class="jira-details mt-2"
+                  >
+                    <!-- Current Sprint -->
+                    <div *ngIf="jira.sprints.currentSprint" class="sprint-section">
+                      <p class="mb-1"><strong>Sprint:</strong> {{ jira.sprints.currentSprint.name }}</p>
+                      <p class="mb-1">
+                        <strong>Start:</strong> {{ jira.sprints.currentSprint.startDate | date: 'MMMM d, y' }}
+                      </p>
+                      <p class="mb-0">
+                        <strong>End:</strong> {{ jira.sprints.currentSprint.endDate | date: 'MMMM d, y' }}
+                      </p>
+                    </div>
+
+                    <!-- Future Sprints -->
+                    <div *ngIf="jira.sprints.futureSprints?.length > 0" class="sprint-section mt-3">
+                      <div *ngFor="let sprint of jira.sprints.futureSprints" class="future-sprint-details">
+                        <p class="mb-1"><strong>Sprint:</strong> {{ sprint.name }}</p>
+                        <p class="mb-1"><strong>Start:</strong> {{ sprint.startDate | date: 'MMMM d, y' }}</p>
+                        <p class="mb-0"><strong>End:</strong> {{ sprint.endDate | date: 'MMMM d, y' }}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Indicator for delayed tickets with previous sprints -->
+                  <div *ngIf="jira.sprints.previousSprints?.length > 0" class="previous-sprints-indicator mt-2">
+                    <span class="badge badge-warning">Delayed</span>
+                    <ul class="previous-sprints-list mt-2">
+                      <li
+                        *ngFor="let sprint of jira.sprints.previousSprints"
+                        style="color:#301a1a !important"
+                        class="text-muted small"
+                      >
+                        <strong>Previous Sprint:</strong> {{ sprint.name }}
+                      </li>
+                    </ul>
                   </div>
                 </li>
               </ul>
@@ -230,22 +327,6 @@
           <p><strong>Subject:</strong> {{ selectedTicket?.subject }}</p>
           <!-- Text area to write the message -->
           <div class="form-group">
-            <div class="form-group">
-              <label>
-                <input type="checkbox" [(ngModel)]="ShouldBeInternal" />
-                Send as Internal
-              </label>
-            </div>
-            <label for="customMessage">Reply</label>
-            <textarea
-              id="customMessage"
-              class="form-control"
-              rows="3"
-              [(ngModel)]="customMessage"
-              [ngClass]="{ 'highlight-internal': ShouldBeInternal }"
-            ></textarea>
-          </div>
-          <div class="form-group">
             <label for="newETA">New ETA:</label>
             <input
               id="newETA"
@@ -259,36 +340,63 @@
               Please provide a valid date.
             </div>
           </div>
+
+          <div class="form-group form-check form-check-inline">
+            <input
+              type="checkbox"
+              class="form-check-input"
+              id="internalCheck"
+              [disabled]="!newETA"
+              [(ngModel)]="ShouldBeInternal"
+            />
+            <label class="form-check-label" for="internalCheck">Send as Internal</label>
+          </div>
+
+          <div class="form-group form-check form-check-inline">
+            <input
+              type="checkbox"
+              class="form-check-input"
+              id="requesterNameCheck"
+              [(ngModel)]="includeRequesterName"
+              (change)="updateEmailText()"
+              [disabled]="!newETA"
+            />
+            <label class="form-check-label" for="requesterNameCheck">Include Requester Name</label>
+          </div>
+
+          <div class="form-group">
+            <label for="customMessage">Reply</label>
+            <textarea
+              id="customMessage"
+              class="form-control"
+              rows="3"
+              [disabled]="!newETA"
+              [(ngModel)]="customMessage"
+              [ngClass]="{ 'highlight-internal': ShouldBeInternal }"
+            ></textarea>
+          </div>
+
           <!-- Predefined message options -->
           <div class="form-group">
             <label for="messageTemplates">Select a predefined message:</label>
-            <select id="messageTemplates" class="form-control" (change)="onTemplateSelect($event)" [disabled]="!newETA">
+            <select
+              id="messageTemplates"
+              class="form-control"
+              [(ngModel)]="selectedTemplate"
+              (change)="onTemplateSelect($event)"
+              [disabled]="!newETA"
+            >
               <option value="">-- Select a message --</option>
               <option *ngFor="let template of messageTemplates" [value]="template.value">
                 {{ template.label }}
               </option>
             </select>
           </div>
-          <div class="form-group">
-            <label>
-              <input
-                type="checkbox"
-                [(ngModel)]="includeRequesterName"
-                (change)="updateEmailText()"
-                [disabled]="!newETA"
-              />
-              Include Requester Name
-            </label>
-          </div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-primary" (click)="sendETAUpdate()">Send Update</button>
+          <button class="btn btn-primary" (click)="sendETAUpdate()" [disabled]="!customMessage">Send Update</button>
         </div>
       </div>
     </div>
-  </div>
-
-  <div *ngIf="!isLoading && assignedTickets.length === 0">
-    <p>No tickets assigned.</p>
   </div>
 </div>

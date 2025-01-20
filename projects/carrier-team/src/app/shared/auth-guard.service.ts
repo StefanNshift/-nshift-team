@@ -1,18 +1,30 @@
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRouteSnapshot } from '@angular/router';
 
-export const authGuard = (): boolean => {
+export const authGuard = (route?: ActivatedRouteSnapshot): boolean => {
   const router = inject(Router);
 
-  // Hämta admin-status från localStorage
-  const isAdmin = localStorage.getItem('isAdmin') === 'true';
+  // Hämta användarens roll och admin-status från localStorage
+  const userRole = localStorage.getItem('userRole'); // Exempel: 'admin', 'manager', etc.
+  const isAdmin = localStorage.getItem('isAdmin') === 'true'; // För backward compatibility
 
-  if (!isAdmin) {
-    console.warn('Access denied: Redirecting to login');
-    router.navigate(['/']); // Omdirigera till login
+  // Om route-data innehåller en förväntad roll, kontrollera åtkomst
+  const expectedRole = route?.data?.['role'];
+
+  // Logga roller för debug
+
+  // Kontrollera om användaren är admin (alltid tillåten)
+  if (isAdmin) {
+    return true;
+  }
+
+  // Kontrollera om användarens roll matchar den förväntade rollen
+  if (expectedRole && userRole !== expectedRole) {
+    console.warn(`Access denied: User role "${userRole}" does not match required role "${expectedRole}"`);
+    router.navigate(['/']); // Omdirigera vid obehörig åtkomst
     return false;
   }
 
-  console.log('Access granted: User is admin');
+  // Om ingen roll krävs eller om roll matchar
   return true;
 };

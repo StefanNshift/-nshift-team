@@ -55,6 +55,8 @@ export class LoginComponent implements OnInit {
   logout() {
     localStorage.removeItem('user');
     localStorage.removeItem('isAdmin');
+    localStorage.removeItem('userRole');
+
     this.user = null;
     this.isAdmin = false;
     location.reload(); // Reload page after logout
@@ -66,22 +68,47 @@ export class LoginComponent implements OnInit {
    */
   checkAdminStatus(user: User) {
     const adminRef = ref(this.db, `admins/${user.uid}`);
+    const membersRef = ref(this.db, `members`);
 
     get(adminRef)
       .then(snapshot => {
-        // Check if user is an admin
+        // Kontrollera om användaren är admin
         this.isAdmin = snapshot.exists() && snapshot.val() === true;
 
-        // Save user data in localStorage
+        // Spara användarens adminstatus i localStorage
         localStorage.setItem('user', JSON.stringify(user));
         localStorage.setItem('isAdmin', JSON.stringify(this.isAdmin));
 
+        // Om användaren är admin
         if (this.isAdmin) {
-          location.reload(); // Reload for admin access
-        } else {
-          this.noAdminAccess = true; // Show message for non-admin access
-          location.reload(); // Reload page after logout
+          console.log('User is admin');
+          localStorage.setItem('userRole', 'admin'); // Spara manager-rollen i localStorage
+
+          location.reload(); // Ladda om för admin-åtkomst
+          return;
         }
+
+        // Kontrollera om användaren finns i "members" för manager-åtkomst
+        get(membersRef)
+          .then(membersSnapshot => {
+            if (membersSnapshot.exists()) {
+              const members = Object.values(membersSnapshot.val()) as Array<any>;
+              const isManager = members.some(member => member.email.toLowerCase() === user.email.toLowerCase());
+
+              if (isManager) {
+                console.log('User is manager');
+                localStorage.setItem('userRole', 'manager'); // Spara manager-rollen i localStorage
+                location.reload(); // Ladda om för manager-åtkomst
+              } else {
+                console.warn('User does not have manager access');
+                this.noAdminAccess = true; // Visa meddelande för otillräcklig åtkomst
+                location.reload(); // Ladda om för att logga ut
+              }
+            }
+          })
+          .catch(error => {
+            console.error('Error checking members:', error);
+          });
       })
       .catch(error => {
         console.error('Error checking admin status:', error);

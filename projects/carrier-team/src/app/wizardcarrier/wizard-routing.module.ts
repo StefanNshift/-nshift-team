@@ -49,10 +49,11 @@ const routes: WizardStep[] = [
       {
         path: 'user',
         component: AdminStepComponent,
+        canActivate: [authGuard], // Kontrollera manager-åtkomst
         data: {
           heading: 'Central CIS',
+          role: 'manager', // Kräv rollen manager för alla under /user
           subSteps: ['mytickets', 'carrierjira', 'carrierzendesk'],
-
           controls: [
             {
               type: 'next',
@@ -67,26 +68,31 @@ const routes: WizardStep[] = [
           {
             path: 'mytickets',
             component: UserComponent,
+            canActivate: [authGuard],
             data: {
-              heading: 'My Dashboard',
+              heading: 'CIS Tickets',
               pageHeading: '',
+              role: 'manager', // Kräv manager-roll
             },
           },
-
           {
             path: 'carrierjira',
             component: CarrierFieldModuleComponent,
+            canActivate: [authGuard],
             data: {
               heading: 'Carrier list in Jira',
               pageHeading: '',
+              role: 'manager', // Kräv manager-roll
             },
           },
           {
             path: 'carrierzendesk',
             component: ZendeskFieldModuleComponent,
+            canActivate: [authGuard],
             data: {
               heading: 'Carrier list in Zendesk',
               pageHeading: '',
+              role: 'manager', // Kräv manager-roll
               controls: [
                 {
                   type: 'prev',
@@ -99,10 +105,11 @@ const routes: WizardStep[] = [
       {
         path: 'admin',
         component: AdminStepComponent,
+        canActivate: [authGuard], // Kontrollera admin-åtkomst
         data: {
           heading: 'Admin',
+          role: 'admin', // Kräv rollen admin för alla under /admin
           subSteps: ['team', 'tickets', 'sprint'],
-
           controls: [
             {
               type: 'next',
@@ -114,35 +121,34 @@ const routes: WizardStep[] = [
             path: '',
             component: AdminIndexComponent,
           },
-
           {
             path: 'team',
             component: AdminModuleComponent,
             canActivate: [authGuard],
-
             data: {
               heading: 'Carrier Team',
               pageHeading: '',
+              role: 'admin', // Kräv admin-roll
             },
           },
           {
             path: 'tickets',
             component: CarrierTicketComponent,
             canActivate: [authGuard],
-
             data: {
-              heading: 'Carrier Tickets',
+              heading: 'Central Libary Tickets',
               pageHeading: '',
+              role: 'admin', // Kräv admin-roll
             },
           },
           {
             path: 'sprint',
             component: SprintreviewComponent,
             canActivate: [authGuard],
-
             data: {
               heading: 'Sprint Review',
               pageHeading: '',
+              role: 'admin', // Kräv admin-roll
               controls: [
                 {
                   type: 'prev',
