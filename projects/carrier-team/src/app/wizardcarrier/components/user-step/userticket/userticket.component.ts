@@ -22,7 +22,7 @@ export class UserComponent implements OnInit {
   assignedTickets: any[] = [];
   assignedTicketsBackup: any[] = [];
   activeFilter = '';
-  responseType: string = 'public';
+  responseType = 'public';
 
   unassignedTickets: any[] = [];
   jiraVisibility: boolean[] = [];
@@ -97,7 +97,7 @@ export class UserComponent implements OnInit {
     private wizardBackendService: WizardbackendService, // Lägg till denna
   ) {}
 
-  selectedEmail: string = ''; // För vald e-postadress
+  selectedEmail = ''; // För vald e-postadress
 
   // Lista med e-postadresser
   adminEmails = [
@@ -241,7 +241,9 @@ export class UserComponent implements OnInit {
   }
 
   private getDaysOld(updatedAt: string): number {
-    if (!updatedAt) return 0;
+    if (!updatedAt) {
+      return 0;
+    }
     const updatedDate = new Date(updatedAt).getTime();
     const today = new Date().getTime();
     return Math.floor((today - updatedDate) / (1000 * 3600 * 24));
@@ -550,8 +552,12 @@ export class UserComponent implements OnInit {
       const indexB = priorityOrder.indexOf(b.priority);
 
       // Om prioritet inte finns i listan, lägg dem sist
-      if (indexA === -1) return 1;
-      if (indexB === -1) return -1;
+      if (indexA === -1) {
+        return 1;
+      }
+      if (indexB === -1) {
+        return -1;
+      }
 
       return indexA - indexB;
     });

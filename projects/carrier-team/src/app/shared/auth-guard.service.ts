@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { Router, ActivatedRouteSnapshot } from '@angular/router';
+import { ActivatedRouteSnapshot, Router } from '@angular/router';
 
 export const authGuard = (route?: ActivatedRouteSnapshot): boolean => {
   const router = inject(Router);
