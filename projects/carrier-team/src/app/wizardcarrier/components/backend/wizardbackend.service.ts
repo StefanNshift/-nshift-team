@@ -98,6 +98,13 @@ export class WizardbackendService {
     return this.http.get(url, { headers, params });
   }
 
+  getZendeskTicketComments(ticketId: string): Observable<any> {
+    const url = `${this.WIZARD_BACKEND_URL}/GetZendeskTicketComments`;
+    const headers = this.getHeaders();
+    const params = new HttpParams().set('ticketID', ticketId);
+    return this.http.get(url, { headers, params });
+  }
+
   GetZendeskTicketRequesterName(ticketId: string): Observable<any> {
     const url = `${this.WIZARD_BACKEND_URL}/GetZendeskRequesterName`;
     const headers = this.getHeaders();
@@ -106,7 +113,7 @@ export class WizardbackendService {
   }
 
   ReplyZendeskTicket(ticketId: number, email: string, message: string, isPublic: boolean): Observable<any> {
-    const url = `${this.WIZARD_BACKEND_URL}/ReplyZendeskTicket`;
+    const url = `${this.WIZARD_BACKEND_URL}/ReplyZendeskTicket1`;
     const body = {
       ticketId: ticketId,
       email: email,

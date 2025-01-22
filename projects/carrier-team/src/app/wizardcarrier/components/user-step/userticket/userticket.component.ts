@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth'; // Firebase Auth modules
 import { Database, get, ref, update } from '@angular/fire/database';
 import { Router } from '@angular/router';
+import { send } from 'process';
 import { WizardbackendService } from '../../backend/wizardbackend.service';
 
 @Component({
@@ -11,6 +12,9 @@ import { WizardbackendService } from '../../backend/wizardbackend.service';
   styleUrls: ['./userticket.component.scss'],
 })
 export class UserComponent implements OnInit {
+  constructor(
+    private wizardBackendService: WizardbackendService, // Lägg till denna
+  ) {}
   tickets: any[] = [];
   collectedData: any[] = [];
   isLoading = true;
@@ -23,7 +27,9 @@ export class UserComponent implements OnInit {
   assignedTicketsBackup: any[] = [];
   activeFilter = '';
   responseType = 'public';
-
+  latestPublic: any;
+  latestInternal: any;
+  latestAssigneeReply: any;
   unassignedTickets: any[] = [];
   jiraVisibility: boolean[] = [];
   ticketsToBeAnsweredCount = 0;
@@ -33,10 +39,13 @@ export class UserComponent implements OnInit {
   selectedTicket: any = null;
   selectedTemplate: string | null = null;
   newETA = '';
+  ticketNumber = '';
+
   adminEnabled = false;
   customMessage = '';
   includeRequesterName = false;
   ShouldBeInternal = false;
+  isChatHistoryTab = false;
   requesterName = '';
   messageTemplates: { label: string; value: string }[] = [
     {
@@ -81,6 +90,18 @@ export class UserComponent implements OnInit {
     },
   ];
 
+  members = [
+    { zendeskID: 5029634049180, email: 'stefan.liden@nshift.com' },
+    { zendeskID: 392655027080, email: 'adriana.covrig@nshift.com' },
+    { zendeskID: 115013890774, email: 'andreas.elind@nshift.com' },
+    { zendeskID: 1901648861654, email: 'crystal.aguilar@nshift.com' },
+    { zendeskID: 375464540999, email: 'anca.cava@nshift.com' },
+    { zendeskID: 361633069534, email: 'mark.austin@nshift.com' },
+    { zendeskID: 114863839473, email: 'karolina.karlsson@nshift.com' },
+    { zendeskID: 115012328113, email: 'siri.montell@nshift.com' },
+    { zendeskID: 4467698588828, email: 'ciprian.balasa@nshift.com' },
+  ];
+
   tier1Tickets = 0;
   tier2Tickets = 0;
   tier3Tickets = 0;
@@ -93,9 +114,6 @@ export class UserComponent implements OnInit {
   filteredUnassignedTickets: any[] = [];
   sortKey = '';
   sortDirection = 'asc';
-  constructor(
-    private wizardBackendService: WizardbackendService, // Lägg till denna
-  ) {}
 
   selectedEmail = ''; // För vald e-postadress
 
@@ -112,8 +130,15 @@ export class UserComponent implements OnInit {
     'ciprian.balasa@nshift.com',
   ];
 
+  activeTab = 'tab1'; // Default active tab
+
   toggleJiraVisibility(index: number) {
     this.jiraVisibility[index] = !this.jiraVisibility[index];
+  }
+
+  switchTab(tab: string) {
+    this.isChatHistoryTab = tab !== 'tab1';
+    this.activeTab = tab; // Set active tab when switching
   }
 
   showToast(message: string, type: string) {
@@ -130,6 +155,8 @@ export class UserComponent implements OnInit {
 
   handleEmailChange(email: string) {
     this.isLoading = true;
+    sessionStorage.removeItem('assignedTickets');
+    sessionStorage.removeItem('assignedTicketsTimestamp');
     this.fetchAllTickets(email);
     this.filterTickets('total');
   }
@@ -142,6 +169,8 @@ export class UserComponent implements OnInit {
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
         this.user = JSON.parse(storedUser);
+
+        // Försök hämta tickets från sessionStorage
         this.fetchAllTickets(this.user.email);
         this.filterTickets('total');
       }
@@ -149,39 +178,74 @@ export class UserComponent implements OnInit {
   }
 
   private fetchAllTickets(user: string) {
+    // Kontrollera om data och tidsstämpel finns i sessionStorage
+    const cachedTickets = sessionStorage.getItem('assignedTickets');
+    const cachedTimestamp = sessionStorage.getItem('assignedTicketsTimestamp');
+
+    if (cachedTickets && cachedTimestamp) {
+      const timestamp = new Date(cachedTimestamp).getTime();
+      const now = new Date().getTime();
+
+      // Kontrollera om datan är nyare än 1 timme (3600000 ms)
+      if (now - timestamp < 3600000) {
+        // Datan är giltig, använd den
+        const parsedData = JSON.parse(cachedTickets);
+        this.processTicketData(parsedData);
+        return;
+      } else {
+        // Datan är för gammal, ta bort den
+        sessionStorage.removeItem('assignedTickets');
+        sessionStorage.removeItem('assignedTicketsTimestamp');
+      }
+    }
+
+    // Om ingen giltig cache finns, hämta data från backend
     this.wizardBackendService.getAllUserTickets(user).subscribe(
       (response: any) => {
-        this.tier1Tickets = response.assignedTickets[0]?.tier1Tickets || 0;
-        this.tier2Tickets = response.assignedTickets[0]?.tier2Tickets || 0;
-        this.tier3Tickets = response.assignedTickets[0]?.tier3Tickets || 0;
-        this.zendeskTicketCount = response.assignedTickets[0]?.ticket_count || 0;
+        if (response?.assignedTickets) {
+          // Spara data och tidsstämpel i sessionStorage
+          sessionStorage.setItem('assignedTickets', JSON.stringify(response.assignedTickets));
+          sessionStorage.setItem('assignedTicketsTimestamp', new Date().toISOString());
 
-        // Process tickets and convert "tier" to numerical value
-        const processedTickets = this.calculateETA(
-          (response.assignedTickets[0]?.tickets || []).map(ticket => ({
-            ...ticket,
-            tier: this.convertTierToNumber(ticket.tier),
-          })),
-        );
-
-        console.log(processedTickets);
-        this.ticketCountsByPriority = this.countTicketsByPriority(processedTickets);
-        this.ticketsMissingETACount = processedTickets.filter(ticket => !ticket.eta).length;
-        this.assignedTickets = processedTickets;
-        this.assignedTicketsBackup = [...processedTickets];
-        this.sortKey = 'priority';
-        this.sortDirection = 'asc';
-
-        this.sortTickets();
-        this.countTicketsToBeAnswered();
-        console.log(this.tickets);
-        this.isLoading = false;
+          // Bearbeta datan
+          this.processTicketData(response.assignedTickets);
+        } else {
+          console.error('Invalid response from backend:', response);
+          this.isLoading = false;
+        }
       },
       error => {
         console.error('Error fetching tickets:', error);
         this.isLoading = false;
       },
     );
+  }
+
+  // Separat funktion för att bearbeta datan
+  private processTicketData(assignedTickets: any[]) {
+    this.tier1Tickets = assignedTickets[0]?.tier1Tickets || 0;
+    this.tier2Tickets = assignedTickets[0]?.tier2Tickets || 0;
+    this.tier3Tickets = assignedTickets[0]?.tier3Tickets || 0;
+    this.zendeskTicketCount = assignedTickets[0]?.ticket_count || 0;
+
+    // Process tickets and convert "tier" to numerical value
+    const processedTickets = this.calculateETA(
+      (assignedTickets[0]?.tickets || []).map(ticket => ({
+        ...ticket,
+        tier: this.convertTierToNumber(ticket.tier),
+      })),
+    );
+
+    this.ticketCountsByPriority = this.countTicketsByPriority(processedTickets);
+    this.ticketsMissingETACount = processedTickets.filter(ticket => !ticket.eta).length;
+    this.assignedTickets = processedTickets;
+    this.assignedTicketsBackup = [...processedTickets];
+    this.sortKey = 'priority';
+    this.sortDirection = 'asc';
+
+    this.sortTickets();
+    this.countTicketsToBeAnswered();
+    this.isLoading = false;
   }
 
   private convertTierToNumber(tier: string): number | null {
@@ -249,82 +313,50 @@ export class UserComponent implements OnInit {
     return Math.floor((today - updatedDate) / (1000 * 3600 * 24));
   }
 
+  private isDateBefore(date1: string, date2: string): boolean {
+    const d1 = new Date(date1).setHours(0, 0, 0, 0);
+    const d2 = new Date(date2).setHours(0, 0, 0, 0);
+    return d1 < d2; // Compare timestamps
+  }
+
+  private getDaysDifference(date1: string, date2: string): number {
+    const time1 = new Date(date1).getTime();
+    const time2 = new Date(date2).getTime();
+    return Math.floor((time2 - time1) / (1000 * 3600 * 24));
+  }
+
   isToBeAnswered(updatedAt: string, ticket: any): boolean {
-    const daysOld = this.getDaysOld(updatedAt);
-
-    const hasUpcomingFutureSprint = ticket.jiraData?.some(
-      jira =>
-        jira.sprints?.futureSprints?.some(futureSprint => {
-          const startDate = new Date(futureSprint.startDate);
-          const today = new Date();
-          const diffInDays = (startDate.getTime() - today.getTime()) / (1000 * 3600 * 24);
-          return diffInDays <= 5; // Sprint börjar inom 5 dagar
-        }) ?? false, // Fall tillbaka till false om futureSprints inte existerar
-    );
-
-    if (hasUpcomingFutureSprint) {
-      return false;
-    }
-
-    // console.log(`Analyzing ticket ID: ${ticket.ticket_id}`);
-    // console.log(`Days since last update: ${daysOld}`);
-    // console.log(`Priority: ${ticket.priority}`);
-    // console.log(`Custom Status: ${ticket.customStatus}`);
-    // console.log(`Jira Data:`, ticket.jiraData);
-
-    // Carrier Development: Kräver uppdatering efter 10 dagar
-    if (ticket.customStatus === 'Carrier Development') {
-      if (daysOld > 10) {
-        // console.log(`Ticket ID ${ticket.ticket_id} requires update due to Carrier Development older than 10 days.`);
-        return true;
-      }
-      return false;
-    }
-
-    // Prioritet:
-    if (ticket.priority === 'urgent' && daysOld > 2) {
-      // console.log(`Ticket ID ${ticket.ticket_id} requires update due to Urgent priority older than 2 days.`);
-      return true;
-    }
-    if (ticket.priority === 'high' && daysOld > 3) {
-      // console.log(`Ticket ID ${ticket.ticket_id} requires update due to High priority older than 3 days.`);
+    // Rule 1
+    if (
+      ticket.latestInternalComment?.created_at &&
+      this.isDateBefore(ticket.latestInternalComment.created_at, updatedAt)
+    ) {
       return true;
     }
 
-    // Jira-data koppling:
-    if (ticket.jiraData?.length > 0) {
-      const allJiraClosed = ticket.jiraData.every(jira => jira.sprints?.ticketStatus === 'Closed');
-      const hasActiveSprint = ticket.jiraData.some(jira => jira.sprints?.currentSprint);
+    if (ticket.latestPublicComment?.created_at && this.isDateBefore(ticket.latestPublicComment.created_at, updatedAt)) {
+      return true;
+    }
 
-      if (allJiraClosed && !['Closed', 'Resolved', 'Verified Fix'].includes(ticket.customStatus)) {
-        // console.log(
-        //   `Ticket ID ${ticket.ticket_id} requires update because all Jira tickets are closed but Zendesk status is not.`,
-        // );
-        return true;
-      }
+    // Rule 2
+    if (ticket.ticketStatus === 'open') {
+      const latestCommentDate = ticket.latestInternalComment?.created_at || ticket.latestPublicComment?.created_at;
 
-      if (hasActiveSprint) {
-        // console.log(`Ticket ID ${ticket.ticket_id} does not require update due to active Jira sprint.`);
-        return false;
+      if (latestCommentDate) {
+        const daysSinceLastComment = this.getDaysDifference(latestCommentDate, new Date().toISOString());
+
+        if (daysSinceLastComment > 3) {
+          return true;
+        }
+      } else {
+        const daysSinceCreated = this.getDaysDifference(ticket.created_at, new Date().toISOString());
+
+        if (daysSinceCreated > 3) {
+          return true;
+        }
       }
     }
 
-    // Status Pending Customer eller Carrier Feedback: Kräver uppdatering efter 10 dagar
-    if (['Pending Customer', 'Carrier Feedback'].includes(ticket.customStatus) && daysOld > 10) {
-      // console.log(
-      //   `Ticket ID ${ticket.ticket_id} requires update due to Pending Customer or Carrier Feedback status older than 10 days.`,
-      // );
-      return true;
-    }
-
-    // Status Open eller In Progress: Kräver uppdatering efter 5 dagar
-    if (['Open', 'In Progress'].includes(ticket.customStatus) && daysOld > 5) {
-      // console.log(`Ticket ID ${ticket.ticket_id} requires update due to Open or In Progress status older than 5 days.`);
-      return true;
-    }
-
-    // Default: Kräver ingen uppdatering
-    // console.log(`Ticket ID ${ticket.ticket_id} does not require an update.`);
     return false;
   }
 
@@ -401,7 +433,6 @@ export class UserComponent implements OnInit {
         return 0;
       }
 
-      // Hantera ETA och Updated At som datum
       if (this.sortKey === 'eta' || this.sortKey === 'updated_at') {
         valueA = valueA ? new Date(valueA).getTime() : null;
         valueB = valueB ? new Date(valueB).getTime() : null;
@@ -416,7 +447,6 @@ export class UserComponent implements OnInit {
         return this.sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
       }
 
-      // Sortera övriga värden
       if (valueA === null || valueA === undefined) {
         return 1;
       }
@@ -442,12 +472,17 @@ export class UserComponent implements OnInit {
     return ticket.jiraData.some((jira: any) => jira.sprints?.previousSprints?.length > 0);
   }
 
+  getJiraBadgeClass(ticketStatus: string): string {
+    return `jira-badge jira-badge-${ticketStatus.toLowerCase().replace(/\s+/g, '-')}`;
+  }
+
   isHoldStatus(status: string): boolean {
     const specialStatuses = [
       'Carrier Development',
       'Product Development',
       'Account Management',
       'Awaiting',
+      '3. Party feedback',
       'Accounting Services',
       'Customer meeting',
       'Software release',
@@ -492,6 +527,18 @@ export class UserComponent implements OnInit {
     this.jiraVisibility = this.assignedTicketsBackup.map(() => false);
 
     switch (filter) {
+      case 'currentSprint':
+        this.assignedTickets = this.assignedTicketsBackup.filter(ticket =>
+          ticket.jiraData?.some(jira => jira.sprints?.currentSprint),
+        );
+        break;
+
+      case 'futureSprint':
+        this.assignedTickets = this.assignedTicketsBackup.filter(ticket =>
+          ticket.jiraData?.some(jira => jira.sprints?.futureSprints && jira.sprints.futureSprints.length > 0),
+        );
+        break;
+
       case 'total':
         this.assignedTickets = [...this.assignedTicketsBackup];
         break;
@@ -562,6 +609,16 @@ export class UserComponent implements OnInit {
       return indexA - indexB;
     });
   }
+  getCurrentSprintTicketsCount(): number {
+    return this.assignedTicketsBackup.filter(ticket => ticket.jiraData?.some(jira => jira.sprints?.currentSprint))
+      .length;
+  }
+
+  getFutureSprintTicketsCount(): number {
+    return this.assignedTicketsBackup.filter(ticket =>
+      ticket.jiraData?.some(jira => jira.sprints?.futureSprints && jira.sprints.futureSprints.length > 0),
+    ).length;
+  }
 
   isJiraWithoutSprint(ticket: any): boolean {
     return (
@@ -593,8 +650,10 @@ export class UserComponent implements OnInit {
   }
 
   openModal(ticket: any) {
-    this.selectedTicket = ticket;
+    console.log(this.selectedTicket);
 
+    this.selectedTicket = ticket;
+    this.ticketNumber = ticket.ticket_id;
     this.newETA = ticket?.eta ? new Date(ticket.eta).toISOString().split('T')[0] : '';
 
     const delayedMessageTemplate = this.messageTemplates.find(template => template.label === 'Delayed Message');
@@ -606,6 +665,7 @@ export class UserComponent implements OnInit {
     // Visa placeholder medan datan laddas
     this.requesterName = 'Loading...';
 
+    // Fetch requester name
     this.wizardBackendService.GetZendeskTicketRequesterName(ticket.ticket_id).subscribe(
       response => {
         this.requesterName = response.requesterName || 'Customer';
@@ -618,12 +678,85 @@ export class UserComponent implements OnInit {
       },
     );
 
+    // Fetch comments and determine latest reply by assignee
+    this.wizardBackendService.getZendeskTicketComments(ticket.ticket_id).subscribe(
+      response => {
+        if (response && response.comments) {
+          const { latestPublic, latestInternal } = this.getLatestComments(response.comments);
+          this.latestPublic = latestPublic;
+          this.latestInternal = latestInternal;
+
+          // Find and store latest reply by assignee
+          const latestAssigneeReply = this.getLatestReplyByAssignee(response.comments);
+          if (latestAssigneeReply) {
+            this.latestAssigneeReply = {
+              body: latestAssigneeReply.body,
+              date: new Date(latestAssigneeReply.created_at).toLocaleString(),
+              public: latestAssigneeReply.public, // Capture the public/internal status
+            };
+          } else {
+            this.latestAssigneeReply = null;
+          }
+        } else {
+          console.error('Invalid comments response:', response);
+        }
+      },
+      error => {
+        console.error('Error fetching ticket data:', error);
+      },
+    );
+
     const modal = document.getElementById('customModal');
     if (modal) {
       modal.classList.add('show');
       modal.style.display = 'block';
       document.body.classList.add('modal-open');
     }
+  }
+
+  getLatestReplyByAssignee(comments: any[]) {
+    // Get the Zendesk ID of the current user
+    const currentUserZendeskID = this.members.find(member => member.email === this.user.email)?.zendeskID;
+
+    if (!currentUserZendeskID) {
+      console.warn('Zendesk ID not found for the current user.');
+      return null;
+    }
+
+    // Filter comments to find those authored by the assignee
+    const assigneeComments = comments.filter(comment => comment.author_id === currentUserZendeskID);
+
+    // Sort comments by `created_at` in descending order to find the latest reply
+    const sortedAssigneeComments = assigneeComments.sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
+
+    // Return the latest reply, or null if none are found
+    return sortedAssigneeComments.length > 0 ? sortedAssigneeComments[0] : null;
+  }
+
+  getLatestComments(comments: any[]) {
+    if (!Array.isArray(comments) || comments.length === 0) {
+      return { latestPublic: null, latestInternal: null };
+    }
+
+    // Filtrera ut publika och interna kommentarer
+    const publicComments = comments.filter(comment => comment.public);
+    const internalComments = comments.filter(comment => !comment.public);
+
+    // Sortera efter `created_at` i fallande ordning (senaste först)
+    const sortedPublicComments = publicComments.sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
+    const sortedInternalComments = internalComments.sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
+
+    // Hämta senaste från varje kategori
+    const latestPublic = sortedPublicComments.length > 0 ? sortedPublicComments[0] : null;
+    const latestInternal = sortedInternalComments.length > 0 ? sortedInternalComments[0] : null;
+
+    return { latestPublic, latestInternal };
   }
 
   closeModal() {
@@ -639,6 +772,7 @@ export class UserComponent implements OnInit {
     this.includeRequesterName = false;
     this.customMessage = '';
     this.newETA = '';
+    this.activeTab = 'tab1';
   }
 
   updateEmailText() {
@@ -680,12 +814,9 @@ export class UserComponent implements OnInit {
       this.showToast('Please provide an ETA before sending the update.', 'error');
       return;
     }
-    let sendPublic;
-    if (this.ShouldBeInternal == true) {
-      sendPublic = false;
-    } else {
-      sendPublic = true;
-    }
+
+    const sendPublic = this.ShouldBeInternal === true ? false : true;
+
     if (this.newETA && this.customMessage) {
       const updatePayload = {
         ticketId: this.selectedTicket.ticket_id,
@@ -694,13 +825,69 @@ export class UserComponent implements OnInit {
         public: sendPublic,
       };
 
+      const currentDateTime = new Date().toISOString();
+      this.selectedTicket.updated_at = currentDateTime;
+      this.selectedTicket.eta = this.newETA;
+
+      if (sendPublic === true) {
+        this.selectedTicket.latestPublicComment = { created_at: currentDateTime }; // Update latestPublicComment
+      } else {
+        this.selectedTicket.latestInternalComment = { created_at: currentDateTime }; // Update latestInternalComment
+      }
+
+      console.log('Selected Ticket After Update:', this.selectedTicket);
+
+      // Overwrite sessionStorage with updated tickets
+      const cachedTickets = sessionStorage.getItem('assignedTickets');
+      if (cachedTickets) {
+        const parsedTickets = JSON.parse(cachedTickets);
+
+        // Update the relevant ticket in the parsedTickets array
+        parsedTickets.forEach((team: any) => {
+          team.tickets = team.tickets.map((ticket: any) => {
+            if (`${ticket.ticket_id}` === `${this.selectedTicket.ticket_id}`) {
+              console.log('Match found! Updating ticket:', ticket.ticket_id);
+
+              // Update the ticket with new fields
+              return {
+                ...ticket,
+                updated_at: currentDateTime,
+                eta: this.newETA,
+                latestPublicComment: sendPublic ? { created_at: currentDateTime } : ticket.latestPublicComment,
+                latestInternalComment: !sendPublic ? { created_at: currentDateTime } : ticket.latestInternalComment,
+              };
+            }
+            return ticket;
+          });
+        });
+
+        // Save the updated data to sessionStorage
+        sessionStorage.setItem('assignedTickets', JSON.stringify(parsedTickets));
+        console.log('Updated tickets saved to sessionStorage:', parsedTickets);
+      } else {
+        console.warn('No tickets found in sessionStorage. Creating new entry...');
+        const newTicketsData = [
+          {
+            name: this.user.name,
+            zendeskID: this.user.zendeskID,
+            ticket_count: 1,
+            tickets: [this.selectedTicket],
+          },
+        ];
+        sessionStorage.setItem('assignedTickets', JSON.stringify(newTicketsData));
+      }
+
+      // Close modal and reset state
       this.closeModal();
+      this.isChatHistoryTab = false;
+
+      // Call backend to update ticket
       this.wizardBackendService
         .ReplyZendeskTicket(updatePayload.ticketId, updatePayload.email, updatePayload.message, updatePayload.public)
         .subscribe(
           response => {
             this.showToast('ETA updated successfully for ' + this.selectedTicket.ticket_id, 'success');
-            this.fetchAllTickets(this.user.email);
+            // Fetch updated tickets
           },
           error => {
             console.error('Error updating ETA:', error);

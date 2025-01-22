@@ -30,16 +30,15 @@
   </div>
 </div>
 
-<div *ngIf="isLoading" class="loading-container">
-  <p>Loading tickets...</p>
-</div>
+<div *ngIf="isLoading" class="skeleton-loader skeleton-loader-table"></div>
 
 <div class="row">
   <div class="col-md-12 mb-3">
     <div *ngIf="!isLoading && assignedTickets.length > 0">
       <div class="ticket-summary-container">
-        <div class="ticket-summary-container mt-3">
-          <div class="small-stats-container d-flex">
+        <div class="small-stats-container">
+          <!-- Row 1: Overview and Sprint -->
+          <div class="stats-row">
             <!-- Overview -->
             <div class="stats-group">
               <h5>Overview</h5>
@@ -79,6 +78,32 @@
               </div>
             </div>
 
+            <!-- Sprint -->
+            <div class="stats-group">
+              <h5>Sprint</h5>
+              <div class="stats-row">
+                <div
+                  class="stat-box"
+                  [class.active]="activeFilter === 'currentSprint'"
+                  (click)="filterTickets('currentSprint')"
+                >
+                  <p>Current Sprint</p>
+                  <h4>{{ getCurrentSprintTicketsCount() }}</h4>
+                </div>
+                <div
+                  class="stat-box"
+                  [class.active]="activeFilter === 'futureSprint'"
+                  (click)="filterTickets('futureSprint')"
+                >
+                  <p>Future Sprint</p>
+                  <h4>{{ getFutureSprintTicketsCount() }}</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 2: Priorities and Tiers -->
+          <div class="stats-row">
             <!-- Priorities -->
             <div class="stats-group">
               <h5>Priorities</h5>
@@ -166,7 +191,7 @@
                     </span>
 
                     <span *ngIf="hasAllJiraClosed(ticket)" class="badge status-badge bg-jiracompleted text-white">
-                      Jira Completed
+                      Completed
                     </span>
 
                     <span *ngIf="hasPreviousSprints(ticket)" class="badge status-badge bg-delayed text-dark"
@@ -181,16 +206,20 @@
                     </span>
                   </div>
                 </div>
-                <div class="card-menu-control"></div>
+                <!--   <div class="card-menu-control"></div> -->
               </div>
             </div>
             <div class="card-body d-flex flex-column align-items-stretch">
               <ul class="ticket-details">
                 <li>
+                  <i class="fa fa-envelope"></i>
+                  <!-- Ändra ikonen till önskad -->
                   <strong>Subject:</strong>
                   {{ ticket.subject.length > 40 ? (ticket.subject | slice: 0:40) + '...' : ticket.subject }}
                 </li>
                 <li>
+                  <i class="fa fa-calendar"></i>
+                  <!-- Ändra ikonen till önskad -->
                   <strong>ETA:</strong>
                   <span [ngClass]="{ 'missing-eta': ticket.jiraData?.length > 0 && !ticket.eta }">
                     <ng-container *ngIf="ticket.jiraData?.length > 0; else noJiras">
@@ -201,20 +230,55 @@
                         {{ ticket.eta | date: 'MMMM d, y' }}
                       </ng-template>
                     </ng-container>
-                    <ng-template #noJiras>
-                      No JIRA tickets added
-                    </ng-template>
+                    <ng-template #noJiras> No JIRA tickets added </ng-template>
                   </span>
                 </li>
-                <li><strong>Updated At:</strong> {{ ticket.updated_at | date: 'MMMM d, y' }}</li>
-                <li><strong>Created At:</strong> {{ ticket.created_at | date: 'MMMM d, y' }}</li>
                 <li>
+                  <i class="fa fa-clock"></i>
+                  <!-- Ändra ikonen till önskad -->
+                  <strong>Updated At:</strong>
+                  {{ ticket.updated_at | date: 'MMMM d, y' }}
+                </li>
+                <li>
+                  <i class="fa fa-calendar-plus"></i>
+                  <!-- Ändra ikonen till önskad -->
+                  <strong>Created At:</strong>
+                  {{ ticket.created_at | date: 'MMMM d, y' }}
+                </li>
+
+                <li>
+                  <i class="fa fa-calendar-alt"></i>
+                  <strong>Your Latest Public:</strong>
+                  <span *ngIf="ticket.latestPublicComment?.created_at; else noPublicComment">
+                    {{ ticket.latestPublicComment.created_at | date: 'MMMM d, y' }}
+                  </span>
+                  <ng-template #noPublicComment>
+                    <span>None</span>
+                  </ng-template>
+                </li>
+
+                <li>
+                  <i class="fa fa-calendar-check"></i>
+                  <strong>Your Latest Internal:</strong>
+                  <span *ngIf="ticket.latestInternalComment?.created_at; else noInternalComment">
+                    {{ ticket.latestInternalComment.created_at | date: 'MMMM d, y' }}
+                  </span>
+                  <ng-template #noInternalComment>
+                    <span>None</span>
+                  </ng-template>
+                </li>
+
+                <li>
+                  <i class="fa fa-signal"></i>
+                  <!-- Ändra ikonen till önskad -->
                   <strong>Tier:</strong>
                   <span [ngClass]="{ 'missing-tier': !ticket.tier }">
                     {{ ticket.tier ? ticket.tier : 'Tier Missing' }}
                   </span>
                 </li>
                 <li>
+                  <i class="fa fa-truck"></i>
+                  <!-- Ändra ikonen till önskad -->
                   <strong>Carrier ID:</strong>
                   <span [ngClass]="{ missing: !ticket.carrier_id }">
                     {{ ticket.carrier_id ? ticket.carrier_id : 'Carrier ID Missing' }}
@@ -251,17 +315,7 @@
                     >
                       {{ jira.ticket }}
                     </a>
-                    <span
-                      class="jira-status badge"
-                      [ngClass]="{
-                        'badge-success': jira.sprints.ticketStatus === 'Resolved',
-                        'badge-primary': jira.sprints.ticketStatus === 'Open' || jira.sprints.ticketStatus === 'Reopen',
-                        'badge status-badge bg-jiracompleted text-white': jira.sprints.ticketStatus === 'Closed',
-                        'badge-warning': jira.sprints.ticketStatus === 'Draft',
-                        'badge-info': jira.sprints.ticketStatus === 'Testing',
-                        'badge-secondary': jira.sprints.ticketStatus === 'Verified Fix'
-                      }"
-                    >
+                    <span class="jira-status jira-badge" [ngClass]="getJiraBadgeClass(jira.sprints.ticketStatus)">
                       {{ jira.sprints.ticketStatus }}
                     </span>
                   </div>
@@ -273,11 +327,16 @@
                   >
                     <!-- Current Sprint -->
                     <div *ngIf="jira.sprints.currentSprint" class="sprint-section">
-                      <p class="mb-1"><strong>Sprint:</strong> {{ jira.sprints.currentSprint.name }}</p>
                       <p class="mb-1">
+                        <i class="fa fa-flag-checkered"></i>
+                        <strong>Sprint:</strong> {{ jira.sprints.currentSprint.name }}
+                      </p>
+                      <p class="mb-1">
+                        <i class="fa fa-calendar-alt"></i>
                         <strong>Start:</strong> {{ jira.sprints.currentSprint.startDate | date: 'MMMM d, y' }}
                       </p>
                       <p class="mb-0">
+                        <i class="fa fa-calendar"></i>
                         <strong>End:</strong> {{ jira.sprints.currentSprint.endDate | date: 'MMMM d, y' }}
                       </p>
                     </div>
@@ -285,22 +344,28 @@
                     <!-- Future Sprints -->
                     <div *ngIf="jira.sprints.futureSprints?.length > 0" class="sprint-section mt-3">
                       <div *ngFor="let sprint of jira.sprints.futureSprints" class="future-sprint-details">
-                        <p class="mb-1"><strong>Sprint:</strong> {{ sprint.name }}</p>
-                        <p class="mb-1"><strong>Start:</strong> {{ sprint.startDate | date: 'MMMM d, y' }}</p>
-                        <p class="mb-0"><strong>End:</strong> {{ sprint.endDate | date: 'MMMM d, y' }}</p>
+                        <p class="mb-1">
+                          <i class="fa fa-flag"></i>
+                          <strong>Sprint:</strong> {{ sprint.name }}
+                        </p>
+                        <p class="mb-1">
+                          <i class="fa fa-calendar-alt"></i>
+                          <strong>Start:</strong> {{ sprint.startDate | date: 'MMMM d, y' }}
+                        </p>
+                        <p class="mb-0">
+                          <i class="fa fa-calendar"></i>
+                          <strong>End:</strong> {{ sprint.endDate | date: 'MMMM d, y' }}
+                        </p>
                       </div>
                     </div>
                   </div>
 
                   <!-- Indicator for delayed tickets with previous sprints -->
                   <div *ngIf="jira.sprints.previousSprints?.length > 0" class="previous-sprints-indicator mt-2">
-                    <span class="badge badge-warning">Delayed</span>
+                    <span class="badge badge-warning"> <i class="fa fa-exclamation-triangle"></i> Delayed </span>
                     <ul class="previous-sprints-list mt-2">
-                      <li
-                        *ngFor="let sprint of jira.sprints.previousSprints"
-                        style="color:#301a1a !important"
-                        class="text-muted small"
-                      >
+                      <li *ngFor="let sprint of jira.sprints.previousSprints" class="text-muted small">
+                        <i class="fa fa-history"></i>
                         <strong>Previous Sprint:</strong> {{ sprint.name }}
                       </li>
                     </ul>
@@ -313,88 +378,175 @@
       </div>
     </div>
   </div>
-
   <div class="modal" id="customModal" tabindex="-1" role="dialog" aria-labelledby="customModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Update ETA for Ticket {{ selectedTicket?.ticket_id }}</h5>
+          <h5 class="modal-title">#{{ ticketNumber }}</h5>
           <button type="button" class="close" aria-label="Close" (click)="closeModal()">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
-          <p><strong>Subject:</strong> {{ selectedTicket?.subject }}</p>
-          <!-- Text area to write the message -->
-          <div class="form-group">
-            <label for="newETA">New ETA:</label>
-            <input
-              id="newETA"
-              type="date"
-              class="form-control"
-              [(ngModel)]="newETA"
-              (change)="onETAChange($event)"
-              [ngClass]="{ 'is-invalid': !newETA }"
-            />
-            <div *ngIf="!newETA" class="invalid-feedback">
-              Please provide a valid date.
+          <!-- Tabs Navigation -->
+          <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" [class.active]="activeTab === 'tab1'" (click)="switchTab('tab1')" type="button">
+                Update ETA
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" [class.active]="activeTab === 'tab2'" (click)="switchTab('tab2')" type="button">
+                Ticket History
+              </button>
+            </li>
+          </ul>
+
+          <!-- Tabs Content -->
+          <div class="tab-content mt-3">
+            <!-- Tab 1 Content -->
+            <div class="tab-pane fade" [class.show]="activeTab === 'tab1'" [class.active]="activeTab === 'tab1'">
+              <p><strong>Subject:</strong> {{ selectedTicket?.subject }}</p>
+              <!-- Add your existing content for Update ETA here -->
+
+              <div class="form-group">
+                <label for="newETA">New ETA:</label>
+                <input
+                  id="newETA"
+                  type="date"
+                  class="form-control"
+                  [(ngModel)]="newETA"
+                  (change)="onETAChange($event)"
+                  [ngClass]="{ 'is-invalid': !newETA }"
+                />
+                <div *ngIf="!newETA" class="invalid-feedback">
+                  Please provide a valid date.
+                </div>
+              </div>
+
+              <div class="form-group form-check form-check-inline">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="internalCheck"
+                  [disabled]="!newETA"
+                  [(ngModel)]="ShouldBeInternal"
+                />
+                <label class="form-check-label" for="internalCheck">Send as Internal</label>
+              </div>
+
+              <div class="form-group form-check form-check-inline">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="requesterNameCheck"
+                  [(ngModel)]="includeRequesterName"
+                  (change)="updateEmailText()"
+                  [disabled]="!newETA"
+                />
+                <label class="form-check-label" for="requesterNameCheck">Include Requester Name</label>
+              </div>
+
+              <div class="form-group">
+                <label for="customMessage">Reply</label>
+                <textarea
+                  id="customMessage"
+                  class="form-control"
+                  rows="3"
+                  [disabled]="!newETA"
+                  [(ngModel)]="customMessage"
+                  [ngClass]="{ 'highlight-internal': ShouldBeInternal }"
+                ></textarea>
+              </div>
+
+              <!-- Predefined message options -->
+              <div class="form-group">
+                <label for="messageTemplates">Select a predefined message:</label>
+                <select
+                  id="messageTemplates"
+                  class="form-control"
+                  [(ngModel)]="selectedTemplate"
+                  (change)="onTemplateSelect($event)"
+                  [disabled]="!newETA"
+                >
+                  <option value="">-- Select a message --</option>
+                  <option *ngFor="let template of messageTemplates" [value]="template.value">
+                    {{ template.label }}
+                  </option>
+                </select>
+              </div>
             </div>
-          </div>
 
-          <div class="form-group form-check form-check-inline">
-            <input
-              type="checkbox"
-              class="form-check-input"
-              id="internalCheck"
-              [disabled]="!newETA"
-              [(ngModel)]="ShouldBeInternal"
-            />
-            <label class="form-check-label" for="internalCheck">Send as Internal</label>
-          </div>
+            <!-- Tab 2 Content -->
+            <div class="tab-pane fade" [class.show]="activeTab === 'tab2'" [class.active]="activeTab === 'tab2'">
+              <div class="comments-container">
+                <h4>Comments</h4>
 
-          <div class="form-group form-check form-check-inline">
-            <input
-              type="checkbox"
-              class="form-check-input"
-              id="requesterNameCheck"
-              [(ngModel)]="includeRequesterName"
-              (change)="updateEmailText()"
-              [disabled]="!newETA"
-            />
-            <label class="form-check-label" for="requesterNameCheck">Include Requester Name</label>
-          </div>
+                <!-- Public Comment Section -->
+                <div *ngIf="latestPublic" class="comment-card public-comment">
+                  <div class="comment-header">Public Comment</div>
+                  <div class="comment-body">
+                    <p>
+                      <strong>Created At:</strong>
+                      {{ latestPublic.created_at | date: 'medium' }}
+                    </p>
+                    <p><strong>Content:</strong> {{ latestPublic.plain_body }}</p>
+                  </div>
+                </div>
+                <div *ngIf="!latestPublic" class="comment-card empty-comment">
+                  <div class="comment-header">Latest Public Comment</div>
+                  <div class="comment-body">
+                    <p>No public comments available.</p>
+                  </div>
+                </div>
 
-          <div class="form-group">
-            <label for="customMessage">Reply</label>
-            <textarea
-              id="customMessage"
-              class="form-control"
-              rows="3"
-              [disabled]="!newETA"
-              [(ngModel)]="customMessage"
-              [ngClass]="{ 'highlight-internal': ShouldBeInternal }"
-            ></textarea>
-          </div>
+                <!-- Internal Comment Section -->
+                <div *ngIf="latestInternal" class="comment-card internal-comment">
+                  <div class="comment-header">Latest Internal Comment</div>
+                  <div class="comment-body">
+                    <p>
+                      <strong>Created At:</strong>
+                      {{ latestInternal.created_at | date: 'medium' }}
+                    </p>
+                    <p><strong>Content:</strong> {{ latestInternal.plain_body }}</p>
+                  </div>
+                </div>
+                <div *ngIf="!latestInternal" class="comment-card empty-comment">
+                  <div class="comment-header">Internal Comment</div>
+                  <div class="comment-body">
+                    <p>No internal comments available.</p>
+                  </div>
+                </div>
 
-          <!-- Predefined message options -->
-          <div class="form-group">
-            <label for="messageTemplates">Select a predefined message:</label>
-            <select
-              id="messageTemplates"
-              class="form-control"
-              [(ngModel)]="selectedTemplate"
-              (change)="onTemplateSelect($event)"
-              [disabled]="!newETA"
-            >
-              <option value="">-- Select a message --</option>
-              <option *ngFor="let template of messageTemplates" [value]="template.value">
-                {{ template.label }}
-              </option>
-            </select>
+                <!-- Latest Assignee Reply Section -->
+                <div *ngIf="latestAssigneeReply" class="comment-card assignee-reply">
+                  <div class="comment-header">Latest Reply by You</div>
+                  <div class="comment-body">
+                    <p>
+                      <strong>Created At:</strong>
+                      {{ latestAssigneeReply.date }}
+                    </p>
+                    <p>
+                      <strong>Type:</strong>
+                      {{ latestAssigneeReply.public ? 'Public' : 'Internal' }}
+                    </p>
+                    <p><strong>Content:</strong> {{ latestAssigneeReply.body }}</p>
+                  </div>
+                </div>
+                <div *ngIf="!latestAssigneeReply" class="comment-card empty-comment">
+                  <div class="comment-header">Latest Reply by You</div>
+                  <div class="comment-body">
+                    <p>No replies by you are available.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-primary" (click)="sendETAUpdate()" [disabled]="!customMessage">Send Update</button>
+          <button *ngIf="!isChatHistoryTab" type="button" (click)="sendETAUpdate()" class="btn btn-primary">
+            Update Ticket
+          </button>
         </div>
       </div>
     </div>

@@ -98,25 +98,8 @@
     "extends": [
       "@commitlint/config-conventional"
     ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged && npm run package-lock-sanitizer && git add package-lock.json",
-      "commit-msg": "commitlint --edit"
-    }
-  },
-  "lint-staged": {
-    "*.scss": [
-      "stylelint --fix --syntax=scss",
-      "git add"
-    ],
-    "*.{ts,scss,html,md,json}": [
-      "prettier --write",
-      "git add"
-    ],
-    "*.ts": [
-      "tslint --fix",
-      "git add"
-    ]
-  }
+  
+}
+
+
 }

@@ -34,6 +34,17 @@
   box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
 }
 
+.card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.15);
+}
+
 .card-columns {
   display: flex;
   flex-wrap: wrap;
@@ -49,11 +60,11 @@
 
 @media (max-width: 1500px) {
   .card-header {
-    height: 150px;
+    height: 200px;
   }
 
   .card-body {
-    height: 320px;
+    height: 350px;
   }
 }
 
@@ -388,4 +399,235 @@
 
 .highlight-internal {
   background-color: #fff7ed; /* Sätt bakgrundsfärgen till gul */
+}
+
+.comments-container {
+  display: grid;
+  grid-template-columns: 1fr; /* Single column layout */
+  gap: 1rem;
+  padding: 1rem;
+  max-width: 100%;
+}
+
+.comment-card {
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.comment-card .comment-header {
+  background-color: #0116a3; /* Default blue */
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+}
+
+.public-comment .comment-header {
+  background-color: #0116a3 !important; /* Blue for public */
+}
+
+.internal-comment .comment-header {
+  background-color: #e66c1b; /* Orange for internal */
+}
+
+.assignee-reply .comment-header {
+  background-color: #0116a3; /* Blue for assignee */
+}
+
+.comment-card .comment-body {
+  padding: 1rem;
+  overflow-y: auto; /* Scrollable if content exceeds height */
+}
+
+.comment-card .comment-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.comment-card .comment-body::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.comment-card .comment-body::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+.empty-comment {
+  background-color: #f8f9fa; /* Light gray for empty comments */
+}
+
+@media (min-width: 768px) {
+  .comments-container {
+    grid-template-columns: 1fr; /* Maintain single column on all screen sizes */
+  }
+}
+
+.comment-card .comment-body {
+  padding: 1rem;
+  overflow-y: auto; /* Scrollable if content exceeds height */
+  color: #333333; /* Adjust text color for better readability */
+}
+
+.comment-card .comment-body p {
+  margin-bottom: 0.5rem; /* Add spacing between paragraphs */
+}
+
+.assignee-reply .comment-header {
+  background-color: #3f51b5; /* Distinct blue color for assignee */
+  color: #ffffff;
+}
+
+.assignee-reply .comment-body {
+  color: #333333;
+}
+
+.ticket-details i {
+  margin-right: 8px; /* Avstånd mellan ikon och text */
+  font-size: 16px; /* Justera storlek på ikonen */
+  color: #555; /* Ändra färg om nödvändigt */
+}
+
+.ticket-details li {
+  line-height: 1.5; /* Ger bättre avstånd mellan rader */
+  font-size: 14px; /* Gör textstorleken konsekvent */
+}
+
+/* Base Styles */
+.jira-badge {
+  padding: 0.2rem 0.4rem; /* Compact padding */
+  border-radius: 0.2rem; /* Rounded corners */
+  font-weight: 600; /* Slightly bold text */
+  font-size: 0.75rem; /* Small font size */
+  display: inline-block;
+  text-align: center;
+  white-space: nowrap; /* Prevents wrapping */
+  border: 1px solid transparent; /* Default border */
+}
+
+/* Status-Specific Styles */
+.jira-badge-resolved {
+  background-color: #d4edda; /* Light green */
+  color: #155724; /* Dark green text */
+  border-color: #c3e6cb; /* Green border */
+}
+
+.jira-badge-verified-fix {
+  background-color: #d4edda; /* Light green */
+  color: #155724; /* Dark green text */
+  border-color: #c3e6cb; /* Green border */
+}
+
+.jira-badge-approving-fix {
+  background-color: #cce5ff; /* Light blue */
+  color: #004085; /* Dark blue text */
+  border-color: #b8daff; /* Blue border */
+}
+
+.jira-badge-open,
+.jira-badge-reopen {
+  background-color: #cce5ff; /* Light blue */
+  color: #004085; /* Dark blue text */
+  border-color: #b8daff; /* Blue border */
+}
+
+.jira-badge-closed {
+  background-color: #d4edda; /* Light green */
+  color: #155724; /* Dark green text */
+  border-color: #c3e6cb; /* Green border */
+}
+
+.jira-badge-draft {
+  background-color: #fff3cd; /* Light yellow */
+  color: #856404; /* Dark yellow text */
+  border-color: #ffeeba; /* Yellow border */
+}
+
+.jira-badge-testing {
+  background-color: #d1ecf1; /* Light cyan */
+  color: #0c5460; /* Dark cyan text */
+  border-color: #bee5eb; /* Cyan border */
+}
+
+.jira-badge-not-to-be-released {
+  background-color: #d4edda; /* Light green */
+  color: #155724; /* Dark green text */
+  border-color: #c3e6cb; /* Green border */
+}
+
+.jira-badge-default {
+  background-color: #e2e3e5; /* Light gray */
+  color: #383d41; /* Dark gray text */
+  border-color: #d6d8db; /* Gray border */
+}
+
+.jira-details {
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  margin-bottom: 10px;
+}
+
+.jira-details .sprint-section {
+  margin-bottom: 15px;
+}
+
+.jira-details p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.jira-details p i {
+  margin-right: 5px;
+  color: #555;
+}
+
+.badge-warning {
+  background-color: #ffc107;
+  color: #212529;
+  padding: 5px 10px;
+  font-size: 12px;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.badge-warning i {
+  margin-right: 5px;
+}
+
+.previous-sprints-list {
+  margin-top: 10px;
+  padding-left: 20px;
+}
+
+.previous-sprints-list li {
+  font-size: 13px;
+  color: #555;
+  display: flex;
+  align-items: center;
+}
+
+.previous-sprints-list li i {
+  margin-right: 5px;
+  color: #6c757d;
+}
+
+.jira-details .sprint-section .fa-calendar-alt,
+.jira-details .sprint-section .fa-calendar,
+.jira-details .sprint-section .fa-flag {
+  color: #555;
+}
+
+.jira-details .badge {
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+  margin-top: 5px;
 }
