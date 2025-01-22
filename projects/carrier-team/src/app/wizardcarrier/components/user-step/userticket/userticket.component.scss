@@ -18,6 +18,7 @@
   height: 100px;
   box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
   transition: height 0.3s ease;
+  padding:1rem;
 }
 
 .card-body {
@@ -25,7 +26,7 @@
   flex-direction: column;
   justify-content: center; /* Vertical centering */
   align-items: flex-start; /* Horizontal alignment */
-  padding: 1rem;
+  padding: 1.25rem;
   height: 100%; /* Ensure full height is utilized */
   box-sizing: border-box;
 }
@@ -38,11 +39,6 @@
   position: relative;
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.card:hover {
-  transform: translateY(-10px) scale(1.02);
-  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.15);
 }
 
 .card-columns {
@@ -59,32 +55,46 @@
 }
 
 @media (max-width: 1500px) {
-  .card-header {
-    height: 200px;
-  }
+
 
   .card-body {
     height: 350px;
+  }
+  .card-header {
+    height: 140px;
   }
 }
 
 /* ---------------------------------------------
    Badge Styles
 --------------------------------------------- */
+.status-badge-container {
+  display: flex;
+  gap: 10px; /* Space between badges */
+  align-items: center;
+}
+
+/* General badge styling */
+
 .status-badge {
   font-weight: 500;
-  border-radius: 8px; /* Softer corners for a modern look */
-  padding: 0.3rem 1rem; /* Increased padding for a balanced layout */
-  display: inline-flex; /* Better alignment for text */
+  border-radius: 20px; /* Rundare hörn för en modern stil */
+  padding: 0.5rem 1.5rem; /* Mer avstånd för bättre läsbarhet */
+  display: inline-flex; /* För att centrera texten */
   align-items: center;
   justify-content: center;
-  text-transform: capitalize;
-  line-height: 1.5; /* Improved spacing */
-  color: #fff; /* Default text color */
-  white-space: nowrap; /* Prevent text wrapping */
-  transition: all 0.2s ease-in-out; /* Smooth hover animations */
-  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2); /* Slightly stronger shadow */
+  text-transform: capitalize; /* Gör texten enklare */
+  color: #fff; /* Standard textfärg */
+  background-color: #e0e0e0; /* Standard bakgrundsfärg */
+  white-space: nowrap; /* Förhindrar radbrytningar */
+  cursor: pointer; /* Markör vid hover */
+  transition: all 0.3s ease-in-out; /* Mjukare övergångar */
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* Lättare skugga */
 }
+
+
+
+
 .status-badge.bg-urgent {
   background: linear-gradient(135deg, #b71c1c, #c62828);
   color: #fff;
@@ -249,94 +259,82 @@
 
 /* Layout and spacing for small-stats */
 /* Container för att lägga alla grupper horisontellt */
+/* Main container */
 .small-stats-container {
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 15px;
-  justify-content: flex-start;
-  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 20px; /* Space between rows or groups */
+  justify-content: space-between;
 }
 
-/* Gruppstil för varje sektion */
+/* Stats Group - Shared styling for all groups */
 .stats-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  flex: 1 1 calc(50% - 20px); /* Two groups per row */
 }
 
+/* Heading Styling */
 .stats-group h5 {
-  text-align: left;
-  font-size: 14px; /* Mindre textstorlek för rubriker */
-  margin: 0;
+  font-size: 16px;
   font-weight: bold;
+  margin: 0;
   color: #333;
 }
 
-/* Stat-row layout */
-.stats-row {
+/* Buttons Container */
+.stats-buttons {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-wrap: wrap; /* Wrap buttons if necessary */
+  gap: 10px; /* Space between buttons */
 }
 
-/* Stat-box styling */
-.stat-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #ddd;
+/* Button Styling */
+.filter-btn {
+  background-color: #e0e0e0;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 15px;
+  font-size: 14px;
   font-weight: 500;
-  border-radius: 6px; /* Mindre rundade hörn */
-  padding: 5px; /* Mindre padding */
-  width: 90px; /* Smalare boxar */
-  height: 60px; /* Lägre boxar */
-  background-color: #f9f9f9;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-}
-
-.stat-box:hover {
-  transform: translateY(-3px); /* Mindre lyft vid hover */
-  box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.2);
-  background-color: #eaf4ff;
-}
-
-.stat-box.active {
-  background-color: #d0e8ff;
-  border-color: #0056b3;
-}
-
-.stat-box p {
-  font-size: 12px; /* Mindre textstorlek */
-  margin: 0;
-  color: #666;
-}
-
-.stat-box h4 {
-  font-size: 14px; /* Mindre textstorlek för siffror */
-  font-weight: bold;
   color: #333;
-  margin: 5px 0 0;
+  cursor: pointer;
+  display: flex
+;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+  flex: 1;
+  max-width: 140px;
 }
 
-/* Responsivitet */
+.filter-btn span {
+  font-size: 14px;
+}
+
+.filter-btn strong {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* Active Button Styling */
+.filter-btn.active {
+  background-color: #000;
+  color: #fff;
+}
+
+/* Responsive Adjustments */
 @media (max-width: 768px) {
-  .small-stats-container {
-    flex-direction: column;
-    gap: 15px;
+  .stats-group {
+    flex: 1 1 100%; /* Full width on smaller screens */
   }
 
-  .stats-row {
-    justify-content: center;
-  }
-
-  .stat-box {
-    width: 100%; /* Full bredd på små skärmar */
-    height: auto;
+  .filter-btn {
+    flex: 1 1 100%; /* Full width for buttons */
   }
 }
+
 
 /* ---------------------------------------------
    Zendeskticket Link
@@ -520,6 +518,12 @@
   color: #155724; /* Dark green text */
   border-color: #c3e6cb; /* Green border */
 }
+.jira-badge-in-progress{
+  background-color: #cce5ff; /* Light blue */
+  color: #004085; /* Dark blue text */
+  border-color: #b8daff; /* Blue border */
+}
+
 
 .jira-badge-approving-fix {
   background-color: #cce5ff; /* Light blue */
@@ -528,7 +532,7 @@
 }
 
 .jira-badge-open,
-.jira-badge-reopen {
+.jira-badge-Reopened {
   background-color: #cce5ff; /* Light blue */
   color: #004085; /* Dark blue text */
   border-color: #b8daff; /* Blue border */
@@ -630,4 +634,104 @@
   font-weight: 500;
   display: inline-block;
   margin-top: 5px;
+}
+
+
+
+/* Main container */
+.custom-select-container {
+  width: 250px; /* Justera bredden efter behov */
+  position: relative;
+}
+
+/* Label styling */
+.select-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #555;
+}
+
+/* Custom select */
+.custom-select {
+  position: relative;
+  height:3rem; /* Minska höjden */
+  border: none !important;
+  border-radius: 12px; /* Rundare hörn */
+  background: #f5f5f5; /* Ljusare bakgrundsfärg */
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtil skugga */
+}
+
+.selected-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px; /* Minskat padding */
+  font-size: 14px;
+  color: #333;
+}
+
+.selected-option i {
+  margin-right: 8px; /* Mindre mellanrum för ikoner */
+}
+
+.dropdown-icon {
+  font-size: 16px; /* Förbättra ikonstorlek */
+  color: #888; /* Neutral färg */
+}
+
+/* Dropdown options */
+.dropdown-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: block;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  border: 1px solid #ddd;
+  background: #fff;
+  z-index: 10;
+  max-height: 180px; /* Begränsa höjd */
+  overflow-y: auto;
+  border-radius: 0 0 12px 12px; /* Rundare nedre hörn */
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1); /* Skugga för dropdown */
+}
+
+.dropdown-options li {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px; /* Minska padding för kompakt stil */
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.dropdown-options li:hover {
+  background: #f0f0f0;
+  color: #000;
+}
+
+.dropdown-options i {
+  margin-right: 8px; /* Mindre mellanrum för ikoner */
+}
+
+/* Open dropdown styling */
+.custom-select.open .dropdown-options {
+  display: block;
+}
+
+/* Close dropdown styling */
+.custom-select:not(.open) .dropdown-options {
+  display: none;
+}
+
+/* För finare hover-effekt på dropdown */
+.custom-select:hover {
+  background: #eaeaea; /* Ljusare hover */
 }

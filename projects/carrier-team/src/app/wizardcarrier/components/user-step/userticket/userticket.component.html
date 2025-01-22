@@ -38,117 +38,180 @@
       <div class="ticket-summary-container">
         <div class="small-stats-container">
           <!-- Row 1: Overview and Sprint -->
-          <div class="stats-row">
-            <!-- Overview -->
-            <div class="stats-group">
-              <h5>Overview</h5>
-              <div class="stats-row">
-                <div class="stat-box" [class.active]="activeFilter === 'total'" (click)="filterTickets('total')">
-                  <p>Total</p>
-                  <h4>{{ zendeskTicketCount || 0 }}</h4>
-                </div>
-                <div
-                  class="stat-box"
-                  [class.active]="activeFilter === 'closedJira'"
-                  (click)="filterTickets('closedJira')"
-                >
-                  <p>Jira Done</p>
-                  <h4>{{ getClosedJiraTicketsCount() }}</h4>
-                </div>
-                <div
-                  class="stat-box"
-                  [class.active]="activeFilter === 'needUpdate'"
-                  (click)="filterTickets('needUpdate')"
-                >
-                  <p>Need Update</p>
-                  <h4>{{ ticketsToBeAnsweredCount || 0 }}</h4>
-                </div>
-                <div class="stat-box" [class.active]="activeFilter === 'delayed'" (click)="filterTickets('delayed')">
-                  <p>Delayed</p>
-                  <h4>{{ getDelayedTicketsCount() }}</h4>
-                </div>
-                <div
-                  class="stat-box"
-                  [class.active]="activeFilter === 'missingETA'"
-                  (click)="filterTickets('missingETA')"
-                >
-                  <p>Missing ETA</p>
-                  <h4>{{ ticketsMissingETACount || 0 }}</h4>
-                </div>
-              </div>
-            </div>
-
-            <!-- Sprint -->
-            <div class="stats-group">
-              <h5>Sprint</h5>
-              <div class="stats-row">
-                <div
-                  class="stat-box"
-                  [class.active]="activeFilter === 'currentSprint'"
-                  (click)="filterTickets('currentSprint')"
-                >
-                  <p>Current Sprint</p>
-                  <h4>{{ getCurrentSprintTicketsCount() }}</h4>
-                </div>
-                <div
-                  class="stat-box"
-                  [class.active]="activeFilter === 'futureSprint'"
-                  (click)="filterTickets('futureSprint')"
-                >
-                  <p>Future Sprint</p>
-                  <h4>{{ getFutureSprintTicketsCount() }}</h4>
-                </div>
-              </div>
+          <div class="stats-group">
+            <h5>Overview</h5>
+            <div class="stats-buttons">
+              <button
+                class="filter-btn"
+                [class.active]="activeFilter === 'total'"
+                (click)="filterTickets('total')"
+              >
+                <span>Total</span>
+                <strong>{{ zendeskTicketCount || 0 }}</strong>
+              </button>
+              <button
+                class="filter-btn"
+                [class.active]="activeFilter === 'closedJira'"
+                (click)="filterTickets('closedJira')"
+              >
+                <span>Completed</span>
+                <strong>{{ getClosedJiraTicketsCount() }}</strong>
+              </button>
+              <button
+                class="filter-btn"
+                [class.active]="activeFilter === 'needUpdate'"
+                (click)="filterTickets('needUpdate')"
+              >
+                <span>Need Update</span>
+                <strong>{{ ticketsToBeAnsweredCount || 0 }}</strong>
+              </button>
+              <button
+                class="filter-btn"
+                [class.active]="activeFilter === 'delayed'"
+                (click)="filterTickets('delayed')"
+              >
+                <span>Delayed</span>
+                <strong>{{ getDelayedTicketsCount() }}</strong>
+              </button>
+              <button
+                class="filter-btn"
+                [class.active]="activeFilter === 'missingETA'"
+                (click)="filterTickets('missingETA')"
+              >
+                <span>Missing ETA</span>
+                <strong>{{ ticketsMissingETACount || 0 }}</strong>
+              </button>
             </div>
           </div>
-
+        
+          <div class="stats-group">
+            <h5>Sprint</h5>
+            <div class="stats-buttons">
+              <button
+                class="filter-btn"
+                [class.active]="activeFilter === 'currentSprint'"
+                (click)="filterTickets('currentSprint')"
+              >
+                <span>Current Sprint</span>
+                <strong>{{ getCurrentSprintTicketsCount() }}</strong>
+              </button>
+              <button
+                class="filter-btn"
+                [class.active]="activeFilter === 'futureSprint'"
+                (click)="filterTickets('futureSprint')"
+              >
+                <span>Future Sprint</span>
+                <strong>{{ getFutureSprintTicketsCount() }}</strong>
+              </button>
+            </div>
+          </div>
+        
           <!-- Row 2: Priorities and Tiers -->
-          <div class="stats-row">
-            <!-- Priorities -->
-            <div class="stats-group">
-              <h5>Priorities</h5>
-              <div class="stats-row">
-                <div class="stat-box" [class.active]="activeFilter === 'urgent'" (click)="filterTickets('urgent')">
-                  <p>Urgent</p>
-                  <h4>{{ ticketCountsByPriority['urgent'] || 0 }}</h4>
-                </div>
-                <div class="stat-box" [class.active]="activeFilter === 'high'" (click)="filterTickets('high')">
-                  <p>High</p>
-                  <h4>{{ ticketCountsByPriority['high'] || 0 }}</h4>
-                </div>
-                <div class="stat-box" [class.active]="activeFilter === 'normal'" (click)="filterTickets('normal')">
-                  <p>Normal</p>
-                  <h4>{{ ticketCountsByPriority['normal'] || 0 }}</h4>
-                </div>
-                <div class="stat-box" [class.active]="activeFilter === 'low'" (click)="filterTickets('low')">
-                  <p>Low</p>
-                  <h4>{{ ticketCountsByPriority['low'] || 0 }}</h4>
-                </div>
-              </div>
-            </div>
-
-            <!-- Tiers -->
-            <div class="stats-group">
-              <h5>Tiers</h5>
-              <div class="stats-row">
-                <div class="stat-box" [class.active]="activeFilter === 'tier1'" (click)="filterTickets('tier1')">
-                  <p>Tier 1</p>
-                  <h4>{{ getTierTicketsCount(1) }}</h4>
-                </div>
-                <div class="stat-box" [class.active]="activeFilter === 'tier2'" (click)="filterTickets('tier2')">
-                  <p>Tier 2</p>
-                  <h4>{{ getTierTicketsCount(2) }}</h4>
-                </div>
-                <div class="stat-box" [class.active]="activeFilter === 'tier3'" (click)="filterTickets('tier3')">
-                  <p>Tier 3</p>
-                  <h4>{{ getTierTicketsCount(3) }}</h4>
-                </div>
-              </div>
+          <div class="stats-group">
+            <h5>Priorities</h5>
+            <div class="stats-buttons">
+              <button
+                class="filter-btn"
+                [class.active]="activeFilter === 'urgent'"
+                (click)="filterTickets('urgent')"
+              >
+                <span>Urgent</span>
+                <strong>{{ ticketCountsByPriority['urgent'] || 0 }}</strong>
+              </button>
+              <button
+                class="filter-btn"
+                [class.active]="activeFilter === 'high'"
+                (click)="filterTickets('high')"
+              >
+                <span>High</span>
+                <strong>{{ ticketCountsByPriority['high'] || 0 }}</strong>
+              </button>
+              <button
+                class="filter-btn"
+                [class.active]="activeFilter === 'normal'"
+                (click)="filterTickets('normal')"
+              >
+                <span>Normal</span>
+                <strong>{{ ticketCountsByPriority['normal'] || 0 }}</strong>
+              </button>
+              <button
+                class="filter-btn"
+                [class.active]="activeFilter === 'low'"
+                (click)="filterTickets('low')"
+              >
+                <span>Low</span>
+                <strong>{{ ticketCountsByPriority['low'] || 0 }}</strong>
+              </button>
             </div>
           </div>
-        </div>
+        
+          <div class="stats-group">
+            <h5>Tiers</h5>
+            <div class="stats-buttons">
+              <button
+                class="filter-btn"
+                [class.active]="activeFilter === 'tier1'"
+                (click)="filterTickets('tier1')"
+              >
+                <span>Tier 1</span>
+                <strong>{{ tier1Tickets}}</strong>
+              </button>
+              <button
+                class="filter-btn"
+                [class.active]="activeFilter === 'tier2'"
+                (click)="filterTickets('tier2')"
+              >
+                <span>Tier 2</span>
+                <strong>{{ tier2Tickets}}</strong>
+              </button>
+              <button
+                class="filter-btn"
+                [class.active]="activeFilter === 'tier3'"
+                (click)="filterTickets('tier3')"
+              >
+                <span>Tier 3</span>
+                <strong>{{ tier3Tickets}}</strong>
+              </button>
+            </div>
+          </div>
 
-        <div class="card-columns">
+          <div class="stats-group">
+
+            <div  class="custom-select-container">
+              <h5 style="margin-bottom: 0.5rem;">Carriers</h5>
+              <div class="custom-select" [class.open]="isDropdownOpen" (click)="toggleDropdown()">
+                <div class="selected-option">
+                  <i class="fa fa-truck"></i>
+                  <span>
+                    {{ selectedOption?.name || 'Select an option' }}
+                    <span *ngIf="selectedOption?.count">({{ selectedOption.count }})</span>
+                  </span>
+                  <i class="fa fa-caret-down dropdown-icon"></i>
+                </div>
+            
+                <ul class="dropdown-options" *ngIf="isDropdownOpen">
+                  <li *ngFor="let option of options" (click)="selectOption(option, $event)">
+                    <i class="fa fa-truck"></i>
+                    {{ option.name }} ({{ option.count }})
+                  </li>
+                </ul>
+              </div>
+            </div>
+            
+            
+            
+            
+            
+            
+        </div>
+        </div>
+        
+        
+    
+        
+        
+
+        <div class="card-columns mt-4">
           <div
             *ngFor="let ticket of assignedTickets; let i = index"
             class="card h-100 shadow border-0 rounded ticket-card"
@@ -166,9 +229,9 @@
                   >
                     #{{ ticket.ticket_id }}
                   </a>
-                  <div class="card-subtitle mt-2 d-flex flex-wrap align-items-center gap-1">
+                  <div class="card-subtitle mt-2 d-flex flex-wrap align-items-center gap-1 ">
                     <span
-                      class="badge status-badge"
+                      class="badge status-badge lead"
                       [ngClass]="{
                         'bg-urgent': ticket.priority === 'urgent',
                         'bg-high': ticket.priority === 'high',
@@ -180,7 +243,7 @@
                     </span>
 
                     <span
-                      class="badge status-badge"
+                      class="badge status-badge lead"
                       [ngClass]="{
                       'bg-assigned': ticket.customStatus === 'Open',
                       'bg-pending': isPendingStatus(ticket.customStatus),
@@ -190,22 +253,22 @@
                       {{ ticket.customStatus }}
                     </span>
 
-                    <span *ngIf="hasAllJiraClosed(ticket)" class="badge status-badge bg-jiracompleted text-white">
-                      Completed
+                    <span *ngIf="hasAllJiraClosed(ticket)" class="badge status-badge bg-jiracompleted text-white lead">
+                      Done
                     </span>
 
-                    <span *ngIf="hasPreviousSprints(ticket)" class="badge status-badge bg-delayed text-dark"
-                      >Delayed
+                    <span *ngIf="hasPreviousSprints(ticket)" class="badge status-badge bg-delayed text-dark lead"
+                      >Delay
                     </span>
 
                     <span
                       *ngIf="isToBeAnswered(ticket.updated_at, ticket)"
-                      class="badge status-badge bg-warning text-dark"
+                      class="badge status-badge bg-warning text-dark lead"
                     >
-                      Update Needed
+                    Need Update
                     </span>
-                  </div>
                 </div>
+              </div>
                 <!--   <div class="card-menu-control"></div> -->
               </div>
             </div>
@@ -289,7 +352,7 @@
             <!-- Card Footer -->
             <div class="card-footer bg-light d-flex justify-content-between align-items-center">
               <button class="btn btn-primary btn-sm" (click)="openModal(ticket)">
-                Update
+                Update Ticket
               </button>
               <ng-container *ngIf="ticket.jiraData?.length > 0; else noJira">
                 <button class="btn btn-outline-info btn-sm" (click)="toggleJiraVisibility(i)">

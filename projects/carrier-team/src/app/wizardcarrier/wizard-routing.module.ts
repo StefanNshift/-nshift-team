@@ -70,7 +70,7 @@ const routes: WizardStep[] = [
             component: UserComponent,
             canActivate: [authGuard],
             data: {
-              heading: 'CIS Tickets',
+              heading: 'My Tickets',
               pageHeading: '',
               role: 'manager', // Kräv manager-roll
             },

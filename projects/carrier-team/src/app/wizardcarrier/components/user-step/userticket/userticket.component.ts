@@ -5,6 +5,7 @@ import { Database, get, ref, update } from '@angular/fire/database';
 import { Router } from '@angular/router';
 import { send } from 'process';
 import { WizardbackendService } from '../../backend/wizardbackend.service';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-introduction',
@@ -13,7 +14,9 @@ import { WizardbackendService } from '../../backend/wizardbackend.service';
 })
 export class UserComponent implements OnInit {
   constructor(
-    private wizardBackendService: WizardbackendService, // Lägg till denna
+    private wizardBackendService: WizardbackendService, 
+    private cdr: ChangeDetectorRef // Lägg till detta
+
   ) {}
   tickets: any[] = [];
   collectedData: any[] = [];
@@ -155,8 +158,6 @@ export class UserComponent implements OnInit {
 
   handleEmailChange(email: string) {
     this.isLoading = true;
-    sessionStorage.removeItem('assignedTickets');
-    sessionStorage.removeItem('assignedTicketsTimestamp');
     this.fetchAllTickets(email);
     this.filterTickets('total');
   }
@@ -178,36 +179,28 @@ export class UserComponent implements OnInit {
   }
 
   private fetchAllTickets(user: string) {
-    // Kontrollera om data och tidsstämpel finns i sessionStorage
     const cachedTickets = sessionStorage.getItem('assignedTickets');
     const cachedTimestamp = sessionStorage.getItem('assignedTicketsTimestamp');
 
     if (cachedTickets && cachedTimestamp) {
       const timestamp = new Date(cachedTimestamp).getTime();
       const now = new Date().getTime();
-
-      // Kontrollera om datan är nyare än 1 timme (3600000 ms)
+  
       if (now - timestamp < 3600000) {
-        // Datan är giltig, använd den
         const parsedData = JSON.parse(cachedTickets);
         this.processTicketData(parsedData);
         return;
       } else {
-        // Datan är för gammal, ta bort den
         sessionStorage.removeItem('assignedTickets');
         sessionStorage.removeItem('assignedTicketsTimestamp');
       }
     }
-
-    // Om ingen giltig cache finns, hämta data från backend
+  
     this.wizardBackendService.getAllUserTickets(user).subscribe(
       (response: any) => {
         if (response?.assignedTickets) {
-          // Spara data och tidsstämpel i sessionStorage
           sessionStorage.setItem('assignedTickets', JSON.stringify(response.assignedTickets));
           sessionStorage.setItem('assignedTicketsTimestamp', new Date().toISOString());
-
-          // Bearbeta datan
           this.processTicketData(response.assignedTickets);
         } else {
           console.error('Invalid response from backend:', response);
@@ -220,14 +213,43 @@ export class UserComponent implements OnInit {
       },
     );
   }
+  
 
+
+  isDropdownOpen = false;
+  selectedOption: { name: string; count: number; id: string } | null = null;
+  options: { name: string; count: number; id: string }[] = [];
+
+
+  toggleDropdown(): void {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  
+  selectOption(option: { name: string; count: number; id: string }, event: Event): void {
+    event.stopPropagation();
+    this.selectedOption = option;
+    this.isDropdownOpen = false;
+  
+    // Kontrollera om "Total Carriers" är valt
+    if (option.id === 'all') {
+      this.assignedTickets = [...this.assignedTicketsBackup];
+    } else {
+      // Filtrera biljetterna baserat på carrier_id
+      this.assignedTickets = this.assignedTicketsBackup.filter(ticket => ticket.carrier_id?.toString() === option.id);
+    }
+  
+    // Säkerställ att vyn uppdateras
+    this.cdr.markForCheck();
+  }
+  
   // Separat funktion för att bearbeta datan
   private processTicketData(assignedTickets: any[]) {
+
     this.tier1Tickets = assignedTickets[0]?.tier1Tickets || 0;
     this.tier2Tickets = assignedTickets[0]?.tier2Tickets || 0;
     this.tier3Tickets = assignedTickets[0]?.tier3Tickets || 0;
     this.zendeskTicketCount = assignedTickets[0]?.ticket_count || 0;
-
     // Process tickets and convert "tier" to numerical value
     const processedTickets = this.calculateETA(
       (assignedTickets[0]?.tickets || []).map(ticket => ({
@@ -243,10 +265,41 @@ export class UserComponent implements OnInit {
     this.sortKey = 'priority';
     this.sortDirection = 'asc';
 
+    // Calculate ticket counts grouped by carrier ID
+    const carrierCounts: { [key: string]: number } = {};
+    processedTickets.forEach(ticket => {
+        if (ticket.carrier_id) {
+            carrierCounts[ticket.carrier_id] = (carrierCounts[ticket.carrier_id] || 0) + 1;
+        }
+    });
+
+    // Calculate total number of tickets
+    const totalTickets = Object.values(carrierCounts).reduce((sum, count) => sum + count, 0);
+
+    // Create and sort the dropdown options by count (descending)
+    const sortedOptions = Object.entries(carrierCounts)
+      .map(([id, count]) => ({
+        id: id, // Include the id property
+        name: `Carrier ID ${id}`,
+        count: count,
+      }))
+      .sort((a, b) => b.count - a.count); // Sort by count descending
+
+    // Add static "All Carriers" option at the top
+    this.options = [
+      { id: 'all', name: 'Total Carriers', count: totalTickets }, // Static option
+      ...sortedOptions, // Dynamic options
+    ];
+
+    // Set default selection to "All Carriers"
+    this.selectedOption = this.options[0];
     this.sortTickets();
     this.countTicketsToBeAnswered();
     this.isLoading = false;
-  }
+}
+
+
+
 
   private convertTierToNumber(tier: string): number | null {
     switch (tier) {
@@ -270,7 +323,7 @@ export class UserComponent implements OnInit {
   }
 
   private calculateETA(tickets: any[]): any[] {
-    return tickets.map(ticket => {
+    return tickets[0].tickets.map(ticket => {
       let latestEndDate: string | null = null;
 
       ticket.jiraData.forEach((jira: any) => {
@@ -326,7 +379,11 @@ export class UserComponent implements OnInit {
   }
 
   isToBeAnswered(updatedAt: string, ticket: any): boolean {
-    // Rule 1
+
+    if (ticket.latestAnswerWasAutomated) {
+      return false;
+    }
+    
     if (
       ticket.latestInternalComment?.created_at &&
       this.isDateBefore(ticket.latestInternalComment.created_at, updatedAt)
@@ -469,20 +526,28 @@ export class UserComponent implements OnInit {
     if (!ticket.jiraData) {
       return false;
     }
-    return ticket.jiraData.some((jira: any) => jira.sprints?.previousSprints?.length > 0);
+  
+    // Kontrollera om det finns tidigare sprintar och status inte är "Closed"
+    return ticket.jiraData.some((jira: any) => {
+      const ticketStatus = jira.sprints?.ticketStatus;
+      const hasPrevious = jira.sprints?.previousSprints?.length > 0;
+  
+      // Returnera true endast om det finns tidigare sprintar och status inte är "Closed"
+      return hasPrevious && ticketStatus !== "Closed";
+    });
   }
-
+  
   getJiraBadgeClass(ticketStatus: string): string {
     return `jira-badge jira-badge-${ticketStatus.toLowerCase().replace(/\s+/g, '-')}`;
   }
 
   isHoldStatus(status: string): boolean {
     const specialStatuses = [
-      'Carrier Development',
+      'Carrier Dev',
       'Product Development',
       'Account Management',
       'Awaiting',
-      '3. Party feedback',
+      '3.Party feedback',
       'Accounting Services',
       'Customer meeting',
       'Software release',
@@ -523,6 +588,20 @@ export class UserComponent implements OnInit {
   }
 
   filterTickets(filter: string) {
+
+
+    if (
+      (filter === 'currentSprint' && this.getCurrentSprintTicketsCount() === 0) ||
+      (filter === 'futureSprint' && this.getFutureSprintTicketsCount() === 0) ||
+
+      (filter === 'delayed' && this.getDelayedTicketsCount() === 0) ||
+      (filter === 'closedJira' && this.getClosedJiraTicketsCount() === 0) ||
+      (filter === 'needUpdate' && (this.ticketsToBeAnsweredCount || 0) === 0) ||
+      (filter === 'missingETA' && (this.ticketsMissingETACount || 0) === 0) ||
+      (filter === 'total' && (this.zendeskTicketCount || 0) === 0)
+    ) {
+      return;
+    }
     this.activeFilter = filter;
     this.jiraVisibility = this.assignedTicketsBackup.map(() => false);
 
@@ -562,10 +641,18 @@ export class UserComponent implements OnInit {
       case 'missingETA':
         this.assignedTickets = this.assignedTicketsBackup.filter(ticket => !ticket.eta);
         break;
-      case 'delayed':
-        this.assignedTickets = this.assignedTicketsBackup.filter(ticket =>
-          ticket.jiraData?.some(jira => jira.sprints.previousSprints?.length > 0),
-        );
+        case 'delayed':
+          this.assignedTickets = this.assignedTicketsBackup.filter(ticket =>
+            ticket.jiraData?.some(jira => {
+              const ticketStatus = jira.sprints?.ticketStatus;
+              const hasPreviousSprints = jira.sprints?.previousSprints?.length > 0;
+        
+              // Inkludera endast biljetter som har tidigare sprintar och inte är "Closed"
+              return hasPreviousSprints && ticketStatus !== "Closed";
+            })
+          );
+          break;
+        
         break;
       case 'closedJira':
         this.assignedTickets = this.assignedTicketsBackup.filter(
@@ -589,7 +676,54 @@ export class UserComponent implements OnInit {
 
     // Sort tickets by priority after filtering
     this.sortTicketsByPriority();
+    this.updateCarrierDropdown();
+    this.selectedOption = this.options[0]; // Återställ till "Total Carriers"
+
+
   }
+
+  private updateCarrierDropdown() {
+    // Skapa ett set för unika transportörer
+    const uniqueCarrierIds = new Set<string>();
+    const carrierCounts: { [key: string]: number } = {};
+  
+    this.assignedTickets.forEach(ticket => {
+      if (ticket.carrier_id) {
+        uniqueCarrierIds.add(ticket.carrier_id); // Lägg till unika carrier_id
+        carrierCounts[ticket.carrier_id] = (carrierCounts[ticket.carrier_id] || 0) + 1;
+      }
+    });
+  
+    // Totalt antal transportörer
+    const totalCarriers = uniqueCarrierIds.size;
+  
+    // Skapa och sortera dropdown-alternativ
+    const sortedOptions = Object.entries(carrierCounts)
+      .map(([id, count]) => ({
+        id: id,
+        name: `Carrier ID ${id}`,
+        count: count,
+      }))
+      .sort((a, b) => b.count - a.count);
+  
+    // Lägg till "Total Carriers" som standardalternativ
+    this.options = [
+      { id: 'all', name: 'Total Carriers', count: totalCarriers }, // Räkna unika transportörer
+      ...sortedOptions,
+    ];
+  
+    // Återställ till "Total Carriers" om den valda transportören inte finns kvar
+    if (!this.options.some(option => option.id === this.selectedOption?.id)) {
+      this.selectedOption = this.options[0];
+    }
+  
+    // Tvinga omrendering
+    this.cdr.detectChanges();
+  }
+  
+  
+  
+  
 
   private sortTicketsByPriority() {
     const priorityOrder = ['urgent', 'high', 'normal', 'low'];
@@ -632,9 +766,16 @@ export class UserComponent implements OnInit {
 
   getDelayedTicketsCount(): number {
     return this.assignedTicketsBackup.filter(ticket =>
-      ticket.jiraData?.some(jira => jira.sprints.previousSprints?.length > 0),
+      ticket.jiraData?.some(jira => {
+        const ticketStatus = jira.sprints?.ticketStatus;
+        const hasPreviousSprints = jira.sprints?.previousSprints?.length > 0;
+  
+        // Räkna endast biljetter som har tidigare sprintar och inte är "Closed"
+        return hasPreviousSprints && ticketStatus !== "Closed";
+      })
     ).length;
   }
+  
 
   getClosedJiraTicketsCount(): number {
     return this.assignedTicketsBackup.filter(
@@ -650,8 +791,6 @@ export class UserComponent implements OnInit {
   }
 
   openModal(ticket: any) {
-    console.log(this.selectedTicket);
-
     this.selectedTicket = ticket;
     this.ticketNumber = ticket.ticket_id;
     this.newETA = ticket?.eta ? new Date(ticket.eta).toISOString().split('T')[0] : '';
@@ -835,7 +974,6 @@ export class UserComponent implements OnInit {
         this.selectedTicket.latestInternalComment = { created_at: currentDateTime }; // Update latestInternalComment
       }
 
-      console.log('Selected Ticket After Update:', this.selectedTicket);
 
       // Overwrite sessionStorage with updated tickets
       const cachedTickets = sessionStorage.getItem('assignedTickets');
@@ -846,7 +984,6 @@ export class UserComponent implements OnInit {
         parsedTickets.forEach((team: any) => {
           team.tickets = team.tickets.map((ticket: any) => {
             if (`${ticket.ticket_id}` === `${this.selectedTicket.ticket_id}`) {
-              console.log('Match found! Updating ticket:', ticket.ticket_id);
 
               // Update the ticket with new fields
               return {
@@ -863,7 +1000,6 @@ export class UserComponent implements OnInit {
 
         // Save the updated data to sessionStorage
         sessionStorage.setItem('assignedTickets', JSON.stringify(parsedTickets));
-        console.log('Updated tickets saved to sessionStorage:', parsedTickets);
       } else {
         console.warn('No tickets found in sessionStorage. Creating new entry...');
         const newTicketsData = [
