@@ -106,7 +106,7 @@
 }
 
 .status-badge.bg-high {
-  background: linear-gradient(135deg, #d84315, #e64a19);
+  background: linear-gradient(135deg, #d84315, #cd3100);
   color: #fff;
 }
 
@@ -671,6 +671,7 @@
   align-items: center;
   padding: 8px 12px; /* Minskat padding */
   font-size: 14px;
+  height: 30px;
   color: #333;
 }
 

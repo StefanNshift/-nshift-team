@@ -231,21 +231,89 @@ export class UserComponent implements OnInit {
     this.selectedOption = option;
     this.isDropdownOpen = false;
   
-    // Kontrollera om "Total Carriers" är valt
+    // Om "Total Carriers" är valt, visa alla tickets i det aktuella filtret
     if (option.id === 'all') {
-      this.assignedTickets = [...this.assignedTicketsBackup];
+      this.assignedTickets = [...this.assignedTicketsBackup.filter(ticket => this.filterMatchesActive(ticket))];
     } else {
-      // Filtrera biljetterna baserat på carrier_id
-      this.assignedTickets = this.assignedTicketsBackup.filter(ticket => ticket.carrier_id?.toString() === option.id);
+      // Filtrera biljetterna baserat på carrier_id och det aktuella filtret
+      this.assignedTickets = this.assignedTicketsBackup.filter(ticket => {
+        const matchesCarrier = ticket.carrier_id?.toString() === option.id;
+        const matchesActiveFilter = this.filterMatchesActive(ticket);
+        return matchesCarrier && matchesActiveFilter;
+      });
     }
   
-    // Säkerställ att vyn uppdateras
+    // Tvinga omrendering av vyer
     this.cdr.markForCheck();
   }
+
+private filterMatchesActive(ticket: any): boolean {
+  switch (this.activeFilter) {
+    case 'currentSprint':
+      return ticket.jiraData?.some(jira => jira.sprints?.currentSprint);
+
+    case 'missingSprint':
+      return ticket.jiraData?.some(jira => {
+        const isClosed = jira.sprints?.ticketStatus === 'Closed';
+        const hasCurrentSprint = jira.sprints?.currentSprint !== null;
+        const hasNoSprints = !jira.sprints || jira.sprints.length === 0;
+        const hasPreviousSprints = jira.sprints?.previousSprints && jira.sprints.previousSprints.length > 0;
+        return !isClosed && !hasCurrentSprint && (hasNoSprints || hasPreviousSprints);
+      });
+
+    case 'futureSprint':
+      return ticket.jiraData?.some(jira => jira.sprints?.futureSprints && jira.sprints.futureSprints.length > 0);
+
+    case 'needUpdate':
+      return this.isToBeAnswered(ticket.updated_at, ticket);
+
+    case 'missingETA':
+      return !ticket.eta;
+
+    case 'delayed':
+      return ticket.jiraData?.some(jira => {
+        const ticketStatus = jira.sprints?.ticketStatus;
+        const hasPreviousSprints = jira.sprints?.previousSprints?.length > 0;
+        return hasPreviousSprints && ticketStatus !== 'Closed';
+      });
+
+    case 'closedJira':
+      return (
+        ticket.jiraData?.length > 0 &&
+        ticket.jiraData.every(jira => jira.sprints.ticketStatus === 'Closed')
+      );
+
+    case 'tier1':
+      return ticket.tier === 1;
+
+    case 'tier2':
+      return ticket.tier === 2;
+
+    case 'tier3':
+      return ticket.tier === 3;
+
+    case 'urgent':
+      return ticket.priority === 'urgent';
+
+    case 'high':
+      return ticket.priority === 'high';
+
+    case 'normal':
+      return ticket.priority === 'normal';
+
+    case 'low':
+      return ticket.priority === 'low';
+
+    default:
+      return true; // För 'total' och generella fall
+  }
+}
+
+
+  
   
   // Separat funktion för att bearbeta datan
   private processTicketData(assignedTickets: any[]) {
-
     this.tier1Tickets = assignedTickets[0]?.tier1Tickets || 0;
     this.tier2Tickets = assignedTickets[0]?.tier2Tickets || 0;
     this.tier3Tickets = assignedTickets[0]?.tier3Tickets || 0;
@@ -257,6 +325,7 @@ export class UserComponent implements OnInit {
         tier: this.convertTierToNumber(ticket.tier),
       })),
     );
+    console.log(processedTickets);
 
     this.ticketCountsByPriority = this.countTicketsByPriority(processedTickets);
     this.ticketsMissingETACount = processedTickets.filter(ticket => !ticket.eta).length;
@@ -281,6 +350,7 @@ export class UserComponent implements OnInit {
       .map(([id, count]) => ({
         id: id, // Include the id property
         name: `Carrier ID ${id}`,
+        
         count: count,
       }))
       .sort((a, b) => b.count - a.count); // Sort by count descending
@@ -593,6 +663,7 @@ export class UserComponent implements OnInit {
     if (
       (filter === 'currentSprint' && this.getCurrentSprintTicketsCount() === 0) ||
       (filter === 'futureSprint' && this.getFutureSprintTicketsCount() === 0) ||
+      (filter === 'missingSprint' && this.getMissingSprintTicketsCount() === 0) ||
 
       (filter === 'delayed' && this.getDelayedTicketsCount() === 0) ||
       (filter === 'closedJira' && this.getClosedJiraTicketsCount() === 0) ||
@@ -611,6 +682,20 @@ export class UserComponent implements OnInit {
           ticket.jiraData?.some(jira => jira.sprints?.currentSprint),
         );
         break;
+        case 'missingSprint':
+          this.assignedTickets = this.assignedTicketsBackup.filter(ticket =>
+            ticket.jiraData?.some(jira => {
+              const isClosed = jira.sprints?.ticketStatus === 'Closed';
+              const hasCurrentSprint = jira.sprints?.currentSprint !== null;
+              const hasNoSprints = !jira.sprints || jira.sprints.length === 0;
+              const hasPreviousSprints = jira.sprints?.previousSprints && jira.sprints.previousSprints.length > 0;
+        
+              // Include tickets that are not closed, do not have a current sprint, and either lack sprints or have previous sprints
+              return !isClosed && !hasCurrentSprint && (hasNoSprints || hasPreviousSprints);
+            })
+          );
+                  break;
+        
 
       case 'futureSprint':
         this.assignedTickets = this.assignedTicketsBackup.filter(ticket =>
@@ -681,45 +766,53 @@ export class UserComponent implements OnInit {
 
 
   }
-
+  
   private updateCarrierDropdown() {
-    // Skapa ett set för unika transportörer
-    const uniqueCarrierIds = new Set<string>();
-    const carrierCounts: { [key: string]: number } = {};
+    // Skapa ett set för unika transportörer i de filtrerade tickets
+    const carrierCounts: { [key: string]: { carrierName: string; count: number } } = {};
   
     this.assignedTickets.forEach(ticket => {
       if (ticket.carrier_id) {
-        uniqueCarrierIds.add(ticket.carrier_id); // Lägg till unika carrier_id
-        carrierCounts[ticket.carrier_id] = (carrierCounts[ticket.carrier_id] || 0) + 1;
+        const carrierName = ticket.carrierName || `Carrier ID ${ticket.carrier_id}`;
+        if (!carrierCounts[ticket.carrier_id]) {
+          carrierCounts[ticket.carrier_id] = { carrierName, count: 0 };
+        }
+        carrierCounts[ticket.carrier_id].count++;
       }
     });
   
-    // Totalt antal transportörer
-    const totalCarriers = uniqueCarrierIds.size;
-  
     // Skapa och sortera dropdown-alternativ
     const sortedOptions = Object.entries(carrierCounts)
-      .map(([id, count]) => ({
+      .map(([id, { carrierName, count }]) => ({
         id: id,
-        name: `Carrier ID ${id}`,
+        carrierName: carrierName,
+        name: carrierName, // Lägg till `name` för att undvika felet
         count: count,
       }))
       .sort((a, b) => b.count - a.count);
   
-    // Lägg till "Total Carriers" som standardalternativ
+    // Lägg till "Total Carriers" som första alternativ
     this.options = [
-      { id: 'all', name: 'Total Carriers', count: totalCarriers }, // Räkna unika transportörer
+      {
+        id: 'all',
+        carrierName: 'Total Carriers',
+        name: 'Total Carriers', // Lägg till `name` här också
+        count: this.assignedTickets.length,
+      },
       ...sortedOptions,
     ];
   
-    // Återställ till "Total Carriers" om den valda transportören inte finns kvar
+    // Återställ valt alternativ till "Total Carriers" om den valda transportören inte längre finns kvar
     if (!this.options.some(option => option.id === this.selectedOption?.id)) {
       this.selectedOption = this.options[0];
     }
   
-    // Tvinga omrendering
+    // Säkerställ att dropdown uppdateras
     this.cdr.detectChanges();
   }
+  
+  
+  
   
   
   
@@ -747,6 +840,34 @@ export class UserComponent implements OnInit {
     return this.assignedTicketsBackup.filter(ticket => ticket.jiraData?.some(jira => jira.sprints?.currentSprint))
       .length;
   }
+
+  getMissingSprintTicketsCount(): number {
+    const missingSprintTickets = this.assignedTicketsBackup.filter(ticket =>
+      ticket.jiraData?.some(jira => {
+        // Kontrollera Jira-status och sprintar
+        const isClosed = jira.sprints?.ticketStatus === 'Closed';
+        const hasCurrentSprint = jira.sprints?.currentSprint !== null;
+        const hasNoSprints = !jira.sprints || jira.sprints.length === 0;
+        const hasPreviousSprints = jira.sprints?.previousSprints && jira.sprints.previousSprints.length > 0;
+  
+        // Inkludera endast om status inte är Closed och det saknas current sprint
+        if (!isClosed && !hasCurrentSprint && (hasNoSprints || hasPreviousSprints)) {
+          console.log('Found missing sprint ticket:', ticket); // Logga varje matchande ticket
+          return true;
+        }
+  
+        return false;
+      })
+    );
+  
+    // Logga resultatet
+    console.log('Tickets missing sprint:', missingSprintTickets);
+  
+    return missingSprintTickets.length;
+  }
+  
+  
+  
 
   getFutureSprintTicketsCount(): number {
     return this.assignedTicketsBackup.filter(ticket =>

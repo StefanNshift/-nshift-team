@@ -88,18 +88,23 @@
             <h5>Sprint</h5>
             <div class="stats-buttons">
               <button
+              class="filter-btn"
+              [class.active]="activeFilter === 'missingSprint'"
+              (click)="filterTickets('missingSprint')">
+              <span>Missing Sprint</span>
+              <strong>{{ getMissingSprintTicketsCount() }}</strong>
+            </button>
+              <button
                 class="filter-btn"
                 [class.active]="activeFilter === 'currentSprint'"
-                (click)="filterTickets('currentSprint')"
-              >
+                (click)="filterTickets('currentSprint')">
                 <span>Current Sprint</span>
                 <strong>{{ getCurrentSprintTicketsCount() }}</strong>
               </button>
               <button
                 class="filter-btn"
                 [class.active]="activeFilter === 'futureSprint'"
-                (click)="filterTickets('futureSprint')"
-              >
+                (click)="filterTickets('futureSprint')">
                 <span>Future Sprint</span>
                 <strong>{{ getFutureSprintTicketsCount() }}</strong>
               </button>
