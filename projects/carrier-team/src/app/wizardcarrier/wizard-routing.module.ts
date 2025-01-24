@@ -73,6 +73,22 @@ const routes: WizardStep[] = [
               heading: 'My Tickets',
               pageHeading: '',
               role: 'manager', // Kräv manager-roll
+              controls: [
+                {
+                  type: 'other', // Typ av kontroll
+                  text: 'Refresh Tickets', // Text på knappen
+                  title: 'Refresh Tickets', // Titel för skärmläsare
+                  class: 'btn-clear-session', // CSS-klass (valfritt)
+              },
+                {
+                  type: 'next',
+                },
+             
+                {
+                  type: 'prev',
+                },
+                
+              ],
             },
           },
           {

@@ -113,7 +113,7 @@ export class WizardbackendService {
   }
 
   ReplyZendeskTicket(ticketId: number, email: string, message: string, isPublic: boolean): Observable<any> {
-    const url = `${this.WIZARD_BACKEND_URL}/ReplyZendeskTicket1`;
+    const url = `${this.WIZARD_BACKEND_URL}/ReplyZendeskTicket`;
     const body = {
       ticketId: ticketId,
       email: email,

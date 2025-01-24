@@ -1,35 +1,38 @@
-import { HttpClient } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
-import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth'; // Firebase Auth modules
-import { Database, get, ref, update } from '@angular/fire/database';
-import { Router } from '@angular/router';
-import { send } from 'process';
-import { WizardbackendService } from '../../backend/wizardbackend.service';
-import { ChangeDetectorRef } from '@angular/core';
+import { HttpClient } from "@angular/common/http";
+import {
+  Component,
+  ElementRef,
+  Renderer2,
+  OnInit,
+  OnDestroy,
+} from "@angular/core";
+import { WizardbackendService } from "../../backend/wizardbackend.service";
+import { ChangeDetectorRef } from "@angular/core";
 
 @Component({
-  selector: 'app-introduction',
-  templateUrl: './userticket.component.html',
-  styleUrls: ['./userticket.component.scss'],
+  selector: "app-introduction",
+  templateUrl: "./userticket.component.html",
+  styleUrls: ["./userticket.component.scss"],
 })
 export class UserComponent implements OnInit {
   constructor(
-    private wizardBackendService: WizardbackendService, 
-    private cdr: ChangeDetectorRef // Lägg till detta
-
+    private wizardBackendService: WizardbackendService,
+    private cdr: ChangeDetectorRef, // Lägg till detta
+    private renderer: Renderer2,
+    private el: ElementRef
   ) {}
   tickets: any[] = [];
   collectedData: any[] = [];
   isLoading = true;
   toastVisible = false;
-  toastMessage = '';
-  toastType = '';
+  toastMessage = "";
+  toastType = "";
   zendeskTicketCount = 0;
   ticketsMissingETACount = 0;
   assignedTickets: any[] = [];
   assignedTicketsBackup: any[] = [];
-  activeFilter = '';
-  responseType = 'public';
+  activeFilter = "";
+  responseType = "public";
   latestPublic: any;
   latestInternal: any;
   latestAssigneeReply: any;
@@ -41,68 +44,68 @@ export class UserComponent implements OnInit {
   ticketCountsByPriority: { [key: string]: number } = {};
   selectedTicket: any = null;
   selectedTemplate: string | null = null;
-  newETA = '';
-  ticketNumber = '';
+  newETA = "";
+  ticketNumber = "";
 
   adminEnabled = false;
-  customMessage = '';
+  customMessage = "";
   includeRequesterName = false;
   ShouldBeInternal = false;
   isChatHistoryTab = false;
-  requesterName = '';
+  requesterName = "";
   messageTemplates: { label: string; value: string }[] = [
     {
-      label: 'Case Resolution Timeline',
+      label: "Case Resolution Timeline",
       value:
-        'Hi{{sender}}, we are diligently working to resolve your case. The current estimated timeline for resolution is {{newETA}}. Thank you for your understanding and patience.',
+        "Hi{{sender}}, we are diligently working to resolve your case. The current estimated timeline for resolution is {{newETA}}. Thank you for your understanding and patience.",
     },
     {
-      label: 'Delayed Message',
+      label: "Delayed Message",
       value:
-        'Hi{{sender}}, we would like to inform you that the estimated resolution time for your case has been updated to {{newETA}}. Thank you for your understanding and patience.',
+        "Hi{{sender}}, we would like to inform you that the estimated resolution time for your case has been updated to {{newETA}}. Thank you for your understanding and patience.",
     },
     {
-      label: 'Follow-Up Required',
+      label: "Follow-Up Required",
       value:
-        'Hi{{sender}}, we would like to follow up regarding your case. The updated resolution date is {{newETA}}. Please let us know if you have any further questions.',
+        "Hi{{sender}}, we would like to follow up regarding your case. The updated resolution date is {{newETA}}. Please let us know if you have any further questions.",
     },
     {
-      label: 'Further Updates',
+      label: "Further Updates",
       value:
-        'Hi{{sender}}, we are continuing to investigate your issue and will provide updates as they become available. The estimated resolution date is {{newETA}}.',
+        "Hi{{sender}}, we are continuing to investigate your issue and will provide updates as they become available. The estimated resolution date is {{newETA}}.",
     },
     {
-      label: 'Thank You for Your Patience',
+      label: "Thank You for Your Patience",
       value:
-        'Hi{{sender}}, thank you for your patience while we resolve your issue. The updated resolution date is {{newETA}}. Please feel free to reach out if you need further information.',
+        "Hi{{sender}}, thank you for your patience while we resolve your issue. The updated resolution date is {{newETA}}. Please feel free to reach out if you need further information.",
     },
     {
-      label: 'Updated Resolution Date',
+      label: "Updated Resolution Date",
       value:
-        'Hi{{sender}}, thank you for your continued trust in us. Please note that the updated resolution date for your ticket is {{newETA}}.',
+        "Hi{{sender}}, thank you for your continued trust in us. Please note that the updated resolution date for your ticket is {{newETA}}.",
     },
     {
-      label: 'Urgent Attention Required',
+      label: "Urgent Attention Required",
       value:
-        'Hi{{sender}}, this issue requires urgent attention. The updated resolution date is {{newETA}}. Please let us know if you need further assistance.',
+        "Hi{{sender}}, this issue requires urgent attention. The updated resolution date is {{newETA}}. Please let us know if you need further assistance.",
     },
     {
-      label: 'Working on Issue',
+      label: "Working on Issue",
       value:
-        'Hi{{sender}}, our team is actively working on resolving your issue, and the new estimated resolution time is {{newETA}}. We appreciate your patience and understanding.',
+        "Hi{{sender}}, our team is actively working on resolving your issue, and the new estimated resolution time is {{newETA}}. We appreciate your patience and understanding.",
     },
   ];
 
   members = [
-    { zendeskID: 5029634049180, email: 'stefan.liden@nshift.com' },
-    { zendeskID: 392655027080, email: 'adriana.covrig@nshift.com' },
-    { zendeskID: 115013890774, email: 'andreas.elind@nshift.com' },
-    { zendeskID: 1901648861654, email: 'crystal.aguilar@nshift.com' },
-    { zendeskID: 375464540999, email: 'anca.cava@nshift.com' },
-    { zendeskID: 361633069534, email: 'mark.austin@nshift.com' },
-    { zendeskID: 114863839473, email: 'karolina.karlsson@nshift.com' },
-    { zendeskID: 115012328113, email: 'siri.montell@nshift.com' },
-    { zendeskID: 4467698588828, email: 'ciprian.balasa@nshift.com' },
+    { zendeskID: 5029634049180, email: "stefan.liden@nshift.com" },
+    { zendeskID: 392655027080, email: "adriana.covrig@nshift.com" },
+    { zendeskID: 115013890774, email: "andreas.elind@nshift.com" },
+    { zendeskID: 1901648861654, email: "crystal.aguilar@nshift.com" },
+    { zendeskID: 375464540999, email: "anca.cava@nshift.com" },
+    { zendeskID: 361633069534, email: "mark.austin@nshift.com" },
+    { zendeskID: 114863839473, email: "karolina.karlsson@nshift.com" },
+    { zendeskID: 115012328113, email: "siri.montell@nshift.com" },
+    { zendeskID: 4467698588828, email: "ciprian.balasa@nshift.com" },
   ];
 
   tier1Tickets = 0;
@@ -115,32 +118,31 @@ export class UserComponent implements OnInit {
   unassignedPriorityUrgentCount = 0;
   totalUnassignedCount = 0;
   filteredUnassignedTickets: any[] = [];
-  sortKey = '';
-  sortDirection = 'asc';
+  sortKey = "";
+  sortDirection = "asc";
 
-  selectedEmail = ''; // För vald e-postadress
+  selectedEmail = "";
 
-  // Lista med e-postadresser
   adminEmails = [
-    'stefan.liden@nshift.com',
-    'adriana.covrig@nshift.com',
-    'andreas.elind@nshift.com',
-    'crystal.aguilar@nshift.com',
-    'anca.cava@nshift.com',
-    'mark.austin@nshift.com',
-    'karolina.karlsson@nshift.com',
-    'siri.montell@nshift.com',
-    'ciprian.balasa@nshift.com',
+    "stefan.liden@nshift.com",
+    "adriana.covrig@nshift.com",
+    "andreas.elind@nshift.com",
+    "crystal.aguilar@nshift.com",
+    "anca.cava@nshift.com",
+    "mark.austin@nshift.com",
+    "karolina.karlsson@nshift.com",
+    "siri.montell@nshift.com",
+    "ciprian.balasa@nshift.com",
   ];
 
-  activeTab = 'tab1'; // Default active tab
+  activeTab = "tab1"; // Default active tab
 
   toggleJiraVisibility(index: number) {
     this.jiraVisibility[index] = !this.jiraVisibility[index];
   }
 
   switchTab(tab: string) {
-    this.isChatHistoryTab = tab !== 'tab1';
+    this.isChatHistoryTab = tab !== "tab1";
     this.activeTab = tab; // Set active tab when switching
   }
 
@@ -157,207 +159,251 @@ export class UserComponent implements OnInit {
   }
 
   handleEmailChange(email: string) {
-    this.isLoading = true;
+    sessionStorage.removeItem("assignedTickets");
+    sessionStorage.removeItem("assignedTicketsTimestamp");
     this.fetchAllTickets(email);
-    this.filterTickets('total');
+    this.filterTickets("total");
   }
 
+  private listener: () => void;
+
   ngOnInit() {
-    const userRole = localStorage.getItem('userRole');
-    if (userRole === 'admin') {
+    const observer = new MutationObserver(() => {
+      const button = document.querySelector(".btn-clear-session");
+      if (button) {
+        button.addEventListener("click", () => {
+          sessionStorage.removeItem("assignedTickets");
+          sessionStorage.removeItem("assignedTicketsTimestamp");
+          this.fetchAllTickets(this.user.email);
+        });
+        observer.disconnect();
+      }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    const userRole = localStorage.getItem("userRole");
+    if (userRole === "admin") {
       this.adminEnabled = true;
     } else {
-      const storedUser = localStorage.getItem('user');
+      const storedUser = localStorage.getItem("user");
       if (storedUser) {
         this.user = JSON.parse(storedUser);
 
-        // Försök hämta tickets från sessionStorage
         this.fetchAllTickets(this.user.email);
-        this.filterTickets('total');
+        this.filterTickets("total");
       }
     }
   }
 
-  private fetchAllTickets(user: string) {
-    const cachedTickets = sessionStorage.getItem('assignedTickets');
-    const cachedTimestamp = sessionStorage.getItem('assignedTicketsTimestamp');
+  ngOnDestroy(): void {
+    if (this.listener) {
+      this.listener();
+    }
+  }
 
+  private fetchAllTickets(user: string) {
+    this.isLoading = true;
+    const cachedTickets = sessionStorage.getItem("assignedTickets");
+    const cachedTimestamp = sessionStorage.getItem("assignedTicketsTimestamp");
     if (cachedTickets && cachedTimestamp) {
       const timestamp = new Date(cachedTimestamp).getTime();
       const now = new Date().getTime();
-  
+
       if (now - timestamp < 3600000) {
         const parsedData = JSON.parse(cachedTickets);
         this.processTicketData(parsedData);
         return;
       } else {
-        sessionStorage.removeItem('assignedTickets');
-        sessionStorage.removeItem('assignedTicketsTimestamp');
+        sessionStorage.removeItem("assignedTickets");
+        sessionStorage.removeItem("assignedTicketsTimestamp");
       }
     }
-  
+
     this.wizardBackendService.getAllUserTickets(user).subscribe(
       (response: any) => {
+
         if (response?.assignedTickets) {
-          sessionStorage.setItem('assignedTickets', JSON.stringify(response.assignedTickets));
-          sessionStorage.setItem('assignedTicketsTimestamp', new Date().toISOString());
+          sessionStorage.setItem(
+            "assignedTickets",
+            JSON.stringify(response.assignedTickets)
+          );
+          sessionStorage.setItem(
+            "assignedTicketsTimestamp",
+            new Date().toISOString()
+          );
           this.processTicketData(response.assignedTickets);
         } else {
-          console.error('Invalid response from backend:', response);
+          console.error("Invalid response from backend:", response);
           this.isLoading = false;
         }
       },
-      error => {
-        console.error('Error fetching tickets:', error);
+      (error) => {
+        console.error("Error fetching tickets:", error);
         this.isLoading = false;
-      },
+      }
     );
   }
-  
-
 
   isDropdownOpen = false;
   selectedOption: { name: string; count: number; id: string } | null = null;
   options: { name: string; count: number; id: string }[] = [];
 
-
   toggleDropdown(): void {
     this.isDropdownOpen = !this.isDropdownOpen;
   }
 
-  
-  selectOption(option: { name: string; count: number; id: string }, event: Event): void {
+  selectOption(
+    option: { name: string; count: number; id: string },
+    event: Event
+  ): void {
     event.stopPropagation();
     this.selectedOption = option;
     this.isDropdownOpen = false;
   
-    // Om "Total Carriers" är valt, visa alla tickets i det aktuella filtret
-    if (option.id === 'all') {
-      this.assignedTickets = [...this.assignedTicketsBackup.filter(ticket => this.filterMatchesActive(ticket))];
+    if (option.id === "all") {
+      this.assignedTickets = [
+        ...this.assignedTicketsBackup.filter((ticket) =>
+          this.filterMatchesActive(ticket)
+        ),
+      ];
     } else {
-      // Filtrera biljetterna baserat på carrier_id och det aktuella filtret
-      this.assignedTickets = this.assignedTicketsBackup.filter(ticket => {
+      this.assignedTickets = this.assignedTicketsBackup.filter((ticket) => {
         const matchesCarrier = ticket.carrier_id?.toString() === option.id;
         const matchesActiveFilter = this.filterMatchesActive(ticket);
         return matchesCarrier && matchesActiveFilter;
       });
     }
   
-    // Tvinga omrendering av vyer
+    this.sortKey = "priority";
+    this.sortDirection = "asc"; 
+    this.sortTickets(); 
     this.cdr.markForCheck();
   }
+  
 
-private filterMatchesActive(ticket: any): boolean {
-  switch (this.activeFilter) {
-    case 'currentSprint':
-      return ticket.jiraData?.some(jira => jira.sprints?.currentSprint);
+  private filterMatchesActive(ticket: any): boolean {
+    switch (this.activeFilter) {
+      case "currentSprint":
+        return ticket.jiraData?.some((jira) => jira.sprints?.currentSprint);
 
-    case 'missingSprint':
-      return ticket.jiraData?.some(jira => {
-        const isClosed = jira.sprints?.ticketStatus === 'Closed';
-        const hasCurrentSprint = jira.sprints?.currentSprint !== null;
-        const hasNoSprints = !jira.sprints || jira.sprints.length === 0;
-        const hasPreviousSprints = jira.sprints?.previousSprints && jira.sprints.previousSprints.length > 0;
-        return !isClosed && !hasCurrentSprint && (hasNoSprints || hasPreviousSprints);
-      });
+      case "missingSprint":
+        return ticket.jiraData?.some((jira) => {
+          const isClosed = jira.sprints?.ticketStatus === "Closed";
+          const hasCurrentSprint = jira.sprints?.currentSprint !== null;
+          const hasNoSprints = !jira.sprints || jira.sprints.length === 0;
+          const hasPreviousSprints =
+            jira.sprints?.previousSprints &&
+            jira.sprints.previousSprints.length > 0;
+          return (
+            !isClosed &&
+            !hasCurrentSprint &&
+            (hasNoSprints || hasPreviousSprints)
+          );
+        });
 
-    case 'futureSprint':
-      return ticket.jiraData?.some(jira => jira.sprints?.futureSprints && jira.sprints.futureSprints.length > 0);
+      case "futureSprint":
+        return ticket.jiraData?.some(
+          (jira) =>
+            jira.sprints?.futureSprints && jira.sprints.futureSprints.length > 0
+        );
 
-    case 'needUpdate':
-      return this.isToBeAnswered(ticket.updated_at, ticket);
+      case "needUpdate":
+        return this.isToBeAnswered(ticket.updated_at, ticket);
 
-    case 'missingETA':
-      return !ticket.eta;
+      case "missingETA":
+        return !ticket.eta;
 
-    case 'delayed':
-      return ticket.jiraData?.some(jira => {
-        const ticketStatus = jira.sprints?.ticketStatus;
-        const hasPreviousSprints = jira.sprints?.previousSprints?.length > 0;
-        return hasPreviousSprints && ticketStatus !== 'Closed';
-      });
+      case "delayed":
+        return ticket.jiraData?.some((jira) => {
+          const ticketStatus = jira.sprints?.ticketStatus;
+          const hasPreviousSprints = jira.sprints?.previousSprints?.length > 0;
+          return hasPreviousSprints && ticketStatus !== "Closed";
+        });
 
-    case 'closedJira':
-      return (
-        ticket.jiraData?.length > 0 &&
-        ticket.jiraData.every(jira => jira.sprints.ticketStatus === 'Closed')
-      );
+      case "closedJira":
+        return (
+          ticket.jiraData?.length > 0 &&
+          ticket.jiraData.every(
+            (jira) => jira.sprints.ticketStatus === "Closed"
+          )
+        );
 
-    case 'tier1':
-      return ticket.tier === 1;
+      case "tier1":
+        return ticket.tier === 1;
 
-    case 'tier2':
-      return ticket.tier === 2;
+      case "tier2":
+        return ticket.tier === 2;
 
-    case 'tier3':
-      return ticket.tier === 3;
+      case "tier3":
+        return ticket.tier === 3;
 
-    case 'urgent':
-      return ticket.priority === 'urgent';
+      case "urgent":
+        return ticket.priority === "urgent";
 
-    case 'high':
-      return ticket.priority === 'high';
+      case "high":
+        return ticket.priority === "high";
 
-    case 'normal':
-      return ticket.priority === 'normal';
+      case "normal":
+        return ticket.priority === "normal";
 
-    case 'low':
-      return ticket.priority === 'low';
+      case "low":
+        return ticket.priority === "low";
 
-    default:
-      return true; // För 'total' och generella fall
+      default:
+        return true;
+    }
   }
-}
 
-
-  
-  
-  // Separat funktion för att bearbeta datan
   private processTicketData(assignedTickets: any[]) {
     this.tier1Tickets = assignedTickets[0]?.tier1Tickets || 0;
     this.tier2Tickets = assignedTickets[0]?.tier2Tickets || 0;
     this.tier3Tickets = assignedTickets[0]?.tier3Tickets || 0;
     this.zendeskTicketCount = assignedTickets[0]?.ticket_count || 0;
-    // Process tickets and convert "tier" to numerical value
     const processedTickets = this.calculateETA(
-      (assignedTickets[0]?.tickets || []).map(ticket => ({
+      (assignedTickets[0]?.tickets || []).map((ticket) => ({
         ...ticket,
         tier: this.convertTierToNumber(ticket.tier),
-      })),
+      }))
     );
-    console.log(processedTickets);
 
     this.ticketCountsByPriority = this.countTicketsByPriority(processedTickets);
-    this.ticketsMissingETACount = processedTickets.filter(ticket => !ticket.eta).length;
+    this.ticketsMissingETACount = processedTickets.filter(
+      (ticket) => !ticket.eta
+    ).length;
     this.assignedTickets = processedTickets;
     this.assignedTicketsBackup = [...processedTickets];
-    this.sortKey = 'priority';
-    this.sortDirection = 'asc';
+    this.sortKey = "priority";
+    this.sortDirection = "asc";
 
     // Calculate ticket counts grouped by carrier ID
     const carrierCounts: { [key: string]: number } = {};
-    processedTickets.forEach(ticket => {
-        if (ticket.carrier_id) {
-            carrierCounts[ticket.carrier_id] = (carrierCounts[ticket.carrier_id] || 0) + 1;
-        }
+    processedTickets.forEach((ticket) => {
+      if (ticket.carrier_id) {
+        carrierCounts[ticket.carrier_id] =
+          (carrierCounts[ticket.carrier_id] || 0) + 1;
+      }
     });
 
     // Calculate total number of tickets
-    const totalTickets = Object.values(carrierCounts).reduce((sum, count) => sum + count, 0);
+    const totalTickets = Object.values(carrierCounts).reduce(
+      (sum, count) => sum + count,
+      0
+    );
 
     // Create and sort the dropdown options by count (descending)
     const sortedOptions = Object.entries(carrierCounts)
       .map(([id, count]) => ({
         id: id, // Include the id property
         name: `Carrier ID ${id}`,
-        
+
         count: count,
       }))
       .sort((a, b) => b.count - a.count); // Sort by count descending
 
     // Add static "All Carriers" option at the top
     this.options = [
-      { id: 'all', name: 'Total Carriers', count: totalTickets }, // Static option
+      { id: "all", name: "Total Carriers", count: totalTickets }, // Static option
       ...sortedOptions, // Dynamic options
     ];
 
@@ -366,18 +412,15 @@ private filterMatchesActive(ticket: any): boolean {
     this.sortTickets();
     this.countTicketsToBeAnswered();
     this.isLoading = false;
-}
-
-
-
+  }
 
   private convertTierToNumber(tier: string): number | null {
     switch (tier) {
-      case 'tier 1':
+      case "tier 1":
         return 1;
-      case 'tier 2':
+      case "tier 2":
         return 2;
-      case 'tier 3':
+      case "tier 3":
         return 3;
       default:
         return null;
@@ -386,23 +429,27 @@ private filterMatchesActive(ticket: any): boolean {
 
   private countTicketsByPriority(tickets: any[]): { [key: string]: number } {
     return tickets.reduce((counts, ticket) => {
-      const priority = ticket.priority || 'Unknown';
+      const priority = ticket.priority || "Unknown";
       counts[priority] = (counts[priority] || 0) + 1;
       return counts;
     }, {});
   }
 
   private calculateETA(tickets: any[]): any[] {
-    return tickets[0].tickets.map(ticket => {
+    return tickets[0].tickets.map((ticket) => {
       let latestEndDate: string | null = null;
 
       ticket.jiraData.forEach((jira: any) => {
         const currentSprint = jira.sprints?.currentSprint; // Kontrollera om sprints finns
-        const futureSprintEndDates = jira.sprints?.futureSprints?.map((sprint: any) => sprint.endDate) || []; // Hantera undefined futureSprints
+        const futureSprintEndDates =
+          jira.sprints?.futureSprints?.map((sprint: any) => sprint.endDate) ||
+          []; // Hantera undefined futureSprints
 
         // Hitta det senaste slutdatumet från framtida sprints eller nuvarande sprint
         const relevantDates = [
-          ...(currentSprint && currentSprint.endDate ? [currentSprint.endDate] : []),
+          ...(currentSprint && currentSprint.endDate
+            ? [currentSprint.endDate]
+            : []),
           ...futureSprintEndDates,
         ];
 
@@ -410,7 +457,11 @@ private filterMatchesActive(ticket: any): boolean {
           return !latest || new Date(date) > new Date(latest) ? date : latest;
         }, null);
 
-        if (!latestEndDate || (latestDateInSprints && new Date(latestDateInSprints) > new Date(latestEndDate))) {
+        if (
+          !latestEndDate ||
+          (latestDateInSprints &&
+            new Date(latestDateInSprints) > new Date(latestEndDate))
+        ) {
           latestEndDate = latestDateInSprints;
         }
       });
@@ -449,11 +500,10 @@ private filterMatchesActive(ticket: any): boolean {
   }
 
   isToBeAnswered(updatedAt: string, ticket: any): boolean {
-
     if (ticket.latestAnswerWasAutomated) {
       return false;
     }
-    
+
     if (
       ticket.latestInternalComment?.created_at &&
       this.isDateBefore(ticket.latestInternalComment.created_at, updatedAt)
@@ -461,22 +511,33 @@ private filterMatchesActive(ticket: any): boolean {
       return true;
     }
 
-    if (ticket.latestPublicComment?.created_at && this.isDateBefore(ticket.latestPublicComment.created_at, updatedAt)) {
+    if (
+      ticket.latestPublicComment?.created_at &&
+      this.isDateBefore(ticket.latestPublicComment.created_at, updatedAt)
+    ) {
       return true;
     }
 
     // Rule 2
-    if (ticket.ticketStatus === 'open') {
-      const latestCommentDate = ticket.latestInternalComment?.created_at || ticket.latestPublicComment?.created_at;
+    if (ticket.ticketStatus === "open") {
+      const latestCommentDate =
+        ticket.latestInternalComment?.created_at ||
+        ticket.latestPublicComment?.created_at;
 
       if (latestCommentDate) {
-        const daysSinceLastComment = this.getDaysDifference(latestCommentDate, new Date().toISOString());
+        const daysSinceLastComment = this.getDaysDifference(
+          latestCommentDate,
+          new Date().toISOString()
+        );
 
         if (daysSinceLastComment > 3) {
           return true;
         }
       } else {
-        const daysSinceCreated = this.getDaysDifference(ticket.created_at, new Date().toISOString());
+        const daysSinceCreated = this.getDaysDifference(
+          ticket.created_at,
+          new Date().toISOString()
+        );
 
         if (daysSinceCreated > 3) {
           return true;
@@ -488,22 +549,21 @@ private filterMatchesActive(ticket: any): boolean {
   }
 
   private countTicketsToBeAnswered() {
-    this.ticketsToBeAnsweredCount = this.assignedTicketsBackup.filter(ticket =>
-      this.isToBeAnswered(ticket.updated_at, ticket),
+    this.ticketsToBeAnsweredCount = this.assignedTicketsBackup.filter(
+      (ticket) => this.isToBeAnswered(ticket.updated_at, ticket)
     ).length;
   }
 
   private sortTickets() {
     // Prioritetsordning
-    const priorityOrder = ['urgent', 'high', 'normal', 'low'];
-    const tierOrder = ['tier1', 'tier2', 'tier3', 'tier4'];
+    const priorityOrder = ["urgent", "high", "normal", "low"];
+    const tierOrder = ["tier1", "tier2", "tier3", "tier4"];
 
     this.assignedTickets.sort((a, b) => {
       let valueA = a[this.sortKey];
       let valueB = b[this.sortKey];
 
-      // Anpassad sortering för Priority
-      if (this.sortKey === 'priority') {
+      if (this.sortKey === "priority") {
         const indexA = priorityOrder.indexOf(valueA);
         const indexB = priorityOrder.indexOf(valueB);
 
@@ -517,11 +577,10 @@ private filterMatchesActive(ticket: any): boolean {
           return -1;
         }
 
-        return this.sortDirection === 'asc' ? indexA - indexB : indexB - indexA;
+        return this.sortDirection === "asc" ? indexA - indexB : indexB - indexA;
       }
 
-      // Anpassad sortering för Tier
-      if (this.sortKey === 'tier') {
+      if (this.sortKey === "tier") {
         const indexA = tierOrder.indexOf(valueA);
         const indexB = tierOrder.indexOf(valueB);
 
@@ -535,11 +594,11 @@ private filterMatchesActive(ticket: any): boolean {
           return -1;
         }
 
-        return this.sortDirection === 'asc' ? indexA - indexB : indexB - indexA;
+        return this.sortDirection === "asc" ? indexA - indexB : indexB - indexA;
       }
 
       // Sortera ärenden som borde bli besvarade
-      if (this.sortKey === 'toBeAnswered') {
+      if (this.sortKey === "toBeAnswered") {
         const updatedAtA = new Date(a.updated_at).getTime();
         const updatedAtB = new Date(b.updated_at).getTime();
 
@@ -551,16 +610,16 @@ private filterMatchesActive(ticket: any): boolean {
         const isOlderB = daysDiffB > 5;
 
         if (isOlderA && !isOlderB) {
-          return this.sortDirection === 'asc' ? -1 : 1;
+          return this.sortDirection === "asc" ? -1 : 1;
         }
         if (!isOlderA && isOlderB) {
-          return this.sortDirection === 'asc' ? 1 : -1;
+          return this.sortDirection === "asc" ? 1 : -1;
         }
 
         return 0;
       }
 
-      if (this.sortKey === 'eta' || this.sortKey === 'updated_at') {
+      if (this.sortKey === "eta" || this.sortKey === "updated_at") {
         valueA = valueA ? new Date(valueA).getTime() : null;
         valueB = valueB ? new Date(valueB).getTime() : null;
 
@@ -571,7 +630,7 @@ private filterMatchesActive(ticket: any): boolean {
           return -1;
         }
 
-        return this.sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
+        return this.sortDirection === "asc" ? valueA - valueB : valueB - valueA;
       }
 
       if (valueA === null || valueA === undefined) {
@@ -582,10 +641,10 @@ private filterMatchesActive(ticket: any): boolean {
       }
 
       if (valueA > valueB) {
-        return this.sortDirection === 'asc' ? 1 : -1;
+        return this.sortDirection === "asc" ? 1 : -1;
       }
       if (valueA < valueB) {
-        return this.sortDirection === 'asc' ? -1 : 1;
+        return this.sortDirection === "asc" ? -1 : 1;
       }
 
       return 0;
@@ -596,44 +655,50 @@ private filterMatchesActive(ticket: any): boolean {
     if (!ticket.jiraData) {
       return false;
     }
-  
+
     // Kontrollera om det finns tidigare sprintar och status inte är "Closed"
     return ticket.jiraData.some((jira: any) => {
       const ticketStatus = jira.sprints?.ticketStatus;
       const hasPrevious = jira.sprints?.previousSprints?.length > 0;
-  
+
       // Returnera true endast om det finns tidigare sprintar och status inte är "Closed"
       return hasPrevious && ticketStatus !== "Closed";
     });
   }
-  
-  getJiraBadgeClass(ticketStatus: string): string {
-    return `jira-badge jira-badge-${ticketStatus.toLowerCase().replace(/\s+/g, '-')}`;
+
+getJiraBadgeClass(ticketStatus: string | undefined): string {
+  if (!ticketStatus || typeof ticketStatus !== 'string') {
+    return 'jira-badge jira-badge-unknown'; // Return a default or unknown class
   }
+  return `jira-badge jira-badge-${ticketStatus.toLowerCase().replace(/\s+/g, "-")}`;
+}
 
   isHoldStatus(status: string): boolean {
     const specialStatuses = [
-      'Carrier Dev',
-      'Product Development',
-      'Account Management',
-      'Awaiting',
-      '3.Party feedback',
-      'Accounting Services',
-      'Customer meeting',
-      'Software release',
+      "Carrier Dev",
+      "Product Development",
+      "Account Management",
+      "Awaiting",
+      "Researching",
+      "Subject Matter",
+      "Product Dev",
+      "3.Party feedback",
+      "Accounting Services",
+      "Customer meeting",
+      "Software release",
     ];
     return specialStatuses.includes(status);
   }
 
   isPendingStatus(status: string): boolean {
     const pendingStatuses = [
-      'Pending Customer',
-      'Config feedback',
-      'Subject Matter Expert',
-      'Carrier feedback',
-      'Release feedback',
-      'Temporary fix',
-      'Permanent fix',
+      "Pending Customer",
+      "Config feedback",
+      "Subject Matter Expert",
+      "Carrier feedback",
+      "Release feedback",
+      "Temporary fix",
+      "Permanent fix",
     ];
     return pendingStatuses.includes(status);
   }
@@ -646,7 +711,7 @@ private filterMatchesActive(ticket: any): boolean {
       return;
     }
 
-    const [key, direction] = sortOption.split(':');
+    const [key, direction] = sortOption.split(":");
     this.sortKey = key;
     this.sortDirection = direction;
 
@@ -654,22 +719,22 @@ private filterMatchesActive(ticket: any): boolean {
   }
 
   getTierTicketsCount(tier: number): number {
-    return this.assignedTicketsBackup.filter(ticket => ticket.tier === tier).length;
+    return this.assignedTicketsBackup.filter((ticket) => ticket.tier === tier)
+      .length;
   }
 
   filterTickets(filter: string) {
-
-
     if (
-      (filter === 'currentSprint' && this.getCurrentSprintTicketsCount() === 0) ||
-      (filter === 'futureSprint' && this.getFutureSprintTicketsCount() === 0) ||
-      (filter === 'missingSprint' && this.getMissingSprintTicketsCount() === 0) ||
-
-      (filter === 'delayed' && this.getDelayedTicketsCount() === 0) ||
-      (filter === 'closedJira' && this.getClosedJiraTicketsCount() === 0) ||
-      (filter === 'needUpdate' && (this.ticketsToBeAnsweredCount || 0) === 0) ||
-      (filter === 'missingETA' && (this.ticketsMissingETACount || 0) === 0) ||
-      (filter === 'total' && (this.zendeskTicketCount || 0) === 0)
+      (filter === "currentSprint" &&
+        this.getCurrentSprintTicketsCount() === 0) ||
+      (filter === "futureSprint" && this.getFutureSprintTicketsCount() === 0) ||
+      (filter === "missingSprint" &&
+        this.getMissingSprintTicketsCount() === 0) ||
+      (filter === "delayed" && this.getDelayedTicketsCount() === 0) ||
+      (filter === "closedJira" && this.getClosedJiraTicketsCount() === 0) ||
+      (filter === "needUpdate" && (this.ticketsToBeAnsweredCount || 0) === 0) ||
+      (filter === "missingETA" && (this.ticketsMissingETACount || 0) === 0) ||
+      (filter === "total" && (this.zendeskTicketCount || 0) === 0)
     ) {
       return;
     }
@@ -677,103 +742,130 @@ private filterMatchesActive(ticket: any): boolean {
     this.jiraVisibility = this.assignedTicketsBackup.map(() => false);
 
     switch (filter) {
-      case 'currentSprint':
-        this.assignedTickets = this.assignedTicketsBackup.filter(ticket =>
-          ticket.jiraData?.some(jira => jira.sprints?.currentSprint),
+      case "currentSprint":
+        this.assignedTickets = this.assignedTicketsBackup.filter((ticket) =>
+          ticket.jiraData?.some((jira) => jira.sprints?.currentSprint)
         );
         break;
-        case 'missingSprint':
-          this.assignedTickets = this.assignedTicketsBackup.filter(ticket =>
-            ticket.jiraData?.some(jira => {
-              const isClosed = jira.sprints?.ticketStatus === 'Closed';
-              const hasCurrentSprint = jira.sprints?.currentSprint !== null;
-              const hasNoSprints = !jira.sprints || jira.sprints.length === 0;
-              const hasPreviousSprints = jira.sprints?.previousSprints && jira.sprints.previousSprints.length > 0;
-        
-              // Include tickets that are not closed, do not have a current sprint, and either lack sprints or have previous sprints
-              return !isClosed && !hasCurrentSprint && (hasNoSprints || hasPreviousSprints);
-            })
-          );
-                  break;
-        
+      case "missingSprint":
+        this.assignedTickets = this.assignedTicketsBackup.filter((ticket) =>
+          ticket.jiraData?.some((jira) => {
+            const isClosed = jira.sprints?.ticketStatus === "Closed";
+            const hasCurrentSprint = jira.sprints?.currentSprint !== null;
+            const hasNoSprints = !jira.sprints || jira.sprints.length === 0;
+            const hasPreviousSprints =
+              jira.sprints?.previousSprints &&
+              jira.sprints.previousSprints.length > 0;
 
-      case 'futureSprint':
-        this.assignedTickets = this.assignedTicketsBackup.filter(ticket =>
-          ticket.jiraData?.some(jira => jira.sprints?.futureSprints && jira.sprints.futureSprints.length > 0),
+            // Include tickets that are not closed, do not have a current sprint, and either lack sprints or have previous sprints
+            return (
+              !isClosed &&
+              !hasCurrentSprint &&
+              (hasNoSprints || hasPreviousSprints)
+            );
+          })
         );
         break;
 
-      case 'total':
+      case "futureSprint":
+        this.assignedTickets = this.assignedTicketsBackup.filter((ticket) =>
+          ticket.jiraData?.some(
+            (jira) =>
+              jira.sprints?.futureSprints &&
+              jira.sprints.futureSprints.length > 0
+          )
+        );
+        break;
+
+      case "total":
         this.assignedTickets = [...this.assignedTicketsBackup];
         break;
-      case 'needUpdate':
-        this.assignedTickets = this.assignedTicketsBackup.filter(ticket =>
-          this.isToBeAnswered(ticket.updated_at, ticket),
+      case "needUpdate":
+        this.assignedTickets = this.assignedTicketsBackup.filter((ticket) =>
+          this.isToBeAnswered(ticket.updated_at, ticket)
         );
         break;
-      case 'urgent':
-        this.assignedTickets = this.assignedTicketsBackup.filter(ticket => ticket.priority === 'urgent');
-        break;
-      case 'high':
-        this.assignedTickets = this.assignedTicketsBackup.filter(ticket => ticket.priority === 'high');
-        break;
-      case 'normal':
-        this.assignedTickets = this.assignedTicketsBackup.filter(ticket => ticket.priority === 'normal');
-        break;
-      case 'low':
-        this.assignedTickets = this.assignedTicketsBackup.filter(ticket => ticket.priority === 'low');
-        break;
-      case 'missingETA':
-        this.assignedTickets = this.assignedTicketsBackup.filter(ticket => !ticket.eta);
-        break;
-        case 'delayed':
-          this.assignedTickets = this.assignedTicketsBackup.filter(ticket =>
-            ticket.jiraData?.some(jira => {
-              const ticketStatus = jira.sprints?.ticketStatus;
-              const hasPreviousSprints = jira.sprints?.previousSprints?.length > 0;
-        
-              // Inkludera endast biljetter som har tidigare sprintar och inte är "Closed"
-              return hasPreviousSprints && ticketStatus !== "Closed";
-            })
-          );
-          break;
-        
-        break;
-      case 'closedJira':
+      case "urgent":
         this.assignedTickets = this.assignedTicketsBackup.filter(
-          ticket =>
-            ticket.jiraData?.length > 0 && ticket.jiraData.every(jira => jira.sprints.ticketStatus === 'Closed'),
+          (ticket) => ticket.priority === "urgent"
         );
         break;
-      case 'tier1':
-        this.assignedTickets = this.assignedTicketsBackup.filter(ticket => ticket.tier === 1);
+      case "high":
+        this.assignedTickets = this.assignedTicketsBackup.filter(
+          (ticket) => ticket.priority === "high"
+        );
         break;
-      case 'tier2':
-        this.assignedTickets = this.assignedTicketsBackup.filter(ticket => ticket.tier === 2);
+      case "normal":
+        this.assignedTickets = this.assignedTicketsBackup.filter(
+          (ticket) => ticket.priority === "normal"
+        );
         break;
-      case 'tier3':
-        this.assignedTickets = this.assignedTicketsBackup.filter(ticket => ticket.tier === 3);
+      case "low":
+        this.assignedTickets = this.assignedTicketsBackup.filter(
+          (ticket) => ticket.priority === "low"
+        );
+        break;
+      case "missingETA":
+        this.assignedTickets = this.assignedTicketsBackup.filter(
+          (ticket) => !ticket.eta
+        );
+        break;
+      case "delayed":
+        this.assignedTickets = this.assignedTicketsBackup.filter((ticket) =>
+          ticket.jiraData?.some((jira) => {
+            const ticketStatus = jira.sprints?.ticketStatus;
+            const hasPreviousSprints =
+              jira.sprints?.previousSprints?.length > 0;
+
+            return hasPreviousSprints && ticketStatus !== "Closed";
+          })
+        );
+        break;
+
+        break;
+      case "closedJira":
+        this.assignedTickets = this.assignedTicketsBackup.filter(
+          (ticket) =>
+            ticket.jiraData?.length > 0 &&
+            ticket.jiraData.every(
+              (jira) => jira.sprints.ticketStatus === "Closed"
+            )
+        );
+        break;
+      case "tier1":
+        this.assignedTickets = this.assignedTicketsBackup.filter(
+          (ticket) => ticket.tier === 1
+        );
+        break;
+      case "tier2":
+        this.assignedTickets = this.assignedTicketsBackup.filter(
+          (ticket) => ticket.tier === 2
+        );
+        break;
+      case "tier3":
+        this.assignedTickets = this.assignedTicketsBackup.filter(
+          (ticket) => ticket.tier === 3
+        );
         break;
       default:
         this.assignedTickets = [...this.assignedTicketsBackup];
         break;
     }
 
-    // Sort tickets by priority after filtering
     this.sortTicketsByPriority();
     this.updateCarrierDropdown();
-    this.selectedOption = this.options[0]; // Återställ till "Total Carriers"
-
-
+    this.selectedOption = this.options[0];
   }
-  
+
   private updateCarrierDropdown() {
-    // Skapa ett set för unika transportörer i de filtrerade tickets
-    const carrierCounts: { [key: string]: { carrierName: string; count: number } } = {};
+    const carrierCounts: {
+      [key: string]: { carrierName: string; count: number };
+    } = {};
   
-    this.assignedTickets.forEach(ticket => {
+    this.assignedTickets.forEach((ticket) => {
       if (ticket.carrier_id) {
-        const carrierName = ticket.carrierName || `Carrier ID ${ticket.carrier_id}`;
+        const carrierName =
+          ticket.carrierName || `Carrier ID ${ticket.carrier_id}`;
         if (!carrierCounts[ticket.carrier_id]) {
           carrierCounts[ticket.carrier_id] = { carrierName, count: 0 };
         }
@@ -781,45 +873,37 @@ private filterMatchesActive(ticket: any): boolean {
       }
     });
   
-    // Skapa och sortera dropdown-alternativ
+    const uniqueCarrierCount = Object.keys(carrierCounts).length;
+
     const sortedOptions = Object.entries(carrierCounts)
       .map(([id, { carrierName, count }]) => ({
         id: id,
         carrierName: carrierName,
-        name: carrierName, // Lägg till `name` för att undvika felet
+        name: carrierName,
         count: count,
       }))
       .sort((a, b) => b.count - a.count);
   
-    // Lägg till "Total Carriers" som första alternativ
     this.options = [
       {
-        id: 'all',
-        carrierName: 'Total Carriers',
-        name: 'Total Carriers', // Lägg till `name` här också
-        count: this.assignedTickets.length,
+        id: "all",
+        carrierName: "Total Carriers",
+        name: "Total Carriers",
+        count: uniqueCarrierCount,
       },
       ...sortedOptions,
     ];
   
-    // Återställ valt alternativ till "Total Carriers" om den valda transportören inte längre finns kvar
-    if (!this.options.some(option => option.id === this.selectedOption?.id)) {
+    if (!this.options.some((option) => option.id === this.selectedOption?.id)) {
       this.selectedOption = this.options[0];
     }
   
-    // Säkerställ att dropdown uppdateras
     this.cdr.detectChanges();
   }
   
-  
-  
-  
-  
-  
-  
 
   private sortTicketsByPriority() {
-    const priorityOrder = ['urgent', 'high', 'normal', 'low'];
+    const priorityOrder = ["urgent", "high", "normal", "low"];
 
     this.assignedTickets.sort((a, b) => {
       const indexA = priorityOrder.indexOf(a.priority);
@@ -837,41 +921,46 @@ private filterMatchesActive(ticket: any): boolean {
     });
   }
   getCurrentSprintTicketsCount(): number {
-    return this.assignedTicketsBackup.filter(ticket => ticket.jiraData?.some(jira => jira.sprints?.currentSprint))
-      .length;
+    return this.assignedTicketsBackup.filter((ticket) =>
+      ticket.jiraData?.some((jira) => jira.sprints?.currentSprint)
+    ).length;
   }
 
   getMissingSprintTicketsCount(): number {
-    const missingSprintTickets = this.assignedTicketsBackup.filter(ticket =>
-      ticket.jiraData?.some(jira => {
+    const missingSprintTickets = this.assignedTicketsBackup.filter((ticket) =>
+      ticket.jiraData?.some((jira) => {
         // Kontrollera Jira-status och sprintar
-        const isClosed = jira.sprints?.ticketStatus === 'Closed';
+        const isClosed = jira.sprints?.ticketStatus === "Closed";
         const hasCurrentSprint = jira.sprints?.currentSprint !== null;
         const hasNoSprints = !jira.sprints || jira.sprints.length === 0;
-        const hasPreviousSprints = jira.sprints?.previousSprints && jira.sprints.previousSprints.length > 0;
-  
+        const hasPreviousSprints =
+          jira.sprints?.previousSprints &&
+          jira.sprints.previousSprints.length > 0;
+
         // Inkludera endast om status inte är Closed och det saknas current sprint
-        if (!isClosed && !hasCurrentSprint && (hasNoSprints || hasPreviousSprints)) {
-          console.log('Found missing sprint ticket:', ticket); // Logga varje matchande ticket
+        if (
+          !isClosed &&
+          !hasCurrentSprint &&
+          (hasNoSprints || hasPreviousSprints)
+        ) {
           return true;
         }
-  
+
         return false;
       })
     );
-  
+
     // Logga resultatet
-    console.log('Tickets missing sprint:', missingSprintTickets);
-  
+
     return missingSprintTickets.length;
   }
-  
-  
-  
 
   getFutureSprintTicketsCount(): number {
-    return this.assignedTicketsBackup.filter(ticket =>
-      ticket.jiraData?.some(jira => jira.sprints?.futureSprints && jira.sprints.futureSprints.length > 0),
+    return this.assignedTicketsBackup.filter((ticket) =>
+      ticket.jiraData?.some(
+        (jira) =>
+          jira.sprints?.futureSprints && jira.sprints.futureSprints.length > 0
+      )
     ).length;
   }
 
@@ -879,116 +968,137 @@ private filterMatchesActive(ticket: any): boolean {
     return (
       ticket.jiraData?.length > 0 &&
       ticket.jiraData.every(
-        jira =>
-          !jira.sprints?.currentSprint && (!jira.sprints?.futureSprints || jira.sprints.futureSprints.length === 0),
+        (jira) =>
+          !jira.sprints?.currentSprint &&
+          (!jira.sprints?.futureSprints ||
+            jira.sprints.futureSprints.length === 0)
       )
     );
   }
 
   getDelayedTicketsCount(): number {
-    return this.assignedTicketsBackup.filter(ticket =>
-      ticket.jiraData?.some(jira => {
+    return this.assignedTicketsBackup.filter((ticket) =>
+      ticket.jiraData?.some((jira) => {
         const ticketStatus = jira.sprints?.ticketStatus;
         const hasPreviousSprints = jira.sprints?.previousSprints?.length > 0;
-  
+
         // Räkna endast biljetter som har tidigare sprintar och inte är "Closed"
         return hasPreviousSprints && ticketStatus !== "Closed";
       })
     ).length;
   }
-  
 
   getClosedJiraTicketsCount(): number {
     return this.assignedTicketsBackup.filter(
-      ticket => ticket.jiraData?.length > 0 && ticket.jiraData.every(jira => jira.sprints.ticketStatus === 'Closed'), // Kontrollera att det finns Jira-biljetter // Kontrollera att alla är 'Closed'
+      (ticket) =>
+        ticket.jiraData?.length > 0 &&
+        ticket.jiraData.every((jira) => jira.sprints.ticketStatus === "Closed") // Kontrollera att det finns Jira-biljetter // Kontrollera att alla är 'Closed'
     ).length;
   }
 
   hasAllJiraClosed(ticket: any): boolean {
     // Kontrollera att alla Jira-biljetter i ticketens jiraData har status 'Closed'
     return (
-      ticket.jiraData?.length > 0 && ticket.jiraData.every(jira => jira.sprints.ticketStatus === 'Closed') // Se till att det finns Jira-biljetter // Kontrollera att alla är 'Closed'
+      ticket.jiraData?.length > 0 &&
+      ticket.jiraData.every((jira) => jira.sprints.ticketStatus === "Closed") // Se till att det finns Jira-biljetter // Kontrollera att alla är 'Closed'
     );
   }
 
   openModal(ticket: any) {
     this.selectedTicket = ticket;
     this.ticketNumber = ticket.ticket_id;
-    this.newETA = ticket?.eta ? new Date(ticket.eta).toISOString().split('T')[0] : '';
+    this.newETA = ticket?.eta
+      ? new Date(ticket.eta).toISOString().split("T")[0]
+      : "";
 
-    const delayedMessageTemplate = this.messageTemplates.find(template => template.label === 'Delayed Message');
+    const delayedMessageTemplate = this.messageTemplates.find(
+      (template) => template.label === "Delayed Message"
+    );
     if (delayedMessageTemplate) {
       this.selectedTemplate = delayedMessageTemplate.value;
       this.updateEmailText();
     }
 
     // Visa placeholder medan datan laddas
-    this.requesterName = 'Loading...';
+    this.requesterName = "Loading...";
 
     // Fetch requester name
-    this.wizardBackendService.GetZendeskTicketRequesterName(ticket.ticket_id).subscribe(
-      response => {
-        this.requesterName = response.requesterName || 'Customer';
-        this.updateEmailText();
-      },
-      error => {
-        console.error('Error fetching ticket data:', error);
-        this.requesterName = 'Customer';
-        this.updateEmailText();
-      },
-    );
+    this.wizardBackendService
+      .GetZendeskTicketRequesterName(ticket.ticket_id)
+      .subscribe(
+        (response) => {
+          this.requesterName = response.requesterName || "Customer";
+          this.updateEmailText();
+        },
+        (error) => {
+          console.error("Error fetching ticket data:", error);
+          this.requesterName = "Customer";
+          this.updateEmailText();
+        }
+      );
 
     // Fetch comments and determine latest reply by assignee
-    this.wizardBackendService.getZendeskTicketComments(ticket.ticket_id).subscribe(
-      response => {
-        if (response && response.comments) {
-          const { latestPublic, latestInternal } = this.getLatestComments(response.comments);
-          this.latestPublic = latestPublic;
-          this.latestInternal = latestInternal;
+    this.wizardBackendService
+      .getZendeskTicketComments(ticket.ticket_id)
+      .subscribe(
+        (response) => {
+          if (response && response.comments) {
+            const { latestPublic, latestInternal } = this.getLatestComments(
+              response.comments
+            );
+            this.latestPublic = latestPublic;
+            this.latestInternal = latestInternal;
 
-          // Find and store latest reply by assignee
-          const latestAssigneeReply = this.getLatestReplyByAssignee(response.comments);
-          if (latestAssigneeReply) {
-            this.latestAssigneeReply = {
-              body: latestAssigneeReply.body,
-              date: new Date(latestAssigneeReply.created_at).toLocaleString(),
-              public: latestAssigneeReply.public, // Capture the public/internal status
-            };
+            // Find and store latest reply by assignee
+            const latestAssigneeReply = this.getLatestReplyByAssignee(
+              response.comments
+            );
+            if (latestAssigneeReply) {
+              this.latestAssigneeReply = {
+                body: latestAssigneeReply.body,
+                date: new Date(latestAssigneeReply.created_at).toLocaleString(),
+                public: latestAssigneeReply.public, // Capture the public/internal status
+              };
+            } else {
+              this.latestAssigneeReply = null;
+            }
           } else {
-            this.latestAssigneeReply = null;
+            console.error("Invalid comments response:", response);
           }
-        } else {
-          console.error('Invalid comments response:', response);
+        },
+        (error) => {
+          console.error("Error fetching ticket data:", error);
         }
-      },
-      error => {
-        console.error('Error fetching ticket data:', error);
-      },
-    );
+      );
 
-    const modal = document.getElementById('customModal');
+    const modal = document.getElementById("customModal");
     if (modal) {
-      modal.classList.add('show');
-      modal.style.display = 'block';
-      document.body.classList.add('modal-open');
+      modal.classList.add("show");
+      modal.style.display = "block";
+      document.body.classList.add("modal-open");
     }
   }
 
   getLatestReplyByAssignee(comments: any[]) {
     // Get the Zendesk ID of the current user
-    const currentUserZendeskID = this.members.find(member => member.email === this.user.email)?.zendeskID;
+    const currentUserZendeskID = this.members.find(
+      (member) => member.email === this.user.email
+    )?.zendeskID;
 
     if (!currentUserZendeskID) {
-      console.warn('Zendesk ID not found for the current user.');
+      console.warn("Zendesk ID not found for the current user.");
       return null;
     }
 
     // Filter comments to find those authored by the assignee
-    const assigneeComments = comments.filter(comment => comment.author_id === currentUserZendeskID);
+    const assigneeComments = comments.filter(
+      (comment) => comment.author_id === currentUserZendeskID
+    );
 
     // Sort comments by `created_at` in descending order to find the latest reply
     const sortedAssigneeComments = assigneeComments.sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
 
     // Return the latest reply, or null if none are found
@@ -1000,39 +1110,43 @@ private filterMatchesActive(ticket: any): boolean {
       return { latestPublic: null, latestInternal: null };
     }
 
-    // Filtrera ut publika och interna kommentarer
-    const publicComments = comments.filter(comment => comment.public);
-    const internalComments = comments.filter(comment => !comment.public);
+    const publicComments = comments.filter((comment) => comment.public);
+    const internalComments = comments.filter((comment) => !comment.public);
 
-    // Sortera efter `created_at` i fallande ordning (senaste först)
     const sortedPublicComments = publicComments.sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
     const sortedInternalComments = internalComments.sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
 
     // Hämta senaste från varje kategori
-    const latestPublic = sortedPublicComments.length > 0 ? sortedPublicComments[0] : null;
-    const latestInternal = sortedInternalComments.length > 0 ? sortedInternalComments[0] : null;
+    const latestPublic =
+      sortedPublicComments.length > 0 ? sortedPublicComments[0] : null;
+    const latestInternal =
+      sortedInternalComments.length > 0 ? sortedInternalComments[0] : null;
 
     return { latestPublic, latestInternal };
   }
 
+
+  
   closeModal() {
-    const modal = document.getElementById('customModal');
+    const modal = document.getElementById("customModal");
     if (modal) {
-      modal.classList.remove('show');
-      modal.style.display = 'none';
-      document.body.classList.remove('modal-open');
+      modal.classList.remove("show");
+      modal.style.display = "none";
+      document.body.classList.remove("modal-open");
     }
 
     this.selectedTemplate = null;
     this.ShouldBeInternal = false;
     this.includeRequesterName = false;
-    this.customMessage = '';
-    this.newETA = '';
-    this.activeTab = 'tab1';
+    this.customMessage = "";
+    this.newETA = "";
+    this.activeTab = "tab1";
   }
 
   updateEmailText() {
@@ -1041,7 +1155,7 @@ private filterMatchesActive(ticket: any): boolean {
       if (this.includeRequesterName && this.requesterName) {
         message = message.replace(/{{sender}}/g, ` ${this.requesterName}`);
       } else {
-        message = message.replace(/{{sender}}/g, '');
+        message = message.replace(/{{sender}}/g, "");
       }
 
       this.customMessage = message.trim();
@@ -1058,7 +1172,10 @@ private filterMatchesActive(ticket: any): boolean {
 
   onTemplateSelect(event: Event) {
     if (!this.newETA) {
-      this.showToast('Please provide an ETA before selecting a message.', 'error');
+      this.showToast(
+        "Please provide an ETA before selecting a message.",
+        "error"
+      );
       return;
     }
 
@@ -1071,7 +1188,10 @@ private filterMatchesActive(ticket: any): boolean {
 
   sendETAUpdate() {
     if (!this.newETA) {
-      this.showToast('Please provide an ETA before sending the update.', 'error');
+      this.showToast(
+        "Please provide an ETA before sending the update.",
+        "error"
+      );
       return;
     }
 
@@ -1090,14 +1210,17 @@ private filterMatchesActive(ticket: any): boolean {
       this.selectedTicket.eta = this.newETA;
 
       if (sendPublic === true) {
-        this.selectedTicket.latestPublicComment = { created_at: currentDateTime }; // Update latestPublicComment
+        this.selectedTicket.latestPublicComment = {
+          created_at: currentDateTime,
+        }; // Update latestPublicComment
       } else {
-        this.selectedTicket.latestInternalComment = { created_at: currentDateTime }; // Update latestInternalComment
+        this.selectedTicket.latestInternalComment = {
+          created_at: currentDateTime,
+        }; // Update latestInternalComment
       }
 
-
       // Overwrite sessionStorage with updated tickets
-      const cachedTickets = sessionStorage.getItem('assignedTickets');
+      const cachedTickets = sessionStorage.getItem("assignedTickets");
       if (cachedTickets) {
         const parsedTickets = JSON.parse(cachedTickets);
 
@@ -1105,14 +1228,17 @@ private filterMatchesActive(ticket: any): boolean {
         parsedTickets.forEach((team: any) => {
           team.tickets = team.tickets.map((ticket: any) => {
             if (`${ticket.ticket_id}` === `${this.selectedTicket.ticket_id}`) {
-
               // Update the ticket with new fields
               return {
                 ...ticket,
                 updated_at: currentDateTime,
                 eta: this.newETA,
-                latestPublicComment: sendPublic ? { created_at: currentDateTime } : ticket.latestPublicComment,
-                latestInternalComment: !sendPublic ? { created_at: currentDateTime } : ticket.latestInternalComment,
+                latestPublicComment: sendPublic
+                  ? { created_at: currentDateTime }
+                  : ticket.latestPublicComment,
+                latestInternalComment: !sendPublic
+                  ? { created_at: currentDateTime }
+                  : ticket.latestInternalComment,
               };
             }
             return ticket;
@@ -1120,9 +1246,14 @@ private filterMatchesActive(ticket: any): boolean {
         });
 
         // Save the updated data to sessionStorage
-        sessionStorage.setItem('assignedTickets', JSON.stringify(parsedTickets));
+        sessionStorage.setItem(
+          "assignedTickets",
+          JSON.stringify(parsedTickets)
+        );
       } else {
-        console.warn('No tickets found in sessionStorage. Creating new entry...');
+        console.warn(
+          "No tickets found in sessionStorage. Creating new entry..."
+        );
         const newTicketsData = [
           {
             name: this.user.name,
@@ -1131,28 +1262,40 @@ private filterMatchesActive(ticket: any): boolean {
             tickets: [this.selectedTicket],
           },
         ];
-        sessionStorage.setItem('assignedTickets', JSON.stringify(newTicketsData));
+        sessionStorage.setItem(
+          "assignedTickets",
+          JSON.stringify(newTicketsData)
+        );
       }
 
       // Close modal and reset state
       this.closeModal();
       this.isChatHistoryTab = false;
 
+      
       // Call backend to update ticket
       this.wizardBackendService
-        .ReplyZendeskTicket(updatePayload.ticketId, updatePayload.email, updatePayload.message, updatePayload.public)
+        .ReplyZendeskTicket(
+          updatePayload.ticketId,
+          updatePayload.email,
+          updatePayload.message,
+          updatePayload.public
+        )
         .subscribe(
-          response => {
-            this.showToast('ETA updated successfully for ' + this.selectedTicket.ticket_id, 'success');
+          (response) => {
+            this.showToast(
+              "ETA updated successfully for " + this.selectedTicket.ticket_id,
+              "success"
+            );
             // Fetch updated tickets
           },
-          error => {
-            console.error('Error updating ETA:', error);
-            this.showToast('Failed to update ETA.', 'error');
-          },
+          (error) => {
+            console.error("Error updating ETA:", error);
+            this.showToast("Failed to update ETA.", "error");
+          }
         );
     } else {
-      this.showToast('Please provide an ETA and message.', 'error');
+      this.showToast("Please provide an ETA and message.", "error");
     }
   }
 

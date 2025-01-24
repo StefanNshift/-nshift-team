@@ -9,8 +9,6 @@ export class WizardTutorialComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     const userRole = localStorage.getItem('userRole');
-    console.log('Now');
-    console.log(userRole);
     if (userRole === 'admin') {
       console.log('Admin detected: No restrictions applied.');
       return;
@@ -54,7 +52,6 @@ export class WizardTutorialComponent implements AfterViewInit {
     elements.forEach((element: HTMLElement) => {
       const linkText = element.textContent?.trim();
       if (linkText !== 'Login') {
-        console.log('Hiding element with text (Login-only):', linkText);
         this.renderer.setStyle(element, 'display', 'none');
       }
     });

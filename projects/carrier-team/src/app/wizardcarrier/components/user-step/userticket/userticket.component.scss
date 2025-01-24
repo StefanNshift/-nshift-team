@@ -61,7 +61,7 @@
     height: 350px;
   }
   .card-header {
-    height: 140px;
+    height: 150px;
   }
 }
 
@@ -106,7 +106,7 @@
 }
 
 .status-badge.bg-high {
-  background: linear-gradient(135deg, #d84315, #cd3100);
+  background: linear-gradient(135deg, #e90202, #cd3100);
   color: #fff;
 }
 
@@ -320,8 +320,13 @@
 
 /* Active Button Styling */
 .filter-btn.active {
-  background-color: #000;
+  background-color: #0116a3;
   color: #fff;
+}
+
+.filter-btn:focus {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* Responsive Adjustments */
@@ -513,6 +518,12 @@
   border-color: #c3e6cb; /* Green border */
 }
 
+.jira-badge-ready-for-test{
+  background-color: #cce5ff; /* Light blue */
+  color: #004085; /* Dark blue text */
+  border-color: #b8daff; /* Blue border */
+}
+
 .jira-badge-verified-fix {
   background-color: #d4edda; /* Light green */
   color: #155724; /* Dark green text */
@@ -531,8 +542,13 @@
   border-color: #b8daff; /* Blue border */
 }
 
-.jira-badge-open,
-.jira-badge-Reopened {
+.jira-badge-open{
+  background-color: #d4edda; /* Light green */
+  color: #155724; /* Dark green text */
+  border-color: #c3e6cb; /* Green border */
+}
+
+.jira-badge-reopened {
   background-color: #cce5ff; /* Light blue */
   color: #004085; /* Dark blue text */
   border-color: #b8daff; /* Blue border */
