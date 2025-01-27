@@ -80,14 +80,7 @@ const routes: WizardStep[] = [
                   title: 'Refresh Tickets', // Titel för skärmläsare
                   class: 'btn-clear-session', // CSS-klass (valfritt)
               },
-                {
-                  type: 'next',
-                },
-             
-                {
-                  type: 'prev',
-                },
-                
+
               ],
             },
           },

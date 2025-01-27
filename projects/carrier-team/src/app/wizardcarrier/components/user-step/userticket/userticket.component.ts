@@ -222,7 +222,7 @@ export class UserComponent implements OnInit {
 
     this.wizardBackendService.getAllUserTickets(user).subscribe(
       (response: any) => {
-
+        console.log("response",response)
         if (response?.assignedTickets) {
           sessionStorage.setItem(
             "assignedTickets",
@@ -415,6 +415,9 @@ export class UserComponent implements OnInit {
   }
 
   private convertTierToNumber(tier: string): number | null {
+    if (typeof tier === 'number') {
+      return tier; // Returnera direkt om det redan är ett nummer
+    }
     switch (tier) {
       case "tier 1":
         return 1;
@@ -436,7 +439,8 @@ export class UserComponent implements OnInit {
   }
 
   private calculateETA(tickets: any[]): any[] {
-    return tickets[0].tickets.map((ticket) => {
+    console.log(tickets);
+    return tickets.map((ticket) => {
       let latestEndDate: string | null = null;
 
       ticket.jiraData.forEach((jira: any) => {
@@ -500,53 +504,38 @@ export class UserComponent implements OnInit {
   }
 
   isToBeAnswered(updatedAt: string, ticket: any): boolean {
+    // 1. If the latest answer was automated, send "need update"
     if (ticket.latestAnswerWasAutomated) {
       return false;
     }
-
+  
+    // Normalize `updated_at` to remove time for date comparison
+    const normalizedUpdatedAt = new Date(updatedAt).setHours(0, 0, 0, 0);
+    const today = new Date().setHours(0, 0, 0, 0);
+  
+    // 2. If the reporter has NOT responded, the status is "open," and more than 3 days have passed since `updated_at`, send "need update"
     if (
-      ticket.latestInternalComment?.created_at &&
-      this.isDateBefore(ticket.latestInternalComment.created_at, updatedAt)
+      !ticket.reporterHasResponded && // Reporter has not responded
+      ticket.ticketStatus === "open" && // Ticket is still open
+      (today - normalizedUpdatedAt) / (1000 * 3600 * 24) > 3 // More than 3 days since updated_at
     ) {
       return true;
     }
-
-    if (
-      ticket.latestPublicComment?.created_at &&
-      this.isDateBefore(ticket.latestPublicComment.created_at, updatedAt)
-    ) {
-      return true;
-    }
-
-    // Rule 2
-    if (ticket.ticketStatus === "open") {
-      const latestCommentDate =
-        ticket.latestInternalComment?.created_at ||
-        ticket.latestPublicComment?.created_at;
-
-      if (latestCommentDate) {
-        const daysSinceLastComment = this.getDaysDifference(
-          latestCommentDate,
-          new Date().toISOString()
-        );
-
-        if (daysSinceLastComment > 3) {
-          return true;
-        }
-      } else {
-        const daysSinceCreated = this.getDaysDifference(
-          ticket.created_at,
-          new Date().toISOString()
-        );
-
-        if (daysSinceCreated > 3) {
-          return true;
-        }
+  
+    // 3. If the reporter HAS responded, but they were NOT the last responder, send "need update"
+    if (ticket.reporterHasResponded && !ticket.reporterWasLastResponder) {
+      if(!ticket.needsFollowUp){
+        return false;
       }
+      return true;
     }
-
+  
+    // If none of the conditions are met, no need for update
     return false;
   }
+  
+  
+  
 
   private countTicketsToBeAnswered() {
     this.ticketsToBeAnsweredCount = this.assignedTicketsBackup.filter(
@@ -738,7 +727,7 @@ getJiraBadgeClass(ticketStatus: string | undefined): string {
     ) {
       return;
     }
-    this.activeFilter = filter;
+    this.activeFilter = filter
     this.jiraVisibility = this.assignedTicketsBackup.map(() => false);
 
     switch (filter) {

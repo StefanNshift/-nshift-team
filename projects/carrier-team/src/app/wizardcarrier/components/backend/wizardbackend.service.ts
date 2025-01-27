@@ -43,7 +43,7 @@ export class WizardbackendService {
   }
 
   getAllUserTickets(email: string): Observable<any> {
-    const url = `${this.WIZARD_BACKEND_URL}/GetUserTickets`;
+    const url = `${this.WIZARD_BACKEND_URL}/GetUserTicketIncludeGPT`;
     const params = new HttpParams().set('email', email); // Lägg till e-post som query-param
     return this.http.get(url, { headers: this.getHeaders(), params });
   }
