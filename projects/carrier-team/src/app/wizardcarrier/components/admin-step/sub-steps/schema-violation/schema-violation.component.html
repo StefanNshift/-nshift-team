@@ -1,0 +1,238 @@
+<div class="px-2 mt-5">
+  <div class="border rounded p-4 shadow-sm bg-white">
+    <div class="row">
+      <!-- Prompt List & Add -->
+      <div class="col-md-5">
+        <h4 class="mb-3">Create Schema</h4>
+
+        <div class="mb-3">
+          <label class="form-label small">Schema Name</label>
+          <input [(ngModel)]="newPromptName" class="form-control" placeholder="e.g. breakingchange" />
+        </div>
+
+        
+        <div class="mb-3">
+          <label class="form-label small">Schema Definition </label>
+          <textarea
+            [(ngModel)]="newDefinition"
+            class="form-control"
+            rows="2"
+            placeholder="Detailed definition..."
+          ></textarea>
+        </div>
+          <!-- Rules Section -->
+          <div class="mb-3">
+            <label class="form-label small">Schema Rule </label>
+            <div class="border rounded p-2 mb-2 bg-light">
+              <ul class="list-group list-group-flush">
+                <li
+                  *ngFor="let rule of newRulesList; let i = index"
+                  class="list-group-item d-flex align-items-center gap-2 bg-transparent"
+                >
+                  <span class="badge bg-secondary me-2">{{ i + 1 }}</span>
+                  <input
+                    [(ngModel)]="newRulesList[i]"
+                    class="form-control form-control-sm border-0 bg-white shadow-sm mt-2"
+                    placeholder="Rule description..."
+                  />
+  
+                  <button class="btn btn-sm btn-outline-danger ml-2" (click)="removeNewRule(i)" title="Remove step">
+                    Delete
+                  </button>
+                </li>
+              </ul>
+            </div>
+  
+            <div class="input-group">
+              <input [(ngModel)]="newRule" class="form-control form-control-sm" placeholder="Add new rule..." />
+              <button class="btn btn-sm btn-outline-secondary mt-2" (click)="addNewRule()" title="Add rule">
+                <i class="bi bi-plus"></i> Add Rule
+              </button>
+            </div>
+          </div>
+
+          <hr>
+
+
+        <div class="mb-3">
+          <label class="form-label small">AI Instruction</label>
+          <textarea
+            [(ngModel)]="newInstruction"
+            class="form-control"
+            rows="2"
+            placeholder="You are a bot that..."
+          ></textarea>
+        </div>
+
+        <!-- Steps Section -->
+        <div class="mb-3">
+          <label class="form-label small">AI Steps</label>
+          <div class="border rounded p-2 mb-2 bg-light">
+            <ul class="list-group list-group-flush">
+              <li
+                *ngFor="let step of newStepsList; let i = index"
+                class="list-group-item d-flex align-items-center gap-2 bg-transparent"
+              >
+                <span class="badge bg-primary me-2">{{ i + 1 }}</span>
+                <input
+                  [(ngModel)]="newStepsList[i]"
+                  class="form-control form-control-sm border-0 bg-white shadow-sm"
+                  placeholder="Step description..."
+                />
+                <button class="btn btn-sm btn-outline-danger ml-2" (click)="removeNewStep(i)" title="Remove step">
+                  Delete
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          <div class="input-group">
+            <input [(ngModel)]="newStep" class="form-control form-control-sm" placeholder="Add new step..." />
+            <button class="btn btn-sm btn-outline-primary mt-2" (click)="addNewStep()" title="Add step">
+              <i class="bi bi-plus"></i> Add Step
+            </button>
+          </div>
+        </div>
+
+      
+
+        <div class="mb-3">
+          <label class="form-label small">AI Expected Result</label>
+          <textarea
+            [(ngModel)]="newExpectedResult"
+            class="form-control font-monospace"
+            rows="3"
+            placeholder="Expected JSON output..."
+          ></textarea>
+        </div>
+
+        <button class="btn btn-primary w-100" (click)="addPrompt()">
+          <i class="bi bi-plus-circle me-1"></i> Add Prompt
+        </button>
+      </div>
+
+      <!-- Prompt Editor -->
+      <div class="col-md-7">
+        <ng-select
+          [items]="prompts"
+          bindLabel="name"
+          [(ngModel)]="selectedPrompt"
+          [clearable]="true"
+          placeholder="Select a Schema"
+          class="mb-4 w-50"
+        ></ng-select>
+
+        <div *ngIf="selectedPrompt" class="border rounded p-3 bg-light">
+
+
+          <div class="mb-3">
+            <label class="form-label small" >  Definition {{ selectedPrompt.name }}</label>
+            
+            <textarea [(ngModel)]="selectedPrompt.definition" class="form-control mb-2" rows="2"></textarea>
+          </div>
+
+
+             <!-- Rules Edit Section -->
+             <div class="mb-3">
+              <label class="form-label small">Rules</label>
+              <div class="border rounded p-2 mb-2 bg-white">
+                <ul class="list-group list-group-flush">
+                  <li
+                    *ngFor="let rule of selectedPrompt.rules; let i = index"
+                    class="list-group-item d-flex align-items-center gap-2 bg-transparent"
+                  >
+                  <span class="badge bg-primary me-2">{{ i + 1 }}</span>
+                  <input
+                      [(ngModel)]="selectedPrompt.rules[i]"
+                      class="form-control form-control-sm border-0 bg-light shadow-sm"
+                      placeholder="Rule description..."
+                    />
+                    <button class="btn btn-sm btn-outline-danger ml-2" (click)="removeEditRule(i)" title="Remove rule">
+                      Remove
+                    </button>
+                  </li>
+                </ul>
+              </div>
+  
+              <div class="input-group">
+                <input [(ngModel)]="editRule" class="form-control form-control-sm" placeholder="Add new rule..." />
+                <button class="btn btn-sm btn-outline-secondary mt-2" (click)="addEditRule()" title="Add rule">
+                  <i class="bi bi-plus"></i> Add Rule
+                </button>
+              </div>
+            </div>
+  
+
+            <hr>
+
+          <div class="mb-3">
+            <label class="form-label small">AI Instruction</label>
+            <textarea [(ngModel)]="selectedPrompt.instruction" class="form-control mb-2" rows="2"></textarea>
+          </div>
+
+     
+          <!-- Steps Edit Section -->
+          <div class="mb-3">
+            <label class="form-label small">AI Steps</label>
+            <div class="border rounded p-2 mb-2 bg-white">
+              <ul class="list-group list-group-flush">
+                <li
+                  *ngFor="let step of selectedPrompt.steps; let i = index"
+                  class="list-group-item d-flex align-items-center gap-2 bg-transparent"
+                >
+                  <span class="badge bg-primary me-2">{{ i + 1 }}</span>
+                  <input
+                    [(ngModel)]="selectedPrompt.steps[i]"
+                    class="form-control form-control-sm border-0 bg-light shadow-sm"
+                    placeholder="Step description..."
+                  />
+                  <button class="btn btn-sm btn-outline-danger ml-2" (click)="removeEditStep(i)" title="Remove step">
+                    Remove
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            <div class="input-group">
+              <input [(ngModel)]="editStep" class="form-control form-control-sm" placeholder="Add new step..." />
+              <button class="btn btn-sm btn-outline-primary mt-2" (click)="addEditStep()" title="Add step">
+                <i class="bi bi-plus"></i> Add Step
+              </button>
+            </div>
+          </div>
+
+       
+          <div class="mb-3">
+            <label class="form-label small" >AI Expected Result</label>
+            <textarea [(ngModel)]="selectedPrompt.expectedResult" class="form-control mb-3" rows="3"></textarea>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button class="btn btn-success w-50 btn-sm mr-2" (click)="updatePrompt()">
+              <i class="bi bi-save me-1"></i> Update
+            </button>
+            <button class="btn btn-danger w-50 btn-sm" (click)="deletePrompt(selectedPrompt)">
+              <i class="bi bi-trash me-1"></i> Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+  class="toast"
+  *ngIf="toastVisible"
+  [ngClass]="{
+    visible: toastVisible,
+    'toast-success': toastType === 'success',
+    'toast-error': toastType === 'error',
+    'toast-warning': toastType === 'warning'
+  }"
+>
+  <div class="toast-content">
+    <span class="toast-message">{{ toastMessage }}</span>
+    <button class="close-toast" (click)="hideToast()">×</button>
+  </div>
+</div>
+
+</div>

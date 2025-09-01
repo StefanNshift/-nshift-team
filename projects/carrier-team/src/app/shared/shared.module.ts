@@ -4,8 +4,10 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faGithub } from '@fortawesome/free-brands-svg-icons/faGithub';
 import { faJira } from '@fortawesome/free-brands-svg-icons/faJira';
+import { EditorModule } from '@tinymce/tinymce-angular';
 
 import { NgxPaginationModule } from 'ngx-pagination';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 import { MarkdownModule } from 'ngx-markdown';
 
@@ -13,13 +15,24 @@ import { MarkdownModule } from 'ngx-markdown';
   declarations: [],
   imports: [
     CommonModule,
+    EditorModule,
     FormsModule,
     FontAwesomeModule,
     NgxPaginationModule,
     ReactiveFormsModule,
+    NgSelectModule,
     MarkdownModule.forRoot(),
   ],
-  exports: [CommonModule, FormsModule, FontAwesomeModule, ReactiveFormsModule, NgxPaginationModule, MarkdownModule],
+  exports: [
+    CommonModule,
+    EditorModule,
+    FormsModule,
+    NgSelectModule,
+    FontAwesomeModule,
+    ReactiveFormsModule,
+    NgxPaginationModule,
+    MarkdownModule,
+  ],
 })
 export class SharedModule {
   constructor(library: FaIconLibrary) {

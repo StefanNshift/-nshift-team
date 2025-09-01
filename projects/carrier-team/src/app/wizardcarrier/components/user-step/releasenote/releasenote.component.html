@@ -1,0 +1,601 @@
+<div class="container-fluid mt-2">
+  <div class="row mb-3">
+    <div class="col-12">
+      <div class="d-flex gap-3 flex-wrap">
+        <button class="btn btn-success btn-sm mr-1" (click)="exportToCSV()">
+          <i class="fas fa-file-excel"></i> Export CSV
+        </button>
+        <button class="btn btn-info btn-sm mr-1" (click)="exportToJSON()">
+          <i class="fas fa-file-code"></i> Export JSON
+        </button>
+        <button
+          class="btn btn-primary btn-sm mr-1"
+          (click)="exportReleaseNotes()"
+        >
+          <i class="fas fa-file-alt"></i> Export Release Notes
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="row mb-4">
+    <div class="col-md-2 mb-3" *ngFor="let stat of statisticsList">
+      <div class="card jira-card {{ stat.class }}">
+        <div class="card-body text-center">
+          <i class="fa {{ stat.icon }} fa-2x mb-2"></i>
+          <h5 class="card-title">{{ stat.value }}</h5>
+          <p class="card-text">{{ stat.label }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Main Content -->
+    <div class="col-xl-8 col-lg-7">
+      <!-- Filters -->
+      <div class="card mb-4">
+        <div
+          class="card-header bg-light d-flex justify-content-between align-items-center"
+        >
+          <h5 class="mb-0"><i class="fas fa-filter"></i> Filters</h5>
+          <button
+            class="btn btn-sm btn-outline-secondary"
+            (click)="toggleFilters()"
+          >
+            <i
+              class="fas"
+              [ngClass]="{ 'fa-chevron-up': isFilterExpanded, 'fa-chevron-down': !isFilterExpanded }"
+            ></i>
+          </button>
+        </div>
+        <div id="filterbody" class="card-body" *ngIf="isFilterExpanded">
+          <!-- First row of filters -->
+          <div class="row mt-4 mb-4">
+            <div class="col-md-4">
+              <div class="input-group">
+                <input
+                  type="text"
+                  id="searchInput"
+                  class="form-control"
+                  placeholder="Search issues..."
+                  [(ngModel)]="searchTerm"
+                  (input)="onSearchChange()"
+                />
+              </div>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button class="btn btn-primary w-100" (click)="clearFilters()">
+                <i class="fas fa-refresh"></i> Reset All
+              </button>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-3">
+              <label for="statusFilter" class="form-label">Status</label>
+              <ng-select
+                [items]="statusOptions"
+                bindLabel="label"
+                bindValue="value"
+                [clearable]="false"
+                [searchable]="true"
+                [(ngModel)]="selectedStatus"
+                (ngModelChange)="onStatusChange($event)"
+                placeholder="Select status"
+              >
+              </ng-select>
+            </div>
+            <div class="col-md-3">
+              <label for="priorityFilter" class="form-label">Priority</label>
+              <ng-select
+                [items]="priorityOptions"
+                bindLabel="label"
+                bindValue="value"
+                [clearable]="false"
+                [searchable]="true"
+                [(ngModel)]="selectedPriority"
+                (ngModelChange)="onPriorityChange($event)"
+                placeholder="Select priority"
+              >
+              </ng-select>
+            </div>
+            <div class="col-md-3">
+              <label for="typeFilter" class="form-label">Issue Type</label>
+              <ng-select
+                [items]="typeOptions"
+                bindLabel="label"
+                bindValue="value"
+                [clearable]="false"
+                [searchable]="true"
+                [(ngModel)]="selectedType"
+                (ngModelChange)="onTypeChange($event)"
+                placeholder="Select type"
+              >
+              </ng-select>
+            </div>
+            <div class="col-md-3">
+              <label for="sprintTypeFilter" class="form-label"
+                >Sprint Type</label
+              >
+              <ng-select
+                [items]="sprintTypeOptions"
+                bindLabel="label"
+                bindValue="value"
+                [clearable]="false"
+                [searchable]="true"
+                [(ngModel)]="selectedSprintType"
+                (ngModelChange)="onSprintTypeChange($event)"
+                placeholder="Select sprint type"
+              >
+              </ng-select>
+            </div>
+          </div>
+
+          <!-- Second row of filters -->
+          <div class="row mb-3">
+            <div class="col-md-3">
+              <label for="carrierFilter" class="form-label">Carrier</label>
+              <ng-select
+                [items]="carrierOptions"
+                bindLabel="label"
+                bindValue="value"
+                [clearable]="false"
+                [searchable]="true"
+                [(ngModel)]="selectedCarrier"
+                (ngModelChange)="onCarrierChange($event)"
+                placeholder="Select carrier"
+              >
+              </ng-select>
+            </div>
+            <div class="col-md-3">
+              <label for="reporterFilter" class="form-label">Reporter</label>
+              <ng-select
+                [items]="reporterOptions"
+                bindLabel="label"
+                bindValue="value"
+                [clearable]="false"
+                [searchable]="true"
+                [(ngModel)]="selectedReporter"
+                (ngModelChange)="onReporterChange($event)"
+                placeholder="Select reporter"
+              >
+              </ng-select>
+            </div>
+            <div class="col-md-3">
+              <label for="componentFilter" class="form-label">Component</label>
+              <ng-select
+                [items]="componentOptions"
+                bindLabel="label"
+                bindValue="value"
+                [clearable]="false"
+                [searchable]="true"
+                [(ngModel)]="selectedComponent"
+                (ngModelChange)="onComponentChange($event)"
+                placeholder="Select component"
+              >
+              </ng-select>
+            </div>
+            <div class="col-md-3">
+              <div class="form-check mt-4">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="releaseNoteFilter"
+                  [(ngModel)]="hasReleaseNote"
+                  (change)="onReleaseNoteFilterChange()"
+                />
+                <label class="form-check-label" for="releaseNoteFilter">
+                  Has Release Note
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        *ngIf="isLoading"
+        class="skeleton-loader skeleton-loader-table"
+      ></div>
+
+      <!-- Error State -->
+      <div *ngIf="error" class="alert alert-danger" role="alert">
+        <strong>Error:</strong> {{ error }}
+      </div>
+
+      <!-- Sprint Cards -->
+      <div
+        *ngFor="let sprint of filteredOverview"
+        class="card mb-4 shadow-sm"
+        [id]="'sprint-' + sprint.sprintId"
+      >
+        <!-- HEADER -->
+        <div
+          class="card-header d-flex justify-content-between align-items-center"
+          style="cursor: pointer;"
+          (click)="toggleSprintExpansion(sprint.sprintId)"
+        >
+          <div class="d-flex al zign-items-center">
+            <span
+              class="badge me-3 text-white {{ getSprintTypeBadgeClass(sprint.sprintType) }}"
+            >
+              {{ sprint.sprintType | titlecase }}
+            </span>
+            <h5 class="mb-0">{{ sprint.sprintName }}</h5>
+
+            <div class="text-end">
+              <div class="d-flex align-items-center gap-2">
+                <i
+                  class="fas"
+                  [ngClass]="{
+             'fa-chevron-down': !isSprintExpanded(sprint.sprintId),
+             'fa-chevron-up': isSprintExpanded(sprint.sprintId)
+           }"
+                >
+                </i>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-end">
+            <small class="text-muted d-block fw-semibold">
+              {{ formatDate(sprint.startDate) }} →
+              {{ formatDate(sprint.endDate) }}
+            </small>
+            <div
+              class="progress mt-2"
+              style="height: 6px;"
+              title="{{ getSprintTimePassedPercentage(sprint) }}% av tiden har gått"
+            >
+              <div
+                class="progress-bar bg-success"
+                [style.width.%]="getSprintTimePassedPercentage(sprint)"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="isSprintExpanded(sprint.sprintId)" class="card-body p-0">
+          <div class="list-group list-group-flush">
+            <div
+              *ngFor="let issue of sprint.issues"
+              (click)="openIssueDetails(issue)"
+              class="list-group-item d-flex justify-content-between align-items-start clickable-issue"
+            >
+              <div class="ms-2 me-auto">
+                <div class="fw-bold d-flex align-items-center">
+                  <a
+                    class="me-2 fw-semibold text-decoration-none"
+                    [href]="'https://nshiftgroup.atlassian.net/browse/' + issue.key"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    (click)="$event.stopPropagation()"
+                  >
+                    {{ issue.key }}
+                  </a>
+                  <span
+                    class="badge text-white {{ getStatusBadgeClass(issue.status) }} ml-2"
+                  >
+                    {{ issue.status }}
+                  </span>
+                </div>
+                <p class="mb-1 mt-2">{{ issue.summary }}</p>
+
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                  <span class="badge bg-light text-dark">
+                    <i class="fas fa-cog"></i> {{ issue.issuetype }}
+                  </span>
+                  <span
+                    class="badge {{ getPriorityBadgeClass(issue.priority) }}"
+                  >
+                    <i class="fas fa-exclamation-triangle"></i>
+                    {{ issue.priority }}
+                  </span>
+                  <span *ngIf="issue.carrier" class="badge bg-light text-dark">
+                    <i class="fas fa-truck"></i> {{ issue.carrier }}
+                  </span>
+                  <span class="badge bg-light text-dark">
+                    <i class="fas fa-user"></i> {{ issue.reporter }}
+                  </span>
+                </div>
+
+                <div
+                  *ngIf="issue.releaseNote"
+                  class="mt-3 p-3 bg-release rounded"
+                >
+                  <strong>Release Note:</strong>
+                  <p>{{ issue.releaseNote }}</p>
+                </div>
+
+                <div *ngIf="issue.components.length > 0" class="mt-2">
+                  <span
+                    *ngFor="let component of issue.components"
+                    class="badge bg-secondary me-1"
+                  >
+                    {{ component }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- No Results -->
+      <div
+        *ngIf="!isLoading && filteredOverview.length === 0"
+        class="text-center py-5"
+      >
+        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+        <h4 class="text-muted">No matching results found</h4>
+        <p class="text-muted">Try adjusting your filters or search terms.</p>
+        <button class="btn btn-primary" (click)="clearFilters()">
+          Clear Filters
+        </button>
+      </div>
+    </div>
+
+    <!-- Sidebar with Summary -->
+    <div class="col-xl-4 col-lg-5">
+      <div class="position-sticky" style="top: 1rem;">
+        <!-- Sprint Summary -->
+        <div class="card mb-4">
+          <div class="card-header sprint-header">
+            <h5 class="mb-0 text text-white">
+              <i class="fas fa-calendar-alt"></i> Sprint Timeline
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="timeline">
+              <div
+                *ngFor="let sprint of getSortedSprintsForTimeline().slice(0, 8)"
+                class="timeline-item d-flex align-items-start mb-3 cursor-pointer"
+                (click)="scrollToSprint(sprint.sprintId)"
+              >
+                <div
+                  class="timeline-marker {{ getSprintTypeBadgeClass(sprint.sprintType) }} rounded-circle d-flex align-items-center justify-content-center me-3"
+                  style="width: 40px; height: 40px;"
+                >
+                  <i class="fas fa-calendar text-white"></i>
+                </div>
+                <div class="timeline-content flex-grow-1">
+                  <h6 class="mb-1">{{ sprint.sprintName }}</h6>
+
+                  <span class="badge bg-success text-white">
+                    <i class="fas fa-check-circle me-1"></i>
+                    {{ sprint.issues.length }} issues
+                  </span>
+
+                  <span
+                    *ngIf="getClosedIssuesCount(sprint) > 0"
+                    class="ml-2 badge bg-info text-black"
+                  >
+                    <i class="fas fa-check-circle me-1"></i>
+                    {{ getClosedIssuesCount(sprint) }} closed
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="releaseOverview.length > 8" class="text-center mt-3">
+              <small class="text-muted"
+                >And {{ releaseOverview.length - 8 }} more sprints...</small
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Issue Details Modal - Placerad efter huvudinnehållet -->
+<!-- Issue Details Modal -->
+<div
+  class="modal fade"
+  id="issueDetailsModal"
+  tabindex="-1"
+  aria-labelledby="issueDetailsModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="d-flex align-items-center">
+          <a
+            [href]="'https://nshiftgroup.atlassian.net/browse/' + selectedIssue?.key"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-decoration-none me-3"
+          >
+            <h5 class="modal-title fw-bold">{{ selectedIssue?.key }}</h5>
+          </a>
+        </div>
+        <button
+          type="button"
+          class="close"
+          aria-label="Close"
+          (click)="closeModal()"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body" *ngIf="selectedIssue">
+        <!-- Issue Summary -->
+        <div class="mb-4">
+          <h6 class="text-muted mb-2">Summary</h6>
+          <p class="fs-5">{{ selectedIssue.summary }}</p>
+        </div>
+
+        <!-- Issue Details Grid -->
+        <div class="mb-4">
+          <div class="row g-3">
+            <!-- Issue Type -->
+            <div class="col-md-6 col-lg-3">
+              <h6 class="text-muted mb-1">Issue Type</h6>
+              <span class="badge bg-light text-dark w-100">
+                <i class="fas fa-cog me-1"></i> {{ selectedIssue.issuetype }}
+              </span>
+            </div>
+
+            <!-- Priority -->
+            <div class="col-md-6 col-lg-3">
+              <h6 class="text-muted mb-1">Priority</h6>
+              <span
+                class="badge {{ getPriorityBadgeClass(selectedIssue.priority) }} w-100"
+              >
+                <i class="fas fa-exclamation-triangle me-1"></i>
+                {{ selectedIssue.priority }}
+              </span>
+            </div>
+
+            <!-- Reporter -->
+            <div class="col-md-6 col-lg-3">
+              <h6 class="text-muted mb-1">Reporter</h6>
+              <span class="badge bg-light text-dark w-100">
+                <i class="fas fa-user me-1"></i> {{ selectedIssue.reporter }}
+              </span>
+            </div>
+
+            <!-- Carrier (conditional) -->
+            <div class="col-md-6 col-lg-3" *ngIf="selectedIssue.carrier">
+              <h6 class="text-muted mb-1">Carrier</h6>
+              <span class="badge bg-light text-dark w-100">
+                <i class="fas fa-truck me-1"></i> {{ selectedIssue.carrier }}
+              </span>
+            </div>
+            <!-- Status -->
+            <div class="col-md-6 col-lg-3 mt-2">
+              <h6 class="text-muted mb-1">Status</h6>
+              <span
+                class="badge text-white {{ getStatusBadgeClass(selectedIssue?.status || '') }}"
+              >
+                {{ selectedIssue?.status }}
+              </span>
+            </div>
+
+            <!-- Components -->
+            <div class="col-md-6 col-lg-3 mt-2">
+              <h6 class="text-muted mb-1">Components</h6>
+              <div class="d-flex flex-wrap gap-1">
+                <span
+                  *ngFor="let component of selectedIssue.components"
+                  class="badge bg-secondary"
+                >
+                  {{ component }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-4" *ngIf="selectedIssue.description">
+          <h6 class="text-muted mb-2">Description</h6>
+          <div class="border p-3 rounded bg-light">
+            <div
+              class="description-content"
+              [innerHTML]="formatDescription(selectedIssue.description)"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Release Note -->
+        <div class="mb-4" *ngIf="selectedIssue.releaseNote">
+          <h6 class="text-muted mb-2">Release Note</h6>
+          <p class="mb-0">{{ selectedIssue.releaseNote }}</p>
+        </div>
+
+        <!-- Linked Zendesk Tickets -->
+        <div class="mt-4">
+          <h6 class="text-muted mb-2">Linked Zendesk Tickets</h6>
+
+          <!-- Tickets List -->
+          <div
+            *ngIf="selectedIssue?.linkedZendeskTickets?.length > 0; else noLinks"
+          >
+            <ul class="list-group">
+              <li
+                *ngFor="let zd of selectedIssue.linkedZendeskTickets"
+                class="list-group-item"
+              >
+                <div class="d-flex justify-content-between align-items-start">
+                  <!-- Ticket Details -->
+                  <div class="me-3 flex-grow-1">
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-ticket-alt text-primary me-2"></i>
+                      <a
+                        [href]="'https://nshift.zendesk.com/agent/tickets/' + zd.ticket_id"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="fw-semibold text-decoration-none"
+                      >
+                        Ticket #{{ zd.ticket_id }}
+                      </a>
+                    </div>
+
+                    <!-- Ticket Subject -->
+                    <div class="text-muted small mb-2">{{ zd.subject }}</div>
+
+                    <!-- Ticket Badges -->
+                    <div class="d-flex flex-wrap gap-1">
+                      <span class="badge bg-light text-dark">
+                        <i class="fas fa-user me-1"></i> {{ zd.requester_name }}
+                      </span>
+                      <span class="badge bg-light text-dark">
+                        <i class="fas fa-info-circle me-1"></i> {{ zd.type }}
+                      </span>
+                      <span class="badge bg-light text-dark">
+                        <i class="fas fa-exclamation-circle me-1"></i>
+                        {{ zd.priority }}
+                      </span>
+                      <span class="badge bg-light text-dark">
+                        <i class="fas fa-tasks me-1"></i> {{ zd.status }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Last Updated -->
+                  <small class="text-muted text-end text-nowrap">
+                    {{ zd.updated_at_ticket | date:'short' }}
+                  </small>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- No Links Template -->
+          <ng-template #noLinks>
+            <div class="text-muted text-center py-3">
+              <i class="fas fa-ticket-alt fa-2x mb-2 opacity-50"></i>
+              <p class="mb-0">No linked Zendesk tickets found.</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn d-flex justify-content-between btn-outline-primary ng-star-inserted"
+          (click)="closeModal()"
+        >
+          Close
+        </button>
+        <a
+          [href]="'https://nshiftgroup.atlassian.net/browse/' + selectedIssue?.key"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn btn-primary"
+        >
+          <i class="fas fa-external-link-alt me-1"></i> Open in Jira
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

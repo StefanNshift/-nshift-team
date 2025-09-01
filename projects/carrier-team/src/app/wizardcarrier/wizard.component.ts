@@ -1,56 +1,85 @@
 import { AfterViewInit, Component, ElementRef, Renderer2 } from '@angular/core';
+import { routes } from './wizard-routing.module'; // Importera dina routes
 
 @Component({
   selector: 'app-take-over',
   templateUrl: './wizard.component.html',
 })
 export class WizardTutorialComponent implements AfterViewInit {
-  constructor(private renderer: Renderer2, private el: ElementRef) {}
+  roleRestrictions: { [key: string]: string[] } = {};
 
-  ngAfterViewInit() {
-    const userRole = localStorage.getItem('userRole');
-    if (userRole === 'admin') {
-      console.log('Admin detected: No restrictions applied.');
-      return;
-    }
-
-    // Case 2: If isManager is 'true', hide manager-restricted elements
-    if (userRole === 'manager') {
-      console.log('Manager detected: Hiding specific elements for managers.');
-      this.hideSpecificElementsManager();
-      return;
-    } else {
-      this.hideAllExceptLogin();
-    }
+  constructor(private renderer: Renderer2, private el: ElementRef) {
+    this.generateRoleRestrictions();
   }
 
-  private hideSpecificElementsManager() {
-    const selectors = ['li.list-group-item'];
-    selectors.forEach(selector => {
-      const elements = this.el.nativeElement.querySelectorAll(selector);
-      elements.forEach((element: HTMLElement) => {
-        const spanElement = element.querySelector('span');
-        const linkText = spanElement?.textContent?.trim() || element.textContent?.trim();
-        if (
-          linkText === 'Admin' ||
-          linkText === 'Carrier Admin' ||
-          linkText === 'Central Libary Tickets' ||
-          linkText === 'Carrier list in JIRA' ||
-          linkText === 'Sprint Review'
-        ) {
-          this.renderer.setStyle(element, 'display', 'none');
+  ngAfterViewInit() {
+    const userRole = localStorage.getItem('userRole') || 'guest';
+    if (userRole === 'guest') {
+      this.hideAllExceptLogin();
+      return;
+    }
+
+    this.applyRoleRestrictions(userRole);
+  }
+
+  private generateRoleRestrictions() {
+    this.roleRestrictions = { admin: [], manager: [], developer: [], guest: [] };
+
+    const extractRoles = (routeArray: any[], parentRoles: string[] = []) => {
+      routeArray.forEach(route => {
+        const roles = route.data?.role || parentRoles;
+        const heading = route.data?.heading;
+
+        if (heading) {
+          if (!roles.includes('admin')) {
+            this.roleRestrictions.admin.push(heading);
+          }
+          if (!roles.includes('manager')) {
+            this.roleRestrictions.manager.push(heading);
+          }
+          if (!roles.includes('developer')) {
+            this.roleRestrictions.developer.push(heading);
+          }
+          if (roles.length === 0) {
+            this.roleRestrictions.guest.push(heading);
+          }
+        }
+
+        if (route.children) {
+          extractRoles(route.children, roles);
         }
       });
-    });
+    };
+
+    extractRoles(routes[0].children);
   }
 
   /**
-   * Hide everything except the "Login" link
+   * Dölj element baserat på roll-restriktioner
    */
+  private applyRoleRestrictions(role: string) {
+    if (!this.roleRestrictions[role]) {
+      return;
+    }
+
+    const restrictedItems = this.roleRestrictions[role];
+
+    const elements = this.el.nativeElement.querySelectorAll('li.list-group-item');
+    elements.forEach((element: HTMLElement) => {
+      const spanElement = element.querySelector('span');
+      const linkText = spanElement?.textContent?.trim() || element.textContent?.trim();
+
+      if (restrictedItems.includes(linkText) && linkText !== 'Carrier Team') {
+        this.renderer.setStyle(element, 'display', 'none');
+      }
+    });
+  }
+
   private hideAllExceptLogin() {
-    const elements = this.el.nativeElement.querySelectorAll('ol.list-group li.list-group-item');
+    const elements = this.el.nativeElement.querySelectorAll('li.list-group-item');
     elements.forEach((element: HTMLElement) => {
       const linkText = element.textContent?.trim();
+
       if (linkText !== 'Login') {
         this.renderer.setStyle(element, 'display', 'none');
       }

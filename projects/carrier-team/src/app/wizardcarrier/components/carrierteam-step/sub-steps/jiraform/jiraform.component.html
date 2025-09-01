@@ -1,0 +1,603 @@
+<div *ngIf="loading" class="loading-container">
+  <div class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading form...</p>
+  </div>
+</div>
+
+<div *ngIf="error" class="error-container">
+  <div class="error-content">
+    <svg class="error-icon" width="24" height="24" viewBox="0 0 24 24" fill="#de350b">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"></path>
+    </svg>
+    <div class="error-message">
+      <h3>Error loading form</h3>
+      <p>Please try again later or contact support</p>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="jiraForm && !loading && !error" class="jira-create-container">
+  <form [formGroup]="jiraForm" (ngSubmit)="submitForm()">
+    <div class="jira-create-content">
+      <!-- MAIN CONTENT -->
+      <div class="jira-create-main">
+        <div class="form-section">
+          <div class="row g-3">
+            <div
+              *ngFor="let field of fields"
+              class="jira-form-field"
+              [ngClass]="['col-12', 'col-md-' + (field.columnWidth || 6)]"
+            >
+              <label [for]="field.key" class="jira-form-label">
+                {{ field.name }}
+                <span *ngIf="field.required" class="required">*</span>
+              </label>
+
+              <!-- Searchable Select -->
+              <ng-select
+                *ngIf="field.type === 'searchable-select' && hasAllowedValues(field)"
+                [items]="field.allowedValues"
+                bindLabel="value"
+                bindValue="id"
+                [placeholder]="field.name"
+                [formControlName]="field.key"
+                [searchable]="true"
+                [clearable]="true"
+                class="unified-select"
+              >
+                <ng-template ng-label-tmp let-item="item">
+                  <span *ngIf="!item.iconUrl && item.emojiFlag">{{ item.emojiFlag }} </span>
+                  <img
+                    *ngIf="item.iconUrl"
+                    [src]="item.iconUrl"
+                    width="16"
+                    height="16"
+                    class="select-item-icon flag-icon"
+                  />
+                  {{ item.name || item.value || item.id }}
+                </ng-template>
+
+                <ng-template ng-option-tmp let-item="item">
+                  <span *ngIf="!item.iconUrl && item.emojiFlag">{{ item.emojiFlag }} </span>
+                  <img
+                    *ngIf="item.iconUrl"
+                    [src]="item.iconUrl"
+                    width="16"
+                    height="16"
+                    class="select-item-icon flag-icon"
+                  />
+                  {{ item.name || item.value || item.id }}
+                </ng-template>
+              </ng-select>
+
+              <!-- Searchable Multiselect -->
+              <ng-select
+                *ngIf="field.type === 'searchable-multiselect' && hasAllowedValues(field)"
+                [items]="field.allowedValues"
+                bindLabel="name"
+                bindValue="id"
+                [formControlName]="field.key"
+                [searchable]="true"
+                [multiple]="true"
+                [clearable]="true"
+                [closeOnSelect]="false"
+                class="unified-select w-100"
+              >
+                <ng-template ng-label-tmp let-item="item">
+                  {{ item.name || item.value || item.id }}
+                </ng-template>
+                <ng-template ng-option-tmp let-item="item">
+                  {{ item.name || item.value || item.id }}
+                </ng-template>
+              </ng-select>
+
+              <!-- Standard Dropdown -->
+              <ng-select
+                *ngIf="
+                  hasAllowedValues(field) &&
+                  field.type !== 'searchable-select' &&
+                  field.type !== 'searchable-multiselect'
+                "
+                [items]="field.allowedValues"
+                bindLabel="name"
+                bindValue="id"
+                [placeholder]="'Select ' + field.name"
+                [formControlName]="field.key"
+                [id]="field.key"
+                [searchable]="true"
+                [clearable]="true"
+                class="w-100"
+                [ngClass]="{
+                  'error-field': jiraForm.controls[field.key].invalid && jiraForm.controls[field.key].touched
+                }"
+              >
+                <ng-template ng-option-tmp let-item="item">
+                  {{ item.name || item.value || item.id }}
+                </ng-template>
+              </ng-select>
+
+              <!-- Text Input -->
+              <input
+                *ngIf="!hasAllowedValues(field) && field.key !== 'description'"
+                type="text"
+                class="jira-form-input"
+                [class.error-field]="jiraForm.controls[field.key].invalid && jiraForm.controls[field.key].touched"
+                [formControlName]="field.key"
+                [id]="field.key"
+                [placeholder]="'Enter ' + field.name.toLowerCase() + '...'"
+              />
+
+              <!-- Validation Error -->
+              <div
+                class="jira-form-error"
+                *ngIf="jiraForm.controls[field.key].invalid && jiraForm.controls[field.key].touched"
+              >
+                <svg class="jira-form-error-icon" width="16" height="16" viewBox="0 0 24 24" fill="#de350b">
+                  <path
+                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+                  ></path>
+                </svg>
+                {{ field.name }} is required
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description Editor -->
+        <div class="form-section">
+          <label for="description" class="jira-form-label">Description </label>
+          <div *ngIf="editorLoading" class="editor-loading">
+            <div style="background:#fafbfc" class="spinner spinner-sm"></div>
+          </div>
+
+          <editor
+            [(ngModel)]="description"
+            [init]="init"
+            id="description"
+            name="description"
+            [ngModelOptions]="{ standalone: true }"
+            class="tinymce-editor"
+          ></editor>
+        </div>
+
+        <!-- Linked Issues Section -->
+        <div class="row g-3">
+          <!-- Search Column -->
+          <div class="col-md-6">
+            <label class="jira-form-label"> 🔗Link Issues </label>
+
+            <!-- Search Input -->
+            <div class="mb-3">
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="bi bi-search"></i>
+                </span>
+                <input
+                  type="text"
+                  [(ngModel)]="linkSearchTerm"
+                  (input)="onLinkSearchChange()"
+                  class="form-control"
+                  placeholder="Type issue key or summary..."
+                  [ngModelOptions]="{ standalone: true }"
+                />
+              </div>
+            </div>
+
+            <!-- Search Results -->
+            <div *ngIf="linkSearchResults.length > 0" class="jiralinksearch-results mb-3">
+              <div class="jiralinksearch-list">
+                <a
+                  *ngFor="let item of linkSearchResults"
+                  (click)="onSelectSearchResult(item)"
+                  class="jiralinksearch-item"
+                >
+                  <div class="jiralinksearch-item-header">
+                    <span class="jiralinksearch-key">{{ item.key }}</span>
+                    <span class="jiralinksearch-type">{{ item.fields.issuetype.name }}</span>
+                  </div>
+                  <div class="jiralinksearch-summary">
+                    {{ item.fields.summary }}
+                  </div>
+                  <div class="jiralinksearch-status">Status: {{ item.fields.status.name }}</div>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Link Management Column -->
+          <div class="col-md-6">
+            <label class="jira-form-label"> Linked Issues </label>
+
+            <!-- Default Link Type Selection -->
+
+            <!-- Linked Issues List -->
+            <div *ngIf="selectedLinks.length > 0" class="linked-issues">
+              <div class="list-group">
+                <div *ngFor="let link of selectedLinks; let i = index" class="list-group-item">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1 me-3">
+                      <div class="d-flex align-items-center mb-1 mr-2">
+                        <span class="jira-ticket-badge">{{ link.key }}</span>
+                        <ng-select
+                          [items]="linkTypes"
+                          bindLabel="label"
+                          bindValue="id"
+                          [(ngModel)]="link.linkType"
+                          [clearable]="false"
+                          [ngModelOptions]="{ standalone: true }"
+                          placeholder="Select type..."
+                          class="link-type-selector"
+                        >
+                          <ng-template ng-label-tmp let-item="item">
+                            {{ item.label }}
+                          </ng-template>
+                        </ng-select>
+                        <span class="new-ticket-badge ml-2 bg-green">This Ticket</span>
+                      </div>
+                      <div class="text-muted small">
+                        {{ getIssueSummary(link.key) }}
+                      </div>
+                    </div>
+                    <button
+                      (click)="removeLinkedIssue(i)"
+                      class="btn btn-sm btn-outline-danger mt-1"
+                      title="Remove link"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Tools Section -->
+        <div class="form-section">
+          <div class="row align-items-start">
+            <div class="col-md-6">
+              <label class="jira-form-label"> 🤖AI Validations </label>
+              <ng-select
+                [items]="aiToolsOptions"
+                bindLabel="label"
+                placeholder="Select AI action..."
+                [(ngModel)]="selectedAiTool"
+                name="aiToolSelect"
+                class="unified-select"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="onAiToolSelected()"
+              >
+                <ng-template ng-label-tmp let-item="item">
+                  <i class="{{ item.icon }}" style="margin-right: 6px;"></i>
+                  {{ item.label }}
+                </ng-template>
+                <ng-template ng-option-tmp let-item="item">
+                  <i class="{{ item.icon }}" style="margin-right: 6px;"></i>
+                  {{ item.label }}
+                </ng-template>
+              </ng-select>
+            </div>
+
+            <div class="col-md-6">
+              <label *ngIf="!isLoading" class="jira-form-label">AI Response</label>
+              <div *ngIf="!isLoading" class="ai-response-box">
+                <div class="response-content" [innerHTML]="aiToolResponse"></div>
+              </div>
+              <div *ngIf="isLoading" class="loading-indicator">
+                <div class="spinner spinner-sm"></div>
+                <div class="loading-text">Generating response...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button type="submit" class="jira-submit-button" [disabled]="jiraForm.invalid">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px;">
+              <path
+                d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"
+              ></path>
+            </svg>
+            Create issue
+          </button>
+        </div>
+
+        <!-- Form Actions -->
+
+        <!-- Success Message -->
+        <div *ngIf="createdNewIssue" class="jira-success-box">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#36b37e">
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
+            ></path>
+          </svg>
+
+          <a [href]="'https://nshiftgroup.atlassian.net/browse/' + createdIssueKey" target="_blank">
+            Jira issue {{ createdIssueKey }}
+          </a>
+          was successfully created!
+        </div>
+
+        <!-- Error Message -->
+        <div *ngIf="jiraCreationFailed" class="jira-error-box">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#ff5630">
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+            ></path>
+          </svg>
+          Failed to create Jira issue.
+          <span *ngIf="errorMessage">({{ errorMessage }})</span>
+        </div>
+      </div>
+
+      <!-- SIDEBAR -->
+      <div class="jira-create-sidebar">
+        <div class="sidebar-section">
+          <h3>Details</h3>
+
+          <div class="jirasidebar">
+            <label for="projectSelect" class="jira-form-label">Project</label>
+            <ng-select
+              [items]="projectOptions"
+              bindLabel="label"
+              bindValue="value"
+              [(ngModel)]="selectedProjectKey"
+              [ngModelOptions]="{ standalone: true }"
+              (change)="onProjectChange()"
+              name="projectSelect"
+              placeholder="Select project..."
+              [searchable]="true"
+              [clearable]="false"
+              class="unified-select"
+            >
+              <ng-template ng-label-tmp let-item="item">
+                <img *ngIf="item.iconUrl" [src]="item.iconUrl" width="16" height="16" class="select-item-icon" />
+                {{ item.label }}
+              </ng-template>
+
+              <ng-template ng-option-tmp let-item="item">
+                <img *ngIf="item.iconUrl" [src]="item.iconUrl" width="16" height="16" class="select-item-icon" />
+                {{ item.label }}
+              </ng-template>
+            </ng-select>
+          </div>
+
+          <div class="jirasidebar">
+            <label for="issueTypeSelect" class="jira-form-label">Work type</label>
+            <ng-select
+              [items]="issueTypeOptions"
+              bindLabel="name"
+              bindValue="id"
+              [(ngModel)]="selectedIssueTypeId"
+              [ngModelOptions]="{ standalone: true }"
+              name="issueTypeSelect"
+              placeholder="Select work type..."
+              [searchable]="true"
+              [clearable]="false"
+              class="unified-select"
+            >
+              <ng-template ng-label-tmp let-item="item">
+                <img [src]="item.iconUrl" width="16" height="16" class="select-item-icon" />
+                {{ item.name }}
+              </ng-template>
+
+              <ng-template ng-option-tmp let-item="item">
+                <img [src]="item.iconUrl" width="16" height="16" class="select-item-icon" />
+                {{ item.name }}
+              </ng-template>
+            </ng-select>
+          </div>
+
+          <div class="jirasidebar">
+            <label class="jira-form-label">Link Zendesk Tickets</label>
+            <div class="mb-3">
+              <ng-select
+                [items]="zendeskTickets$ | async"
+                bindLabel="subject"
+                [multiple]="true"
+                [loading]="zendeskAutocompleteLoading"
+                [hideSelected]="true"
+                [trackByFn]="trackByTicket"
+                [typeahead]="zendeskInput$"
+                [minTermLength]="3"
+                [ngModelOptions]="{ standalone: true }"
+                [typeToSearchText]="'Search by Ticket ID'"
+                [(ngModel)]="selectedZendeskAutocomplete"
+                [closeOnSelect]="false"
+                [clearAllText]="''"
+                name="zendesk-autocomplete"
+              >
+                <ng-template ng-label-tmp let-item="item" let-clear="clear">
+                  <span class="ng-value-label">{{ item.id }}</span>
+                  <span class="ng-value-icon right" (click)="clear(item)">×</span>
+                </ng-template>
+
+                <ng-template ng-option-tmp let-item="item">
+                  <span
+                    >{{ item.subject }} <small class="text-muted">({{ item.id }})</small></span
+                  >
+                </ng-template>
+              </ng-select>
+            </div>
+          </div>
+
+          <div class="jirasidebar">
+            <label for="assignYourselfQa" class="jira-form-label">Assign yourself as QA</label>
+            <ng-select
+              id="assignYourselfQa"
+              [items]="[
+                { id: 'no', value: 'No' },
+                { id: 'yes', value: 'Yes' }
+              ]"
+              bindLabel="value"
+              bindValue="id"
+              [(ngModel)]="assignYourselfQa"
+              [ngModelOptions]="{ standalone: true }"
+              name="assignYourselfQa"
+              placeholder="Select option..."
+              [clearable]="true"
+              class="unified-select"
+            >
+              <ng-template ng-option-tmp let-item="item">
+                {{ item.value }}
+              </ng-template>
+            </ng-select>
+          </div>
+
+          <div class="jirasidebar">
+            <label for="assignYourselfCI" class="jira-form-label">Assign yourself as CI</label>
+            <ng-select
+              id="assignYourselfCI"
+              [items]="[
+                { id: 'no', value: 'No' },
+                { id: 'yes', value: 'Yes' }
+              ]"
+              bindLabel="value"
+              bindValue="id"
+              [(ngModel)]="assignYourselfCI"
+              [ngModelOptions]="{ standalone: true }"
+              name="assignYourselfca"
+              placeholder="Select option..."
+              [clearable]="true"
+              class="unified-select"
+            >
+              <ng-template ng-option-tmp let-item="item">
+                {{ item.value }}
+              </ng-template>
+            </ng-select>
+          </div>
+
+          <div *ngFor="let field of rightColumnFields" class="jirasidebar">
+            <label [for]="field.key" class="jira-form-label">
+              {{ field.name }}
+              <span *ngIf="field.required" class="required">*</span>
+            </label>
+
+            <ng-select
+              *ngIf="hasAllowedValues(field)"
+              [items]="field.allowedValues"
+              bindLabel="name"
+              bindValue="id"
+              [formControlName]="field.key"
+              [placeholder]="field.name"
+              [searchable]="true"
+              [clearable]="jiraForm.get(field.key)?.value"
+              class="unified-select"
+            >
+              <ng-template ng-label-tmp let-item="item">
+                {{ item.name || item.value || item.id }}
+              </ng-template>
+              <ng-template ng-option-tmp let-item="item">
+                {{ item.name || item.value || item.id }}
+              </ng-template>
+            </ng-select>
+
+            <!-- Textarea för "textfield"-typ -->
+            <textarea
+              *ngIf="!hasAllowedValues(field) && field.type === 'textfield'"
+              class="jira-form-input"
+              [formControlName]="field.key"
+              [id]="field.key"
+              [placeholder]="'Enter ' + field.name.toLowerCase() + '...'"
+              rows="4"
+            ></textarea>
+
+            <!-- Standard text input för övriga -->
+            <input
+              *ngIf="!hasAllowedValues(field) && field.type !== 'textfield'"
+              type="text"
+              class="jira-form-input"
+              [formControlName]="field.key"
+              [id]="field.key"
+              [placeholder]="'Enter ' + field.name.toLowerCase() + '...'"
+            />
+
+            <div
+              class="jira-form-error"
+              *ngIf="jiraForm.controls[field.key].invalid && jiraForm.controls[field.key].touched"
+            >
+              <svg class="jira-form-error-icon" width="16" height="16" viewBox="0 0 24 24" fill="#de350b">
+                <path
+                  d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+                ></path>
+              </svg>
+              {{ field.name }} is required
+            </div>
+          </div>
+
+          <div class="jirasidebar">
+            <label for="fileUpload" class="jira-form-label">Attachments</label>
+            <input id="fileUpload" type="file" (change)="onFileSelected($event)" multiple class="jira-form-input" />
+
+            <!-- Lista över uppladdade filer -->
+            <ul class="uploaded-files-list" *ngIf="uploadedFiles?.length">
+              <li *ngFor="let file of uploadedFiles; let i = index">
+                <span>{{ file.name }}</span>
+                <button type="button" (click)="removeFile(i)" class="remove-file-btn" title="Remove">
+                  🗑️
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <!-- JSON Output -->
+</div>
+
+<div *ngIf="formloading" class="form-actions mt-2">
+  <div id="prompt-commands" class="jirapromptbox">
+    <h3>⌨️ Editor Commands</h3>
+    <ul>
+      <li><kbd>@subcarrier</kbd> → Insert Subcarrier Info</li>
+      <li><kbd>@product</kbd> → Insert Service Info</li>
+      <li><kbd>@service</kbd> → Insert Service Info</li>
+      <li><kbd>@addon</kbd> → Insert Addon Info</li>
+      <li><kbd>@validation</kbd> → Insert Validation Rule</li>
+      <li><kbd>@postman</kbd> → Insert Postman Link</li>
+    </ul>
+  </div>
+
+  <button type="button" class="btn btn-primary btn-sm" (click)="showDescriptionAsAdf()">
+    Debug Mode
+  </button>
+</div>
+<div *ngIf="descriptionJson" class="json-output-container">
+  <div class="json-output-header">
+    <h3>JSON Output</h3>
+    <button (click)="descriptionJson = null" class="close-json-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="#5e6c84">
+        <path
+          d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+        ></path>
+      </svg>
+    </button>
+  </div>
+  <pre class="json-output-content">{{ descriptionJson }}</pre>
+</div>
+<!-- Toast Notification -->
+<div
+  class="toast"
+  *ngIf="toastVisible"
+  [ngClass]="{
+    visible: toastVisible,
+    'toast-success': toastType === 'success',
+    'toast-error': toastType === 'error',
+    'toast-warning': toastType === 'warning'
+  }"
+>
+  <div class="toast-content">
+    <span class="toast-message">{{ toastMessage }}</span>
+    <button class="close-toast" (click)="hideToast()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path
+          d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+        ></path>
+      </svg>
+    </button>
+  </div>
+</div>

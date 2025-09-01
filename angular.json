@@ -25,8 +25,20 @@
             "main": "projects/carrier-team/src/main.ts",
             "polyfills": "projects/carrier-team/src/polyfills.ts",
             "tsConfig": "projects/carrier-team/tsconfig.app.json",
-            "assets": ["projects/carrier-team/src/favicon.ico", "projects/carrier-team/src/assets"],
-            "styles": ["projects/carrier-team/src/styles.scss"],
+            "assets": [
+              "projects/carrier-team/src/favicon.ico",
+              "projects/carrier-team/src/assets",
+              {
+                "glob": "**/*",
+                "input": "node_modules/tinymce",
+                "output": "tinymce/"
+              }
+            ],
+            "styles": [
+              "node_modules/@ng-select/ng-select/themes/default.theme.css",
+              "projects/carrier-team/src/styles.scss",
+              "node_modules/prismjs/themes/prism-okaidia.css"
+            ],
             "scripts": [
               "node_modules/marked/marked.min.js",
               "node_modules/prismjs/prism.js",
@@ -64,7 +76,7 @@
                 {
                   "type": "anyComponentStyle",
                   "maximumWarning": "6kb",
-                  "maximumError": "10kb"
+                  "maximumError": "12kb"
                 }
               ]
             },
@@ -115,17 +127,6 @@
             "assets": ["projects/carrier-team/src/favicon.ico", "projects/carrier-team/src/assets"],
             "styles": ["projects/carrier-team/src/styles.scss"],
             "scripts": []
-          }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "projects/carrier-team/tsconfig.app.json",
-              "projects/carrier-team/tsconfig.spec.json",
-              "projects/carrier-team/e2e/tsconfig.json"
-            ],
-            "exclude": ["**/node_modules/**"]
           }
         },
         "e2e": {

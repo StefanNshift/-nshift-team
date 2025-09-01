@@ -1,0 +1,238 @@
+<div class="row">
+  <div class="col-md-9 mb-3">
+    <p class="lead">Add a new carrier field</p>
+    <form [formGroup]="newCarrierForm" (ngSubmit)="addNewCarrierOption()">
+      <div class="form-row mt-3">
+        <div class="form-group col-sm-6 col-xl-3">
+          <div>
+            <label class="col-form" for="name">Carrier Name</label>
+            <input class="form-control" type="text" id="name" formControlName="name" />
+          </div>
+
+          <div>
+            <label class="col-form" for="id">Concept ID</label>
+            <input class="form-control" type="number" id="id" formControlName="id" />
+          </div>
+
+          <div>
+            <label class="col-form" for="country">Country</label>
+            <select class="form-control" id="country" formControlName="country">
+              <option *ngFor="let country of countries" [value]="country.code">
+                {{ country.name }}
+              </option>
+            </select>
+          </div>
+
+          <div>
+            <label class="col-form" for="addTo">Field Type</label>
+            <select class="form-control" id="addTo" formControlName="addTo">
+              <option value="jira">Jira</option>
+              <option value="zendesk">Zendesk</option>
+              <option value="both">Zendesk & Jira</option>
+            </select>
+          </div>
+
+          <button type="submit" style="margin-top: 4%;" class="btn btn-primary" [disabled]="newCarrierForm.invalid">
+            Create Carrier Field
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <div class="row">
+      <!-- Jira Carriers Table -->
+      <div class="col-md-6">
+        <h4 style="margin-top: 2%">Jira Carriers</h4>
+        <div class="overflow-auto mb-3">
+          <div class="mb-3">
+            <input type="text" class="form-control col-md-5" placeholder="Search Carrier..." [(ngModel)]="searchTerm" />
+          </div>
+
+          <div *ngIf="isLoading" class="skeleton-loader skeleton-loader-table"></div>
+
+          <table *ngIf="!isLoading" class="table table-responsive-sm col-md-12">
+            <thead>
+              <tr>
+                <th>Concept ID</th>
+                <th>Carrier</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="
+                  let option of filteredData
+                    | paginate: { id: 'jiraPagination', itemsPerPage: itemsPerPage, currentPage: currentPageJira }
+                "
+              >
+                <!-- Concept ID -->
+                <td>
+                  <div *ngIf="!option.isEditing">{{ option.conceptID }}</div>
+                  <div *ngIf="option.isEditing">
+                    <input
+                      type="text"
+                      class="form-control"
+                      [(ngModel)]="option.editedConceptID"
+                      placeholder="Enter new Concept ID"
+                    />
+                  </div>
+                </td>
+
+                <!-- Carrier -->
+                <td>
+                  <div *ngIf="!option.isEditing">{{ option.carrier }}</div>
+                  <div *ngIf="option.isEditing">
+                    <input
+                      type="text"
+                      class="form-control"
+                      [(ngModel)]="option.editedValue"
+                      placeholder="Enter new Carrier value"
+                    />
+                  </div>
+                </td>
+
+                <!-- Action buttons -->
+                <td>
+                  <button
+                    style="margin-right: 10%; margin-bottom: 5%;"
+                    *ngIf="!option.isEditing"
+                    class="btn btn-sm btn-primary me-2"
+                    (click)="editCarrier(option)"
+                  >
+                    Edit
+                  </button>
+                  <button *ngIf="!option.isEditing" class="btn btn-sm btn-danger" (click)="deleteCarrier(option)">
+                    Delete
+                  </button>
+                  <div *ngIf="option.isEditing" class="d-flex gap-2">
+                    <button class="btn btn-sm btn-primary" (click)="saveCarrierEdit(option)">
+                      Save
+                    </button>
+                    <button class="btn btn-sm btn-secondary btn-outline-primary" (click)="cancelEdit(option)">
+                      Cancel
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <pagination-controls
+            (pageChange)="currentPageJira = $event"
+            [id]="'jiraPagination'"
+            [maxSize]="7"
+            [directionLinks]="true"
+            [autoHide]="true"
+          ></pagination-controls>
+        </div>
+      </div>
+
+      <!-- Zendesk Carriers Table -->
+      <div class="col-md-6">
+        <h4 style="margin-top: 2%">Zendesk Carriers</h4>
+        <div class="overflow-auto mb-3">
+          <div class="mb-3">
+            <input
+              type="text"
+              class="form-control col-md-5"
+              placeholder="Search Carrier..."
+              [(ngModel)]="searchTermZD"
+            />
+          </div>
+          <div *ngIf="isLoading" class="skeleton-loader skeleton-loader-table"></div>
+          <table *ngIf="!isLoading" class="table table-responsive-sm col-md-12">
+            <thead>
+              <tr>
+                <th>Concept ID</th>
+                <th>Carrier</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="
+                  let option of filteredZDData
+                    | paginate: { id: 'zendeskPagination', itemsPerPage: itemsPerPage, currentPage: currentPageZendesk }
+                "
+              >
+                <td>
+                  <div *ngIf="!option.isEditing">{{ option.conceptID }}</div>
+                  <div *ngIf="option.isEditing">
+                    <input
+                      type="text"
+                      class="form-control"
+                      [(ngModel)]="option.editedConceptID"
+                      placeholder="Enter new Concept ID"
+                    />
+                  </div>
+                </td>
+                <td>
+                  <div *ngIf="!option.isEditing">{{ option.carrierName }}</div>
+                  <div *ngIf="option.isEditing">
+                    <input
+                      type="text"
+                      class="form-control"
+                      [(ngModel)]="option.editedName"
+                      placeholder="Enter new Carrier Name"
+                    />
+                  </div>
+                </td>
+                <td>
+                  <button
+                    style="margin-right: 10%; margin-bottom: 5%;"
+                    *ngIf="!option.isEditing"
+                    class="btn btn-sm btn-primary"
+                    (click)="editZendeskField(option)"
+                  >
+                    Edit
+                  </button>
+                  <button *ngIf="!option.isEditing" class="btn btn-sm btn-danger" (click)="deleteZendeskField(option)">
+                    Delete
+                  </button>
+                  <div *ngIf="option.isEditing" class="d-flex gap-2">
+                    <button
+                      style="margin-right: 10%;"
+                      class="btn btn-sm btn-primary"
+                      (click)="saveFieldEditZendesk(option)"
+                    >
+                      Save
+                    </button>
+                    <button class="btn btn-sm btn-secondary btn-outline-primary" (click)="cancelZendeskEdit(option)">
+                      Cancel
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Zendesk-paginering -->
+          <pagination-controls
+            (pageChange)="currentPageZendesk = $event"
+            [id]="'zendeskPagination'"
+            [maxSize]="7"
+            [directionLinks]="true"
+            [autoHide]="true"
+          ></pagination-controls>
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class="toast"
+  *ngIf="toastVisible"
+  [ngClass]="{
+    visible: toastVisible,
+    'toast-success': toastType === 'success',
+    'toast-error': toastType === 'error',
+    'toast-warning': toastType === 'warning'
+  }"
+>
+  <div class="toast-content">
+    <span class="toast-message">{{ toastMessage }}</span>
+    <button class="close-toast" (click)="hideToast()">×</button>
+  </div>
+</div>

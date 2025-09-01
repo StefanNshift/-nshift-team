@@ -1,0 +1,30 @@
+/* You can keep this minimal or add custom styles that Bootstrap doesn't cover */
+.list-group-item.active {
+  cursor: pointer;
+}
+
+.active-prompt {
+  background-color: #e6f2ff;
+  border-left: 3px solid #0d6efd;
+}
+
+.prompt-list-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.prompt-list-container::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 10px;
+}
+
+.prompt-icon {
+  font-size: 1.1rem;
+}
+
+.form-control {
+  font-size: 0.9rem;
+}
+
+textarea.form-control {
+  min-height: 80px;
+}

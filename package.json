@@ -1,16 +1,16 @@
 {
-  "name": "seb-ng-wizard-app",
+  "name": "carrier-team-app",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve seb-ng-wizard-lazy-demo --port 4201 --host=0.0.0.0",
-    "start1:": "ng serve seb-ng-wizard-lazy-demo1 --port 4201 --host=0.0.0.0",
-    "start:simple": "ng serve seb-ng-wizard-simple-usage --port 4202 --host=0.0.0.0 --configuration production",
+    "start": "ng serve carrier-team-lazy-demo --port 4201 --host=0.0.0.0",
+    "start1:": "ng serve carrier-team-lazy-demo1 --port 4201 --host=0.0.0.0",
+    "start:simple": "ng serve carrier-team-simple-usage --port 4202 --host=0.0.0.0 --configuration production",
     "prebuild": "rimraf dist",
-    "build": "ng build seb-ng-wizard --configuration production",
-    "build:watch": "ng build seb-ng-wizard --watch",
-    "prebuild:demo": "rimraf dist/seb-ng-wizard-lazy-demo",
-    "build:demo": "ng build seb-ng-wizard-lazy-demo --configuration production --base-href /ng-wizard/",
+    "build": "ng build carrier-team",
+    "build:watch": "ng build carrier-team --watch",
+    "prebuild:demo": "rimraf dist/carrier-team-lazy-demo",
+    "build:demo": "ng build carrier-team-lazy-demo --configuration production --base-href /ng-wizard/",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
@@ -44,18 +44,22 @@
     "@angular/platform-browser": "^15.2.8",
     "@angular/platform-browser-dynamic": "^15.2.8",
     "@angular/router": "^15.2.8",
-    "@fortawesome/angular-fontawesome": "^0.10.0",
+    "@fortawesome/angular-fontawesome": "^0.10.2",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
     "@fortawesome/free-brands-svg-icons": "^5.15.4",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@ng-select/ng-select": "^10.0.4",
     "@ngneat/transloco": "^3.2.0",
     "@sebgroup/bootstrap": "^6.0.0",
     "@sebgroup/ng-wizard": "^4.0.0",
+    "@tinymce/tinymce-angular": "^4.2.2",
     "core-js": "^2.6.11",
-    "firebase": "^9.0.0",
+    "firebase": "^10.7.1",
     "ngx-markdown": "^15.1.2",
     "ngx-pagination": "^6.0.3",
-    "rxfire": "^6.0.0",
+    "rxfire": "^6.0.4",
     "rxjs": "^6.6.0",
+    "tinymce": "^7.7.2",
     "tslib": "^2.3.1",
     "zone.js": "~0.11.4"
   },
@@ -69,7 +73,6 @@
     "@types/jasmine": "~3.6.0",
     "@types/jasminewd2": "^2.0.10",
     "@types/node": "^12.20.25",
-    "codelyzer": "^6.0.0",
     "commitizen": "^3.0.5",
     "cz-conventional-changelog": "^2.1.0",
     "husky": "^1.3.1",
@@ -86,7 +89,6 @@
     "stylelint-config-recommended-scss": "^4.3.0",
     "stylelint-scss": "^3.21.0",
     "ts-node": "~7.0.0",
-    "tslint": "~6.1.0",
     "typescript": "~4.9.5"
   },
   "config": {
@@ -98,8 +100,21 @@
     "extends": [
       "@commitlint/config-conventional"
     ]
-  
-}
-
-
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged && npm run package-lock-sanitizer && git add package-lock.json",
+      "commit-msg": "commitlint --edit"
+    }
+  },
+  "lint-staged": {
+    "*.scss": [
+      "stylelint --fix --syntax=scss",
+      "git add"
+    ],
+    "*.{ts,scss,html,md,json}": [
+      "prettier --write",
+      "git add"
+    ]
+  }
 }

@@ -1,0 +1,601 @@
+<div
+  class="toast"
+  *ngIf="toastVisible"
+  [ngClass]="{
+    visible: toastVisible,
+    'toast-success': toastType === 'success',
+    'toast-error': toastType === 'error',
+    'toast-warning': toastType === 'warning'
+  }"
+>
+  <div class="toast-content">
+    <span class="toast-message">{{ toastMessage }}</span>
+    <button class="close-toast" (click)="hideToast()">×</button>
+  </div>
+</div>
+
+<div *ngIf="adminEnabled" class="admin-select-container">
+  <div class="form-row mt-3">
+    <div class="form-group col-sm-6 col-xl-2">
+      <select class="form-control" [ngModel]="selectedEmail" (ngModelChange)="handleEmailChange($event)">
+        <option value="" disabled>Select User</option>
+        <option *ngFor="let member of members" [value]="member.email">
+          {{ member.name }}
+        </option>
+      </select>
+    </div>
+  </div>
+  <div *ngIf="!isLoading && assignedTickets.length === 0">
+    <p>No tickets assigned.</p>
+  </div>
+</div>
+
+<div *ngIf="isLoading" class="skeleton-loader skeleton-loader-table"></div>
+
+<div class="row">
+  <div class="col-md-12 mb-3">
+    <div *ngIf="!isLoading && assignedTickets.length > 0">
+      <div class="ticket-summary-container mt-2">
+        <div class="small-stats-container mt-3">
+          <!-- Row 1: Overview and Sprint -->
+          <div class="stats-group">
+            <h5>Overview (Zendesk Tickets)</h5>
+            <div class="stats-buttons">
+              <svg width="50px" height="50px" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="512" cy="512" r="512" style="fill:#0116a3" />
+                <path
+                  transform="translate(.001 .736)"
+                  d="M495.1 432v247.3H290.3L495.1 432zm0-88.7c0 56.6-45.8 102.4-102.4 102.4s-102.4-45.8-102.4-102.4h204.8zm33.8 336c0-56.6 45.8-102.4 102.4-102.4s102.4 45.8 102.4 102.4H528.9zm0-88.8V343.3h204.8L528.9 590.5z"
+                  style="fill:#fff"
+                />
+              </svg>
+
+              <button class="filter-btn" [class.active]="activeFilter === 'total'" (click)="filterTickets('total')">
+                <span>Total Ticket</span>
+                <strong>{{ zendeskTicketCount || 0 }}</strong>
+              </button>
+
+              <button
+                class="filter-btn"
+                [class.active]="activeFilter === 'needUpdate'"
+                (click)="filterTickets('needUpdate')"
+              >
+                <span>Need Update</span>
+                <strong>{{ ticketsToBeAnsweredCount || 0 }}</strong>
+              </button>
+
+              <button class="filter-btn" [class.active]="activeFilter === 'new'" (click)="filterTickets('new')">
+                <span>New Tickets</span>
+                <strong>{{ ticketsNewCount || 0 }}</strong>
+              </button>
+            </div>
+          </div>
+
+          <div class="stats-group">
+            <h5>Jira (Linked Zendesk Tickets)</h5>
+            <div class="stats-buttons">
+              <svg xmlns="http://www.w3.org/2000/svg" width="50px" height="50px" viewBox="0 0 1024 1024">
+                <circle cx="512" cy="512" r="512" style="fill:#0116a3" />
+                <path
+                  d="M413.7 462.6c-4.6-6-13.2-7.2-19.3-2.6-1.8 1.3-3.2 3.1-4.1 5.1L272 701.9c-3.5 7-.7 15.5 6.3 19 2 1 4.1 1.5 6.3 1.5h164.9c5.4.1 10.4-2.9 12.7-7.8 35.5-73.6 14-185.3-48.5-252zm86.9-215.4c-60 92.4-67 209.5-18.2 308.3l79.5 159c2.4 4.8 7.3 7.8 12.7 7.8h164.9c7.8 0 14.2-6.3 14.2-14.2 0-2.2-.5-4.4-1.5-6.3 0 0-221.8-443.7-227.4-454.8-3.2-6.6-11.2-9.4-17.9-6.2-2.8 1.5-5 3.7-6.3 6.4z"
+                  style="fill:#fff"
+                />
+              </svg>
+              <button
+                class="filter-btn"
+                [class.active]="activeFilter === 'closedJira'"
+                (click)="filterTickets('closedJira')"
+              >
+                <span>Done</span>
+                <strong>{{ getClosedJiraTicketsCount() }}</strong>
+              </button>
+
+              <button class="filter-btn" [class.active]="activeFilter === 'delayed'" (click)="filterTickets('delayed')">
+                <span>Delayed</span>
+                <strong>{{ getDelayedTicketsCount() }}</strong>
+              </button>
+              <button
+                class="filter-btn"
+                [class.active]="activeFilter === 'missingSprint'"
+                (click)="filterTickets('missingSprint')"
+              >
+                <span>Missing Sprint</span>
+                <strong>{{ getMissingSprintTicketsCount() }}</strong>
+              </button>
+              <button
+                class="filter-btn"
+                [class.active]="activeFilter === 'currentSprint'"
+                (click)="filterTickets('currentSprint')"
+              >
+                <span>Current Sprint</span>
+                <strong>{{ getCurrentSprintTicketsCount() }}</strong>
+              </button>
+              <button
+                class="filter-btn"
+                [class.active]="activeFilter === 'futureSprint'"
+                (click)="filterTickets('futureSprint')"
+              >
+                <span>Future Sprint</span>
+                <strong>{{ getFutureSprintTicketsCount() }}</strong>
+              </button>
+            </div>
+          </div>
+
+          <!-- Row 2: Priorities and Tiers -->
+          <div class="stats-group">
+            <h5>Priorities</h5>
+            <div class="stats-buttons">
+              <button class="filter-btn" [class.active]="activeFilter === 'urgent'" (click)="filterTickets('urgent')">
+                <span>Urgent</span>
+                <strong>{{ ticketCountsByPriority['urgent'] || 0 }}</strong>
+              </button>
+              <button class="filter-btn" [class.active]="activeFilter === 'high'" (click)="filterTickets('high')">
+                <span>High</span>
+                <strong>{{ ticketCountsByPriority['high'] || 0 }}</strong>
+              </button>
+              <button class="filter-btn" [class.active]="activeFilter === 'normal'" (click)="filterTickets('normal')">
+                <span>Normal</span>
+                <strong>{{ ticketCountsByPriority['normal'] || 0 }}</strong>
+              </button>
+              <button class="filter-btn" [class.active]="activeFilter === 'low'" (click)="filterTickets('low')">
+                <span>Low</span>
+                <strong>{{ ticketCountsByPriority['low'] || 0 }}</strong>
+              </button>
+            </div>
+          </div>
+
+          <div class="stats-group">
+            <h5>Tiers</h5>
+            <div class="stats-buttons">
+              <button class="filter-btn" [class.active]="activeFilter === 'tier1'" (click)="filterTickets('tier1')">
+                <span>Tier 1</span>
+                <strong>{{ tier1Tickets }}</strong>
+              </button>
+              <button class="filter-btn" [class.active]="activeFilter === 'tier2'" (click)="filterTickets('tier2')">
+                <span>Tier 2</span>
+                <strong>{{ tier2Tickets }}</strong>
+              </button>
+              <button class="filter-btn" [class.active]="activeFilter === 'tier3'" (click)="filterTickets('tier3')">
+                <span>Tier 3</span>
+                <strong>{{ tier3Tickets }}</strong>
+              </button>
+            </div>
+          </div>
+
+          <div class="stats-group">
+            <div class="custom-select-container">
+              <h5 style="margin-bottom: 0.5rem;">Carriers</h5>
+              <div class="custom-select" [class.open]="isDropdownOpen" (click)="toggleDropdown()">
+                <div class="selected-option">
+                  <i class="fa fa-truck"></i>
+                  <span>
+                    {{ selectedOption?.name || 'Select an option' }}
+                    <span *ngIf="selectedOption?.count">({{ selectedOption.count }})</span>
+                  </span>
+                  <i class="fa fa-caret-down dropdown-icon"></i>
+                </div>
+
+                <ul class="dropdown-options" *ngIf="isDropdownOpen">
+                  <li *ngFor="let option of options" (click)="selectOption(option, $event)">
+                    <i class="fa fa-truck"></i>
+                    {{ option.name }} ({{ option.count }})
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-columns mt-3">
+          <div
+            *ngFor="let ticket of assignedTickets; let i = index"
+            class="card h-100 shadow border-0 rounded ticket-card"
+          >
+            <!-- Card Header -->
+            <div class="card-header bg-light position-relative">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h5 class="card-title text-dark mb-1"></h5>
+                  <a
+                    [href]="'https://nshift.zendesk.com/agent/tickets/' + ticket.ticket_id"
+                    target="_blank"
+                    id="zenteskTicket"
+                    class="id-value text-decoration-none fw-bold"
+                  >
+                    #{{ ticket.ticket_id }}
+                  </a>
+                  <label style="font-size: 16px; color: #222;">
+                    {{ ticket.subject.length > 40 ? (ticket.subject | slice: 0:40) + '...' : ticket.subject }}
+                  </label>
+                  <div class="card-subtitle mt-2 d-flex flex-wrap align-items-center gap-1">
+                    <span
+                      class="badge status-badge lead"
+                      [ngClass]="{
+                        'bg-urgent': ticket.priority === 'urgent',
+                        'bg-high': ticket.priority === 'high',
+                        'bg-normal': ticket.priority === 'normal',
+                        'bg-low': ticket.priority === 'low'
+                      }"
+                    >
+                      {{ ticket.priority }}
+                    </span>
+
+                    <span
+                      class="badge status-badge lead"
+                      [ngClass]="{
+                      'bg-assigned': ticket.customStatus === 'Open',
+                      'bg-pending': isPendingStatus(ticket.customStatus),
+                      'bg-awaiting':isHoldStatus(ticket.customStatus), 
+                    }"
+                    >
+                      {{ ticket.customStatus }}
+                    </span>
+
+                    <span *ngIf="hasAllJiraClosed(ticket)" class="badge status-badge bg-jiracompleted text-white lead">
+                      Done
+                    </span>
+
+                    <span *ngIf="hasPreviousSprints(ticket)" class="badge status-badge bg-delayed text-dark lead"
+                      >Delay
+                    </span>
+
+                    <span
+                      *ngIf="isToBeAnswered(ticket.updated_at, ticket)"
+                      class="badge status-badge bg-warning text-dark lead"
+                    >
+                      Need Update
+                    </span>
+                  </div>
+                </div>
+                <!--   <div class="card-menu-control"></div> -->
+              </div>
+            </div>
+            <div class="card-body d-flex flex-column align-items-stretch">
+              <ul class="ticket-details">
+                <li>
+                  <i class="fa fa-calendar"></i>
+                  <!-- Ändra ikonen till önskad -->
+                  <strong>ETA:</strong>
+                  <span [ngClass]="{ 'missing-eta': ticket.jiraData?.length > 0 && !ticket.eta }">
+                    <ng-container *ngIf="ticket.jiraData?.length > 0; else noJiras">
+                      <ng-container *ngIf="isJiraWithoutSprint(ticket); else hasEtas">
+                        Jira Ticket Missing Sprint
+                      </ng-container>
+                      <ng-template #hasEtas>
+                        {{ ticket.eta | date: 'MMMM d, y' }}
+                      </ng-template>
+                    </ng-container>
+                    <ng-template #noJiras> No JIRA tickets added </ng-template>
+                  </span>
+                </li>
+                <li>
+                  <i class="fa fa-clock"></i>
+                  <!-- Ändra ikonen till önskad -->
+                  <strong>Updated At:</strong>
+                  {{ ticket.updated_at | date: 'MMMM d, y' }}
+                </li>
+                <li>
+                  <i class="fa fa-calendar-plus"></i>
+                  <!-- Ändra ikonen till önskad -->
+                  <strong>Created At:</strong>
+                  {{ ticket.created_at | date: 'MMMM d, y' }}
+                </li>
+
+                <li>
+                  <i class="fa fa-calendar-alt"></i>
+                  <strong>Your Latest Public:</strong>
+                  <span *ngIf="ticket.latestPublicComment?.created_at; else noPublicComment">
+                    {{ ticket.latestPublicComment.created_at | date: 'MMMM d, y' }}
+                  </span>
+                  <ng-template #noPublicComment>
+                    <span>None</span>
+                  </ng-template>
+                </li>
+
+                <li>
+                  <i class="fa fa-calendar-check"></i>
+                  <strong>Your Latest Internal:</strong>
+                  <span *ngIf="ticket.latestInternalComment?.created_at; else noInternalComment">
+                    {{ ticket.latestInternalComment.created_at | date: 'MMMM d, y' }}
+                  </span>
+                  <ng-template #noInternalComment>
+                    <span>None</span>
+                  </ng-template>
+                </li>
+
+                <li>
+                  <i class="fa fa-signal"></i>
+                  <!-- Ändra ikonen till önskad -->
+                  <strong>Tier:</strong>
+                  <span [ngClass]="{ 'missing-tier': !ticket.tier }">
+                    {{ ticket.tier ? ticket.tier : 'Tier Missing' }}
+                  </span>
+                </li>
+                <li>
+                  <i class="fa fa-truck"></i>
+                  <!-- Ändra ikonen till önskad -->
+                  <strong>Carrier ID:</strong>
+                  <span [ngClass]="{ 'missing-carrier-id': !ticket.carrier_id }">
+                    {{ ticket.carrier_id ? ticket.carrier_id : 'Carrier ID Missing' }}
+                  </span>
+                </li>
+              </ul>
+            </div>
+            <!-- Card Footer -->
+            <div class="card-footer bg-light d-flex justify-content-between align-items-center">
+              <button class="btn btn-primary btn-sm" (click)="openModal(ticket)">
+                Update Ticket
+              </button>
+              <ng-container *ngIf="ticket.jiraData?.length > 0; else noJira">
+                <button class="btn btn-outline-info btn-sm" (click)="toggleJiraVisibility(i)">
+                  {{ jiraVisibility[i] ? 'Hide JIRA Tickets' : 'JIRA Tickets' }}
+                </button>
+              </ng-container>
+              <ng-template #noJira>
+                <button class="btn btn-info btn-sm" disabled>
+                  No Jira Tickets
+                </button>
+              </ng-template>
+            </div>
+            <!-- Jira Tickets Section -->
+            <div *ngIf="jiraVisibility[i] && ticket.jiraData?.length > 0" class="jira-section p-3">
+              <ul class="list-group list-group-flush">
+                <li *ngFor="let jira of ticket.jiraData" class="jira-item list-group-item border-0">
+                  <!-- Jira Header -->
+                  <div class="jira-header d-flex justify-content-between align-items-center">
+                    <a
+                      [href]="'https://nshiftgroup.atlassian.net/browse/' + jira.ticket"
+                      target="_blank"
+                      class="jira-link text-decoration-none fw-bold"
+                    >
+                      {{ jira.ticket }}
+                    </a>
+                    <span class="jira-status jira-badge" [ngClass]="getJiraBadgeClass(jira.sprints.ticketStatus)">
+                      {{ jira.sprints.ticketStatus }}
+                    </span>
+                  </div>
+                  <!-- Jira Details -->
+
+                  <div
+                    *ngIf="jira.sprints.currentSprint || jira.sprints.futureSprints?.length > 0"
+                    class="jira-details mt-2"
+                  >
+                    <!-- Current Sprint -->
+                    <div *ngIf="jira.sprints.currentSprint" class="sprint-section">
+                      <p class="mb-1">
+                        <i class="fa fa-flag-checkered"></i>
+                        <strong>Sprint:</strong>
+                        {{ jira.sprints.currentSprint.name }}
+                      </p>
+                      <p class="mb-1">
+                        <i class="fa fa-calendar-alt"></i>
+                        <strong>Start:</strong>
+                        {{ jira.sprints.currentSprint.startDate | date: 'MMMM d, y' }}
+                      </p>
+                      <p class="mb-0">
+                        <i class="fa fa-calendar"></i>
+                        <strong>End:</strong>
+                        {{ jira.sprints.currentSprint.endDate | date: 'MMMM d, y' }}
+                      </p>
+                    </div>
+
+                    <!-- Future Sprints -->
+                    <div *ngIf="jira.sprints.futureSprints?.length > 0" class="sprint-section mt-3">
+                      <div *ngFor="let sprint of jira.sprints.futureSprints" class="future-sprint-details">
+                        <p class="mb-1">
+                          <i class="fa fa-flag"></i>
+                          <strong>Sprint:</strong> {{ sprint.name }}
+                        </p>
+                        <p class="mb-1">
+                          <i class="fa fa-calendar-alt"></i>
+                          <strong>Start:</strong>
+                          {{ sprint.startDate | date: 'MMMM d, y' }}
+                        </p>
+                        <p class="mb-0">
+                          <i class="fa fa-calendar"></i>
+                          <strong>End:</strong>
+                          {{ sprint.endDate | date: 'MMMM d, y' }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Indicator for delayed tickets with previous sprints -->
+                  <div *ngIf="jira.sprints.previousSprints?.length > 0" class="previous-sprints-indicator mt-2">
+                    <span class="badge badge-warning"> <i class="fa fa-exclamation-triangle"></i> Delayed </span>
+                    <ul class="previous-sprints-list mt-2">
+                      <li *ngFor="let sprint of jira.sprints.previousSprints" class="text-muted small">
+                        <i class="fa fa-history"></i>
+                        <strong>Previous Sprint:</strong> {{ sprint.name }}
+                      </li>
+                    </ul>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal" id="customModal" tabindex="-1" role="dialog" aria-labelledby="customModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">#{{ ticketNumber }}</h5>
+          <button type="button" class="close" aria-label="Close" (click)="closeModal()">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- Tabs Navigation -->
+          <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" [class.active]="activeTab === 'tab1'" (click)="switchTab('tab1')" type="button">
+                Update Ticket
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" [class.active]="activeTab === 'tab2'" (click)="switchTab('tab2')" type="button">
+                Ticket History
+              </button>
+            </li>
+          </ul>
+
+          <!-- Tabs Content -->
+          <div class="tab-content mt-3">
+            <!-- Tab 1 Content -->
+            <div class="tab-pane fade" [class.show]="activeTab === 'tab1'" [class.active]="activeTab === 'tab1'">
+              <p><strong>Subject:</strong> {{ selectedTicket?.subject }}</p>
+              <!-- Add your existing content for Update ETA here -->
+
+              <div class="form-group">
+                <label for="newETA">New ETA:</label>
+                <input
+                  id="newETA"
+                  type="date"
+                  class="form-control"
+                  [(ngModel)]="newETA"
+                  (change)="onETAChange($event)"
+                  [ngClass]="{ 'is-invalid': !newETA }"
+                />
+                <div *ngIf="!newETA" class="invalid-feedback">
+                  Please provide a valid date.
+                </div>
+              </div>
+
+              <div class="form-group form-check form-check-inline">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="internalCheck"
+                  [disabled]="!newETA"
+                  [(ngModel)]="ShouldBeInternal"
+                />
+                <label class="form-check-label" for="internalCheck">Send as Internal</label>
+              </div>
+
+              <div class="form-group form-check form-check-inline">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="requesterNameCheck"
+                  [(ngModel)]="includeRequesterName"
+                  (change)="updateEmailText()"
+                  [disabled]="!newETA"
+                />
+                <label class="form-check-label" for="requesterNameCheck">Include Requester Name</label>
+              </div>
+
+              <div class="form-group">
+                <label for="customMessage">Reply</label>
+                <textarea
+                  id="customMessage"
+                  class="form-control"
+                  rows="3"
+                  [disabled]="!newETA"
+                  [(ngModel)]="customMessage"
+                  [ngClass]="{ 'highlight-internal': ShouldBeInternal }"
+                ></textarea>
+              </div>
+
+              <!-- Predefined message options -->
+              <div class="form-group">
+                <label for="messageTemplates">Select a predefined message:</label>
+                <select
+                  id="messageTemplates"
+                  class="form-control"
+                  [(ngModel)]="selectedTemplate"
+                  (change)="onTemplateSelect($event)"
+                  [disabled]="!newETA"
+                >
+                  <option value="">-- Select a message --</option>
+                  <option *ngFor="let template of messageTemplates" [value]="template.value">
+                    {{ template.label }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Tab 2 Content -->
+            <div class="tab-pane fade" [class.show]="activeTab === 'tab2'" [class.active]="activeTab === 'tab2'">
+              <div class="comments-container">
+                <h4>Comments</h4>
+
+                <!-- Public Comment Section -->
+                <div *ngIf="latestPublic" class="comment-card public-comment">
+                  <div class="comment-header">Public Comment</div>
+                  <div class="comment-body">
+                    <p>
+                      <strong>Created At:</strong>
+                      {{ latestPublic.created_at | date: 'medium' }}
+                    </p>
+                    <p><strong>Content:</strong> {{ latestPublic.plain_body }}</p>
+                  </div>
+                </div>
+                <div *ngIf="!latestPublic" class="comment-card empty-comment">
+                  <div class="comment-header">Latest Public Comment</div>
+                  <div class="comment-body">
+                    <p>No public comments available.</p>
+                  </div>
+                </div>
+
+                <!-- Internal Comment Section -->
+                <div *ngIf="latestInternal" class="comment-card internal-comment">
+                  <div class="comment-header">Latest Internal Comment</div>
+                  <div class="comment-body">
+                    <p>
+                      <strong>Created At:</strong>
+                      {{ latestInternal.created_at | date: 'medium' }}
+                    </p>
+                    <p><strong>Content:</strong> {{ latestInternal.plain_body }}</p>
+                  </div>
+                </div>
+                <div *ngIf="!latestInternal" class="comment-card empty-comment">
+                  <div class="comment-header">Internal Comment</div>
+                  <div class="comment-body">
+                    <p>No internal comments available.</p>
+                  </div>
+                </div>
+
+                <!-- Latest Assignee Reply Section -->
+                <div *ngIf="latestAssigneeReply" class="comment-card assignee-reply">
+                  <div class="comment-header">Latest Reply by You</div>
+                  <div class="comment-body">
+                    <p>
+                      <strong>Created At:</strong>
+                      {{ latestAssigneeReply.date }}
+                    </p>
+                    <p>
+                      <strong>Type:</strong>
+                      {{ latestAssigneeReply.public ? 'Public' : 'Internal' }}
+                    </p>
+                    <p><strong>Content:</strong> {{ latestAssigneeReply.body }}</p>
+                  </div>
+                </div>
+                <div *ngIf="!latestAssigneeReply" class="comment-card empty-comment">
+                  <div class="comment-header">Latest Reply by You</div>
+                  <div class="comment-body">
+                    <p>No replies by you are available.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            (click)="closeModal()"
+            class="btn d-flex justify-content-between btn-outline-primary ng-star-inserted"
+          >
+            Close
+          </button>
+          <button *ngIf="!isChatHistoryTab" type="button" (click)="sendETAUpdate()" class="btn btn-primary">
+            Update Ticket
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

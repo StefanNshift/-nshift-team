@@ -24,11 +24,20 @@ export class PythonAnalyze {
   analyzedCarrier: string;
   activeCarrier: any = null;
 
-  selectedModel = 'openai/chatgpt-4o-latest'; // Default model
+  selectedModel = 'o3-mini'; // Default model
   models = [
-    { label: 'OpenAI GPT-4', value: 'openai/chatgpt-4o-latest' },
-    { label: 'Qwen 2.5 Coder', value: 'qwen/qwen-2.5-coder-32b-instruct' },
-    { label: 'DeepSeek V2.5', value: 'deepseek/deepseek-chat' },
+    { label: 'Deep Analyze', value: 'gpt-4o' },
+    { label: 'Quick Analyze', value: 'o3-mini' },
+  ];
+
+  models1 = [
+    { label: 'o1-mini', value: 'o1-mini' },
+    { label: 'chatgpt-4o-latest', value: 'chatgpt-4o-latest' },
+    { label: 'gpt-4-turbo', value: 'gpt-4-turbo' },
+    { label: 'gpt-4o', value: 'gpt-4o' },
+    { label: 'o1', value: 'o1' },
+    { label: 'gpt-4o-mini', value: 'gpt-4o-mini' },
+    { label: 'o3-mini', value: 'o3-mini' },
   ];
 
   carrierspyt = [
@@ -1121,33 +1130,31 @@ export class PythonAnalyze {
   constructor(private http: HttpClient, private wizardBackendService: WizardbackendService) {}
 
   ngOnInit(): void {
-    // Preprocess the carriers
-    this.carrierspyt = this.carrierspyt.map(carrier => ({
-      ...carrier,
-      title: carrier.title.replace(/^\d+\s*/, ''), // Remove leading numbers
-    }));
-    this.filteredCarriers = [...this.carrierspyt]; // Initialize filtered carriers
+    // Load previous analyzedCarrier from localStorage
+    const storedAnalyzedCarrier = localStorage.getItem('analyzedCarrier');
+    if (storedAnalyzedCarrier) {
+      this.analyzedCarrier = storedAnalyzedCarrier;
+      console.log(`Loaded analyzed carrier: ${this.analyzedCarrier}`);
+    }
 
     // Load response from localStorage for testing
     const storageKey = `carrier_analysis`;
     const storedResponse = localStorage.getItem(storageKey);
 
-    /*if (storedResponse) {
+    if (storedResponse) {
       this.response = storedResponse;
       const responseBody = this.extractBody(storedResponse);
-
-    const cleanedResponse = this.removeInvalidJSON(responseBody);
+      const cleanedResponse = this.removeInvalidJSON(responseBody);
       this.tabsBool = true;
-    const cleanedResponseJSON = JSON.parse(cleanedResponse);
-    const list = this.getAllValues(cleanedResponseJSON);
-     this.carrierServer = this.parseListToJSON(list)
-    ;    console.log(this.carrierServer);
 
+      console.log(cleanedResponse);
+      const cleanedResponseJSON = JSON.parse(cleanedResponse);
+      const list = this.getAllValues(cleanedResponseJSON);
+      this.carrierServer = this.parseListToJSON(list);
+      console.log(this.carrierServer);
 
       this.showToast('Loaded previous response from localStorage.', 'success');
     }
-
-  */
   }
 
   switchTab(tab: string): void {
@@ -1364,6 +1371,9 @@ export class PythonAnalyze {
     this.showToast(`Starting analysis for carrier: ${carrier.title}`, 'success');
     this.analyzedCarrier = `${carrier.title} (${carrier.number})`;
 
+    // Save analyzedCarrier to localStorage
+    localStorage.setItem('analyzedCarrier', this.analyzedCarrier);
+
     // Reset the search and dropdown
     this.searchTerm = '';
     this.filteredCarriers = [];
@@ -1377,23 +1387,19 @@ export class PythonAnalyze {
       model: this.selectedModel, // Include the selected model
     };
 
-    // Använd WizardbackendService för att analysera carrier
     this.wizardBackendService.analyzeCarrier(params).subscribe({
       next: (res: string) => {
         this.response = res;
         this.isLoading = false;
-        const storageKey = `carrier_analysis`;
-        localStorage.setItem(storageKey, res);
+        localStorage.setItem('carrier_analysis', res);
         this.tabsBool = true;
 
         const responseBody = this.extractBody(res);
         const cleanedResponse = this.removeInvalidJSON(responseBody);
-
         const cleanedResponseJSON = JSON.parse(cleanedResponse);
         const list = this.getAllValues(cleanedResponseJSON);
         this.carrierServer = this.parseListToJSON(list);
 
-        // Show success toast
         this.showToast(`Analysis completed for carrier: ${carrier.title}`, 'success');
       },
       error: err => {

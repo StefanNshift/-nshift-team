@@ -53,61 +53,78 @@ export class LoginComponent implements OnInit {
    * Method to handle user logout
    */
   logout() {
-    localStorage.removeItem('user');
-    localStorage.removeItem('isAdmin');
-    localStorage.removeItem('userRole');
-
+    localStorage.clear(); // Tar bort ALLT i localStorage
     this.user = null;
     this.isAdmin = false;
-    location.reload(); // Reload page after logout
+    location.reload(); // Laddar om sidan för att tillämpa ändringar
   }
 
   /**
    * Checks if the logged-in user is an admin
    * @param user - Logged-in user
    */
+  /**
+   * Checks if the logged-in user is an admin, manager, or developer.
+   * @param user - Logged-in user
+   */
   checkAdminStatus(user: User) {
     const adminRef = ref(this.db, `admins/${user.uid}`);
     const membersRef = ref(this.db, `members`);
+    const developersRef = ref(this.db, `developers`);
 
     get(adminRef)
       .then(snapshot => {
-        // Kontrollera om användaren är admin
         this.isAdmin = snapshot.exists() && snapshot.val() === true;
 
-        // Spara användarens adminstatus i localStorage
         localStorage.setItem('user', JSON.stringify(user));
         localStorage.setItem('isAdmin', JSON.stringify(this.isAdmin));
 
-        // Om användaren är admin
         if (this.isAdmin) {
           console.log('User is admin');
-          localStorage.setItem('userRole', 'admin'); // Spara manager-rollen i localStorage
-
-          location.reload(); // Ladda om för admin-åtkomst
+          localStorage.setItem('userRole', 'admin');
+          location.reload();
           return;
         }
 
-        // Kontrollera om användaren finns i "members" för manager-åtkomst
-        get(membersRef)
-          .then(membersSnapshot => {
-            if (membersSnapshot.exists()) {
-              const members = Object.values(membersSnapshot.val()) as Array<any>;
-              const isManager = members.some(member => member.email.toLowerCase() === user.email.toLowerCase());
+        // Kontrollera om användaren finns i "developers" för utvecklar-åtkomst
+        get(developersRef)
+          .then(devSnapshot => {
+            if (devSnapshot.exists()) {
+              const developers = Object.values(devSnapshot.val()) as Array<any>;
+              const isDeveloper = developers.some(dev => dev.email.toLowerCase() === user.email.toLowerCase());
 
-              if (isManager) {
-                console.log('User is manager');
-                localStorage.setItem('userRole', 'manager'); // Spara manager-rollen i localStorage
-                location.reload(); // Ladda om för manager-åtkomst
-              } else {
-                console.warn('User does not have manager access');
-                this.noAdminAccess = true; // Visa meddelande för otillräcklig åtkomst
-                location.reload(); // Ladda om för att logga ut
+              if (isDeveloper) {
+                console.log('User is developer');
+                localStorage.setItem('userRole', 'developer');
+                location.reload();
+                return;
               }
             }
+
+            // Kontrollera om användaren finns i "members" för manager-åtkomst
+            get(membersRef)
+              .then(membersSnapshot => {
+                if (membersSnapshot.exists()) {
+                  const members = Object.values(membersSnapshot.val()) as Array<any>;
+                  const isManager = members.some(member => member.email.toLowerCase() === user.email.toLowerCase());
+
+                  if (isManager) {
+                    console.log('User is manager');
+                    localStorage.setItem('userRole', 'manager');
+                    location.reload();
+                  } else {
+                    console.warn('User does not have admin, developer, or manager access');
+                    this.noAdminAccess = true;
+                    location.reload();
+                  }
+                }
+              })
+              .catch(error => {
+                console.error('Error checking members:', error);
+              });
           })
           .catch(error => {
-            console.error('Error checking members:', error);
+            console.error('Error checking developers:', error);
           });
       })
       .catch(error => {

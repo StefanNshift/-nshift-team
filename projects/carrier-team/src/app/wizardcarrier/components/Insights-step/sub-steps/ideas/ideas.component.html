@@ -1,0 +1,76 @@
+<div class="container">
+  <!-- Form for adding a new idea -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title">Add a New Idea</h5>
+      <form (submit)="addIdea(); $event.preventDefault()">
+        <input
+          type="text"
+          [(ngModel)]="newIdeaTitle"
+          placeholder="Title"
+          required
+          name="ideaTitle"
+          class="form-control mb-2"
+        />
+        <textarea
+          [(ngModel)]="newIdeaDescription"
+          name="ideaDescription"
+          placeholder="Describe your idea"
+          required
+          class="form-control mb-2"
+          rows="3"
+        ></textarea>
+        <button type="submit" class="btn btn-primary">Submit Idea</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Loading indicator -->
+  <div *ngIf="isLoading" class="text-center mt-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading ideas...</p>
+  </div>
+
+  <!-- Card grid for displaying ideas -->
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" *ngIf="!isLoading && ideas.length">
+    <div class="col" *ngFor="let idea of ideas">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">{{ idea.title }}</h5>
+          <p class="card-text">{{ idea.description }}</p>
+          <div class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">Created by: {{ idea.createdByName }}</small>
+            <span class="badge bg-primary rounded-pill">{{ idea.votes }} 👍</span>
+          </div>
+        </div>
+        <div class="card-footer bg-transparent">
+          <!-- Like button -->
+          <ng-container *ngIf="idea.createdBy !== user?.uid">
+            <span *ngIf="idea.voters?.includes(user?.uid)" class="text-success">You voted! ✅</span>
+            <button
+              *ngIf="!idea.voters?.includes(user?.uid)"
+              class="btn btn-outline-success btn-sm"
+              (click)="voteIdea(idea)"
+            >
+              👍 Like
+            </button>
+          </ng-container>
+
+          <!-- Delete button -->
+          <button
+            *ngIf="isAdmin || idea.createdBy === user?.uid"
+            class="btn btn-outline-danger btn-sm float-end"
+            (click)="deleteIdea(idea)"
+          >
+            🗑 Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No ideas message -->
+  <p *ngIf="!isLoading && ideas.length === 0" class="text-center mt-4">No ideas have been submitted yet.</p>
+</div>

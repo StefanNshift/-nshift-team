@@ -1,0 +1,511 @@
+/* Base Container & Layout */
+.jira-create-container {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  margin: 24px;
+  border: 1px solid #dfe1e6;
+}
+
+.jira-create-content {
+  display: flex;
+  min-height: calc(100vh - 200px);
+  align-items: flex-start;
+}
+
+/* Main Content Area */
+.jira-create-main {
+  flex: 1;
+  min-width: 0;
+  padding: 24px;
+  background-color: #fafbfc;
+}
+
+/* Sidebar */
+.jira-create-sidebar {
+  width: 340px;
+  background-color: #ffffff;
+  border-left: 1px solid #e9ecef;
+  padding: 24px;
+  height: 100%;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.02);
+}
+
+.jirasidebar {
+  margin-bottom: 1.5rem;
+}
+
+.jira-create-sidebar h3 {
+  font-size: 14px;
+  color: #5e6c84;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 20px 0;
+  font-weight: 600;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ebecf0;
+}
+
+/* Form Elements */
+.jira-form-field {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.jira-form-label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: block;
+  color: #172b4d;
+  font-size: 13px;
+  letter-spacing: 0.2px;
+}
+
+.jira-form-input,
+.jira-form-select,
+.jira-form-textarea,
+.unified-select .ng-select-container {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+  background-color: #ffffff;
+  color: #172b4d;
+  box-shadow: 0 1px 2px rgba(9, 30, 66, 0.05);
+}
+
+.jira-form-input:hover,
+.jira-form-select:hover,
+.jira-form-textarea:hover,
+.unified-select .ng-select-container:hover {
+  border-color: #b3bac5;
+  background-color: #fafbfc;
+}
+
+.jira-form-input:focus,
+.jira-form-select:focus,
+.jira-form-textarea:focus,
+.unified-select.ng-select-focused .ng-select-container {
+  outline: none;
+  border-color: #4c9aff;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(76, 154, 255, 0.2);
+}
+
+/* Select Dropdown Enhancements */
+.unified-select .ng-select-container {
+  min-height: 42px;
+  align-items: center;
+}
+
+.unified-select .ng-arrow-wrapper {
+  padding-right: 8px;
+}
+
+/* Error States */
+.error-field,
+.error-field .ng-select-container {
+  border-color: #ff5630 !important;
+}
+
+.error-field:focus,
+.error-field.ng-select-focused .ng-select-container {
+  box-shadow: 0 0 0 2px rgba(255, 86, 48, 0.2);
+}
+
+.jira-form-error {
+  color: #de350b;
+  font-size: 12px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.jira-form-error-icon {
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.required {
+  color: #ff5630;
+  margin-left: 4px;
+}
+
+/* Buttons */
+.jira-create-actions {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #ebecf0;
+  display: flex;
+  gap: 12px;
+}
+
+.jira-submit-button {
+  background-color: #0052cc;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+  display: inline-flex;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.jira-submit-button:hover:not(:disabled) {
+  background-color: #0065ff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.jira-submit-button:active:not(:disabled) {
+  background-color: #0747a6;
+  transform: translateY(1px);
+}
+
+.jira-submit-button:disabled {
+  background-color: #ebecf0;
+  color: #a5adba;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Success Message */
+.jira-success-box {
+  margin-top: 20px;
+  padding: 14px 16px;
+  background-color: #e3fcef;
+  color: #006644;
+  border: 1px solid #abf5d1;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.jira-success-box a {
+  color: #006644;
+  font-weight: 600;
+  text-decoration: underline;
+  margin: 0 4px;
+}
+
+.jira-success-box svg {
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.jira-error-box {
+  margin-top: 20px;
+  padding: 14px 16px;
+  background-color: #ffebe6;
+  color: #bf2600;
+  border: 1px solid #ffbdad;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.jira-error-box svg {
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+/* AI Response Box */
+.ai-response-box {
+  min-height: 120px;
+  max-height: 400px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  background-color: #f9f9f9;
+  padding: 16px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #172b4d;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  gap: 12px;
+}
+
+.loading-text {
+  color: #5e6c84;
+  font-size: 13px;
+}
+
+/* TinyMCE Editor */
+.tinymce-editor {
+  margin-bottom: 2rem;
+}
+
+.tinymce-editor .tox {
+  border-radius: 6px;
+  border: 1px solid #dfe1e6;
+}
+
+/* File Upload */
+.uploaded-files-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 12px;
+}
+
+.uploaded-files-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.remove-file-btn {
+  background: none;
+  border: none;
+  color: #ff5630;
+  cursor: pointer;
+  padding: 4px;
+  margin-left: 8px;
+}
+
+.jiralinksearch-results {
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(9, 30, 66, 0.1);
+}
+
+.jiralinksearch-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.jiralinksearch-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid #ebecf0;
+  cursor: pointer;
+  text-decoration: none;
+  color: #172b4d;
+  transition: background 0.2s ease;
+}
+
+.jiralinksearch-item:hover {
+  background-color: #f4f5f7;
+}
+
+.jiralinksearch-item-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.jiralinksearch-key {
+  color: #0052cc;
+}
+
+.jiralinksearch-type {
+  color: #5e6c84;
+  font-size: 12px;
+}
+
+.jiralinksearch-summary {
+  font-size: 13px;
+  color: #172b4d;
+  margin: 4px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.jiralinksearch-status {
+  font-size: 12px;
+  color: #5e6c84;
+}
+
+/* Linked Issues */
+.linked-issues {
+  margin-top: 12px;
+}
+
+.linked-issues .list-group-item {
+  padding: 12px;
+  border: 1px solid #ebecf0;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.jira-ticket-badge {
+  background-color: #deebff;
+  color: #0747a6;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #b3d4ff;
+  margin-right: 8px;
+}
+
+.new-ticket-badge {
+  background-color: #e3fcef;
+  color: #006644;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #abf5d1;
+  margin-left: 8px;
+}
+
+.link-type-selector {
+  min-width: 180px;
+  margin: 0 8px;
+}
+
+/* Toast Notifications */
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+  .jira-create-content {
+    flex-direction: column;
+  }
+
+  .jira-create-sidebar {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #ebecf0;
+  }
+}
+
+@media (max-width: 768px) {
+  .jira-create-container {
+    margin: 12px;
+  }
+
+  .jira-create-main,
+  .jira-create-sidebar {
+    padding: 16px;
+  }
+
+  .row {
+    flex-direction: column;
+  }
+
+  .col-md-6 {
+    width: 100%;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Utility Classes */
+.mb-3 {
+  margin-bottom: 1rem !important;
+}
+
+.mt-2 {
+  margin-top: 0.5rem !important;
+}
+
+.ml-2 {
+  margin-left: 0.5rem !important;
+}
+
+.w-100 {
+  width: 100% !important;
+}
+
+#prompt-commands {
+  background: #f4f5f7;
+  border: 1px solid #dfe1e6;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin: 16px 0;
+  font-size: 14px;
+  color: #172b4d;
+  max-width: 500px;
+  line-height: 1.4;
+}
+
+#prompt-commands h3 {
+  margin-top: 0;
+  font-size: 1.2em;
+  margin-bottom: 8px;
+}
+
+#prompt-commands ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+#prompt-commands li {
+  margin-bottom: 6px;
+}
+
+#prompt-commands kbd {
+  background-color: #0116a3;
+  border: 1px solid #d1d5da;
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-size: 0.9em;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  box-shadow: inset 0 -1px 0 #d1d5da;
+}
+
+#prompt-commands .jiratag {
+  display: inline-block;
+  background: #f4f5f7;
+  color: #172b4d;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+@media (max-width: 1700px   ) {
+  .flag-icon {
+    display: none;
+  }
+}
+

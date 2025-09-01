@@ -1,0 +1,754 @@
+/* ---------------------------------------------
+   General Card Styles
+--------------------------------------------- */
+.ticket-card {
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%; /* Ensure the full height is utilized */
+}
+
+.card {
+  flex: 1 1 calc(33.333% - 1rem);
+  max-width: calc(33.333% - 1rem);
+}
+
+.card-header {
+  height: 100px;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
+  transition: height 0.3s ease;
+  padding:1rem;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Vertical centering */
+  align-items: flex-start; /* Horizontal alignment */
+  padding: 1.25rem;
+  height: 100%; /* Ensure full height is utilized */
+  box-sizing: border-box;
+}
+
+.card-footer {
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
+}
+
+.card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .card {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 1500px) {
+
+
+  .card-body {
+    height: 350px;
+  }
+  .card-header {
+    height: 150px;
+  }
+}
+
+/* ---------------------------------------------
+   Badge Styles
+--------------------------------------------- */
+.status-badge-container {
+  display: flex;
+  gap: 10px; /* Space between badges */
+  align-items: center;
+}
+
+/* General badge styling */
+
+.status-badge {
+  font-weight: 500;
+  border-radius: 20px; /* Rundare hörn för en modern stil */
+  padding: 0.5rem 1.5rem; /* Mer avstånd för bättre läsbarhet */
+  display: inline-flex; /* För att centrera texten */
+  align-items: center;
+  justify-content: center;
+  text-transform: capitalize; /* Gör texten enklare */
+  color: #fff; /* Standard textfärg */
+  background-color: #e0e0e0; /* Standard bakgrundsfärg */
+  white-space: nowrap; /* Förhindrar radbrytningar */
+  cursor: pointer; /* Markör vid hover */
+  transition: all 0.3s ease-in-out; /* Mjukare övergångar */
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* Lättare skugga */
+}
+
+
+
+
+.status-badge.bg-urgent {
+  background: linear-gradient(135deg, #b71c1c, #c62828);
+  color: #fff;
+}
+
+.status-badge.bg-jiracompleted {
+  background: linear-gradient(135deg, #1b5e20, #2e7d32);
+  color: #fff;
+}
+
+.status-badge.bg-high {
+  background: linear-gradient(135deg, #e90202, #cd3100);
+  color: #fff;
+}
+
+.status-badge.bg-normal {
+  background: linear-gradient(135deg, #2e7d32, #388e3c);
+  color: #fff;
+}
+
+.status-badge.bg-low {
+  background: linear-gradient(135deg, #1565c0, #1e88e5);
+  color: #fff;
+}
+
+.status-badge.bg-warning {
+  background: linear-gradient(135deg, #f9a825, #fbc02d); /* Golden yellow for warnings */
+  color: #000; /* Black text */
+}
+
+.status-badge.bg-delayed {
+  background: linear-gradient(135deg, #9a1b1b, #cb2121);
+  color: #fff !important;
+}
+
+.status-badge.bg-update-needed {
+  background: linear-gradient(135deg, #f57f17, #ffb300); /* Amber for update needed */
+  color: #000; /* Black text for better contrast */
+}
+
+.status-badge.bg-assigned {
+  background: linear-gradient(135deg, #00796b, #009688);
+  color: #fff;
+}
+
+.status-badge.bg-pending {
+  background: linear-gradient(135deg, #0277bd, #0288d1);
+  color: #fff;
+}
+
+.status-badge.bg-awaiting {
+  background: linear-gradient(135deg, #616161, #757575);
+  color: #fff;
+}
+
+.status-badge.bg-resolved {
+  background: linear-gradient(135deg, #1b5e20, #2e7d32);
+  color: #fff;
+}
+
+.status-badge.bg-open {
+  background: linear-gradient(135deg, #1565c0, #1976d2);
+  color: #fff;
+}
+
+.status-badge.bg-closed {
+  background: linear-gradient(135deg, #424242, #616161);
+  color: #fff;
+}
+
+/* ---------------------------------------------
+   Status Styles
+--------------------------------------------- */
+.status-resolved {
+  color: #67baa7;
+  border: 1px solid #dee2e6;
+  background: #dcfff1;
+}
+
+.status-open {
+  border: 1px solid #dee2e6;
+  color: #4c5b76;
+  background-color: #f1f2f4;
+}
+
+.status-closed {
+  border: 1px solid #dee2e6;
+  color: #4c5b76;
+  background-color: #f1f2f4;
+}
+
+.status-draft {
+  border: 1px solid #dee2e6;
+  color: #4c5b76;
+  background-color: #f1f2f4;
+}
+
+.status-testing {
+  color: #ffffff;
+  background-color: #007cee;
+}
+
+/* ---------------------------------------------
+   Jira Section Styles
+--------------------------------------------- */
+.jira-section {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-top: 1px solid #ddd;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.jira-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.jira-status {
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.jira-item {
+  margin-bottom: 1rem;
+  padding: 0.5rem 0;
+}
+
+.jira-details {
+  font-size: 0.875rem;
+}
+
+.jira-details p {
+  margin: 0;
+  padding: 0;
+}
+
+.jira-details strong {
+  color: #343a40;
+}
+
+/* ---------------------------------------------
+   Utility Classes
+--------------------------------------------- */
+.list-group-item {
+  font-size: 0.875rem;
+}
+
+.d-flex.flex-wrap.gap-1 {
+  gap: 0.3rem;
+}
+
+/* ---------------------------------------------
+   Filter Classes
+--------------------------------------------- */
+
+/* Layout and spacing for small-stats */
+/* Container för att lägga alla grupper horisontellt */
+/* Main container */
+.small-stats-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px; /* Space between rows or groups */
+  justify-content: space-between;
+}
+
+/* Stats Group - Shared styling for all groups */
+.stats-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1 1 calc(50% - 20px); /* Two groups per row */
+}
+
+/* Heading Styling */
+.stats-group h5 {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0;
+  color: #333;
+}
+
+/* Buttons Container */
+.stats-buttons {
+  display: flex;
+  flex-wrap: wrap; /* Wrap buttons if necessary */
+  gap: 10px; /* Space between buttons */
+}
+
+/* Button Styling */
+.filter-btn {
+  background-color: #e0e0e0;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 15px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  display: flex
+;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+  flex: 1;
+  max-width: 140px;
+}
+
+.filter-btn span {
+  font-size: 14px;
+}
+
+.filter-btn strong {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* Active Button Styling */
+.filter-btn.active {
+  background-color: #0116a3;
+  color: #fff;
+}
+
+.filter-btn:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .stats-group {
+    flex: 1 1 100%; /* Full width on smaller screens */
+  }
+
+  .filter-btn {
+    flex: 1 1 100%; /* Full width for buttons */
+  }
+}
+
+
+/* ---------------------------------------------
+   Zendeskticket Link
+--------------------------------------------- */
+#zenteskTicket {
+  color: #0116a3;
+  font-weight: 500;
+}
+
+#zenteskTicket:hover {
+  color: #0116a3;
+  font-weight: 500;
+}
+
+/* ---------------------------------------------
+   Card Menu Control
+--------------------------------------------- */
+.card-menu-control {
+  border-right: solid #0077b6 0.25rem;
+  border-left: solid #0077b6 0.25rem;
+}
+
+.card-menu-control::before {
+  background: #0077b6;
+}
+
+@media screen and (max-width: 1600px) {
+  .card-menu-control {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------
+   Ticket Details
+--------------------------------------------- */
+.ticket-details {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.ticket-details li {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  text-align: left;
+}
+
+.missing-carrier-id {
+  color: rgb(161 17 17);
+}
+
+.missing-tier {
+  color: rgb(161 17 17);
+}
+
+.missing-eta {
+  color: rgb(161 17 17);
+}
+
+.highlight-internal {
+  background-color: #fff7ed; /* Sätt bakgrundsfärgen till gul */
+}
+
+.comments-container {
+  display: grid;
+  grid-template-columns: 1fr; /* Single column layout */
+  gap: 1rem;
+  padding: 1rem;
+  max-width: 100%;
+}
+
+.comment-card {
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.comment-card .comment-header {
+  background-color: #0116a3; /* Default blue */
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+}
+
+.public-comment .comment-header {
+  background-color: #0116a3 !important; /* Blue for public */
+}
+
+.internal-comment .comment-header {
+  background-color: #e66c1b; /* Orange for internal */
+}
+
+.assignee-reply .comment-header {
+  background-color: #0116a3; /* Blue for assignee */
+}
+
+.comment-card .comment-body {
+  padding: 1rem;
+  overflow-y: auto; /* Scrollable if content exceeds height */
+}
+
+.comment-card .comment-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.comment-card .comment-body::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.comment-card .comment-body::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+.empty-comment {
+  background-color: #f8f9fa; /* Light gray for empty comments */
+}
+
+@media (min-width: 768px) {
+  .comments-container {
+    grid-template-columns: 1fr; /* Maintain single column on all screen sizes */
+  }
+}
+
+.comment-card .comment-body {
+  padding: 1rem;
+  overflow-y: auto; /* Scrollable if content exceeds height */
+  color: #333333; /* Adjust text color for better readability */
+}
+
+.comment-card .comment-body p {
+  margin-bottom: 0.5rem; /* Add spacing between paragraphs */
+}
+
+.assignee-reply .comment-header {
+  background-color: #3f51b5; /* Distinct blue color for assignee */
+  color: #ffffff;
+}
+
+.assignee-reply .comment-body {
+  color: #333333;
+}
+
+.ticket-details i {
+  margin-right: 8px; /* Avstånd mellan ikon och text */
+  font-size: 16px; /* Justera storlek på ikonen */
+  color: #555; /* Ändra färg om nödvändigt */
+}
+
+.ticket-details li {
+  line-height: 1.5; /* Ger bättre avstånd mellan rader */
+  font-size: 14px; /* Gör textstorleken konsekvent */
+}
+
+/* Base Styles */
+.jira-badge {
+  padding: 0.2rem 0.4rem; /* Compact padding */
+  border-radius: 0.2rem; /* Rounded corners */
+  font-weight: 600; /* Slightly bold text */
+  font-size: 0.75rem; /* Small font size */
+  display: inline-block;
+  text-align: center;
+  white-space: nowrap; /* Prevents wrapping */
+  border: 1px solid transparent; /* Default border */
+}
+
+/* Status-Specific Styles */
+.jira-badge-resolved {
+  background-color: #d4edda; /* Light green */
+  color: #155724; /* Dark green text */
+  border-color: #c3e6cb; /* Green border */
+}
+
+.jira-badge-ready-for-test{
+  background-color: #cce5ff; /* Light blue */
+  color: #004085; /* Dark blue text */
+  border-color: #b8daff; /* Blue border */
+}
+
+.jira-badge-verified-fix {
+  background-color: #d4edda; /* Light green */
+  color: #155724; /* Dark green text */
+  border-color: #c3e6cb; /* Green border */
+}
+.jira-badge-in-progress{
+  background-color: #cce5ff; /* Light blue */
+  color: #004085; /* Dark blue text */
+  border-color: #b8daff; /* Blue border */
+}
+
+
+.jira-badge-approving-fix {
+  background-color: #cce5ff; /* Light blue */
+  color: #004085; /* Dark blue text */
+  border-color: #b8daff; /* Blue border */
+}
+
+.jira-badge-open{
+  background-color: #d4edda; /* Light green */
+  color: #155724; /* Dark green text */
+  border-color: #c3e6cb; /* Green border */
+}
+
+.jira-badge-reopened {
+  background-color: #cce5ff; /* Light blue */
+  color: #004085; /* Dark blue text */
+  border-color: #b8daff; /* Blue border */
+}
+
+.jira-badge-closed {
+  background-color: #d4edda; /* Light green */
+  color: #155724; /* Dark green text */
+  border-color: #c3e6cb; /* Green border */
+}
+
+.jira-badge-draft {
+  background-color: #fff3cd; /* Light yellow */
+  color: #856404; /* Dark yellow text */
+  border-color: #ffeeba; /* Yellow border */
+}
+
+.jira-badge-testing {
+  background-color: #d1ecf1; /* Light cyan */
+  color: #0c5460; /* Dark cyan text */
+  border-color: #bee5eb; /* Cyan border */
+}
+
+.jira-badge-not-to-be-released {
+  background-color: #d4edda; /* Light green */
+  color: #155724; /* Dark green text */
+  border-color: #c3e6cb; /* Green border */
+}
+
+.jira-badge-default {
+  background-color: #e2e3e5; /* Light gray */
+  color: #383d41; /* Dark gray text */
+  border-color: #d6d8db; /* Gray border */
+}
+
+.jira-details {
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  margin-bottom: 10px;
+}
+
+.jira-details .sprint-section {
+  margin-bottom: 15px;
+}
+
+.jira-details p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.jira-details p i {
+  margin-right: 5px;
+  color: #555;
+}
+
+.badge-warning {
+  background-color: #ffc107;
+  color: #212529;
+  padding: 5px 10px;
+  font-size: 12px;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.badge-warning i {
+  margin-right: 5px;
+}
+
+.previous-sprints-list {
+  margin-top: 10px;
+  padding-left: 20px;
+}
+
+.previous-sprints-list li {
+  font-size: 13px;
+  color: #555;
+  display: flex;
+  align-items: center;
+}
+
+.previous-sprints-list li i {
+  margin-right: 5px;
+  color: #6c757d;
+}
+
+.jira-details .sprint-section .fa-calendar-alt,
+.jira-details .sprint-section .fa-calendar,
+.jira-details .sprint-section .fa-flag {
+  color: #555;
+}
+
+.jira-details .badge {
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+  margin-top: 5px;
+}
+
+
+
+/* Main container */
+.custom-select-container {
+  width: 250px; /* Justera bredden efter behov */
+  position: relative;
+}
+
+/* Label styling */
+.select-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #555;
+}
+
+/* Custom select */
+.custom-select {
+  position: relative;
+  height:3rem; /* Minska höjden */
+  border: none !important;
+  border-radius: 12px; /* Rundare hörn */
+  background: #f5f5f5; /* Ljusare bakgrundsfärg */
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtil skugga */
+}
+
+.selected-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px; /* Minskat padding */
+  font-size: 14px;
+  height: 30px;
+  color: #333;
+}
+
+.selected-option i {
+  margin-right: 8px; /* Mindre mellanrum för ikoner */
+}
+
+.dropdown-icon {
+  font-size: 16px; /* Förbättra ikonstorlek */
+  color: #888; /* Neutral färg */
+}
+
+/* Dropdown options */
+.dropdown-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: block;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  border: 1px solid #ddd;
+  background: #fff;
+  z-index: 10;
+  max-height: 180px; /* Begränsa höjd */
+  overflow-y: auto;
+  border-radius: 0 0 12px 12px; /* Rundare nedre hörn */
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1); /* Skugga för dropdown */
+}
+
+.dropdown-options li {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px; /* Minska padding för kompakt stil */
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.dropdown-options li:hover {
+  background: #f0f0f0;
+  color: #000;
+}
+
+.dropdown-options i {
+  margin-right: 8px; /* Mindre mellanrum för ikoner */
+}
+
+/* Open dropdown styling */
+.custom-select.open .dropdown-options {
+  display: block;
+}
+
+/* Close dropdown styling */
+.custom-select:not(.open) .dropdown-options {
+  display: none;
+}
+
+/* För finare hover-effekt på dropdown */
+.custom-select:hover {
+  background: #eaeaea; /* Ljusare hover */
+}

@@ -1,0 +1,119 @@
+<div class="row"  >
+  <div class="col-md-10 mb-3">
+    <p class="lead">Get Python Shipment Booking URLs
+    </p>
+    <form>
+      <div class="form-row mt-3">
+        <div class="form-group col-sm-4 col-xl-4">
+          <button
+            class="btn btn-primary"
+            (click)="analyzeSelectedCarriers()"
+            [disabled]="isLoading"
+          >
+          Get URLs
+      
+          </button>
+        </div>
+      </div>
+      <!-- Row för valda transportörer och dropdown -->
+      <div class="form-row align-items-start">
+        <div class="form-group col-sm-4 col-xl-4"   (document:click)="onOutsideClick($event)">
+          <input
+            id="carrierSearch"
+            type="text"
+            class="form-control"
+            autocomplete="off"
+            name="searchTerm" 
+            placeholder="Search Carriers"
+            [(ngModel)]="searchTerm"
+            (focus)="showDropdown()"
+            (input)="filterCarriers()"
+          />
+          <ul
+          class="dropdown-menu w-100"
+          *ngIf="isDropdownVisible && filteredCarriers.length > 0"
+        >
+          <li
+            *ngFor="let carrier of filteredCarriers"
+            class="dropdown-item d-flex justify-content-between align-items-center"
+            (click)="toggleCarrierSelection(carrier)"
+            [ngClass]="{ 'active-row': selectedCarriers.includes(carrier) }"
+          >
+            <span>{{ carrier.title }} ({{ carrier.number }})</span>
+            <input
+              type="checkbox"
+              [checked]="selectedCarriers.includes(carrier)"
+            />
+          </li>
+        </ul>
+        
+          <p *ngIf="searchTerm && filteredCarriers.length === 0" class="text-muted mt-2">
+            No carriers found.
+          </p>
+        </div>
+        <!-- Valda transportörer -->
+        <div class="form-group col-sm-6 col-xl-6">
+          <label for="selectedCarriers">Selected Carriers</label>
+          <ul id="selectedCarriers" class="list-group">
+            <li
+              *ngFor="let carrier of selectedCarriers"
+              class="list-group-item d-flex justify-content-between align-items-center"
+            >
+              <span>{{ carrier.title }} ({{ carrier.number }})</span>
+              <button class="btn btn-danger btn-sm" (click)="removeSelectedCarrier(carrier)">
+                Remove
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Dropdown för att välja transportörer -->
+    
+      </div>
+
+      <!-- Analyze Button -->
+
+    </form>
+    
+<div *ngIf="response.length > 0 && !isLoading">
+  <h5>Result</h5>
+  <ul>
+    <li class="mt-2" *ngFor="let res of response">
+      <strong>{{ res.carrier }}</strong>:
+      <p style="margin-bottom: 0px">Test Endpoint: {{ res.test_url }}</p>
+      <p  style="margin-bottom: 0px">Production Endpoint: {{ res.prod_url }}</p>
+    </li>
+  </ul>
+  <div *ngIf="error && !isLoading" class="alert alert-danger">
+    {{ error }}
+  </div>
+</div>
+
+  </div>
+
+
+
+
+
+
+
+<!-- Response Section -->
+
+
+<!-- Toast Notification -->
+<div
+  class="toast"
+  *ngIf="toastVisible"
+  [ngClass]="{
+    visible: toastVisible,
+    'toast-success': toastType === 'success',
+    'toast-error': toastType === 'error',
+    'toast-warning': toastType === 'warning'
+  }"
+>
+  <div class="toast-content">
+    <span class="toast-message">{{ toastMessage }}</span>
+    <button class="close-toast" (click)="hideToast()">×</button>
+  </div>
+</div>
+</div>

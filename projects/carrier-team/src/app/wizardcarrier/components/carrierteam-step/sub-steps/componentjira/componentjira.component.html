@@ -1,0 +1,131 @@
+<div class="row">
+  <div class="col-md-9 mb-3">
+    <p class="lead">Manage Jira Components</p>
+
+    <!-- Project Selector -->
+    <div class="form-row mt-3">
+      <div class="form-group col-sm-6 col-xl-3">
+        <label for="projectKeyDropdown">Select Jira Project</label>
+        <select
+          id="projectKeyDropdown"
+          class="form-control"
+          [(ngModel)]="selectedProjectKey"
+          (change)="onProjectChange()"
+        >
+          <option *ngFor="let project of availableProjects" [value]="project">
+            {{ project }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <form [formGroup]="newJiraComponentForm" (ngSubmit)="addJiraComponent()">
+      <div class="form-row mt-3">
+        <div class="form-group col-sm-6 col-xl-3">
+          <label for="name">Component Name</label>
+          <input class="form-control" type="text" id="name" formControlName="name" />
+
+          <label for="description">Description</label>
+          <input class="form-control" type="text" id="description" formControlName="description" />
+
+          <label for="projectKey" class="mt-3"> Key</label>
+          <input class="form-control" type="text" id="projectKey" [value]="selectedProjectKey" disabled />
+
+          <button type="submit" class="btn btn-primary mt-3" [disabled]="newJiraComponentForm.invalid">
+            Add Component
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <!-- Component List -->
+    <div class="mt-4">
+      <h4>Jira Components</h4>
+
+      <div class="mb-3">
+        <input type="text" class="form-control col-md-5" placeholder="Search components..." [(ngModel)]="searchTerm" />
+      </div>
+
+      <div *ngIf="isLoading" class="skeleton-loader skeleton-loader-table"></div>
+
+      <table *ngIf="!isLoading" class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Component Name</th>
+            <th>Description</th>
+            <th>Edit</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="
+              let component of filteredJiraComponents
+                | paginate: { id: 'jiraComponentPagination', itemsPerPage: itemsPerPage, currentPage: currentPage }
+            "
+          >
+            <!-- Component Name -->
+            <td>
+              <div *ngIf="!component.isEditing">{{ component.name }}</div>
+              <div *ngIf="component.isEditing">
+                <input class="form-control" [(ngModel)]="component.editedName" placeholder="Component Name" />
+              </div>
+            </td>
+
+            <!-- Description -->
+            <td>
+              <div *ngIf="!component.isEditing">{{ component.description || '—' }}</div>
+              <div *ngIf="component.isEditing">
+                <input class="form-control" [(ngModel)]="component.editedDescription" placeholder="Description" />
+              </div>
+            </td>
+
+            <!-- Edit Column -->
+            <td>
+              <div *ngIf="!component.isEditing">
+                <button class="btn btn-sm btn-primary" (click)="editComponent(component)">
+                  Edit
+                </button>
+              </div>
+              <div *ngIf="component.isEditing" class="d-flex gap-2">
+                <button class="btn btn-sm btn-success mr-2" (click)="saveComponentEdit(component)">Save</button>
+                <button class="btn btn-sm btn-secondary" (click)="cancelEdit(component)">Cancel</button>
+              </div>
+            </td>
+
+            <!-- Delete Column -->
+            <td>
+              <button class="btn btn-sm btn-danger" (click)="deleteJiraComponent(component)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      <pagination-controls
+        (pageChange)="currentPage = $event"
+        [id]="'jiraComponentPagination'"
+        [maxSize]="7"
+        [directionLinks]="true"
+        [autoHide]="true"
+      ></pagination-controls>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div
+  class="toast"
+  *ngIf="toastVisible"
+  [ngClass]="{
+    visible: toastVisible,
+    'toast-success': toastType === 'success',
+    'toast-error': toastType === 'error',
+    'toast-warning': toastType === 'warning'
+  }"
+>
+  <div class="toast-content">
+    <span class="toast-message">{{ toastMessage }}</span>
+    <button class="close-toast" (click)="toastVisible = false">×</button>
+  </div>
+</div>

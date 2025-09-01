@@ -11,6 +11,7 @@ import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 import { provideDatabase, getDatabase } from '@angular/fire/database';
 import { environment } from '../environments/environment'; // Import environment for Firebase config
 import { NgxPaginationModule } from 'ngx-pagination';
+import { EditorModule, TINYMCE_SCRIPT_SRC } from '@tinymce/tinymce-angular';
 
 @NgModule({
   declarations: [AppComponent],
@@ -21,13 +22,16 @@ import { NgxPaginationModule } from 'ngx-pagination';
     HttpClientModule,
     TranslocoRootModule,
     NgxPaginationModule,
+    EditorModule,
     // Firebase setup
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => getAuth()),
     provideDatabase(() => getDatabase()), // Realtime Database
-    provideFirestore(() => getFirestore()) // Firestore
+    provideFirestore(() => getFirestore()), // Firestore
   ],
-  providers: [],
+  providers: [
+    { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' }, // <-- självhostad!
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
